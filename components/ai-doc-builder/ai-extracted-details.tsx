@@ -1,44 +1,68 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
-export const AIExtractedDetails = () => {
+interface AIExtractedDetailsProps {
+  documents: Array<{
+    file: {
+      name: string
+      category: string
+    }
+    type: string
+  }>
+}
+
+export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({ documents }) => {
   // This is a placeholder for AI-extracted data
-  const extractedData = {
-    type: "Earnings Statement",
-    title: "Q4 2023 Earnings Release",
-    date: "February 1, 2024",
-    keyPoints: ["Revenue increased by 15% year-over-year", "Net income grew by 22%", "Launched 3 new product lines"],
-    financialHighlights: {
-      revenue: "$1.2 billion",
-      netIncome: "$300 million",
-      eps: "$2.50 per share",
-    },
-  }
+  const extractedData = documents.map((doc) => ({
+    fileName: doc.file.name,
+    type: doc.type,
+    title: `AI-Generated Title for ${doc.file.name}`,
+    date: new Date().toLocaleDateString(),
+    keyPoints: ["AI-generated key point 1", "AI-generated key point 2", "AI-generated key point 3"],
+    financialHighlights:
+      doc.type === "earnings_statement"
+        ? {
+            revenue: "$X.XX billion",
+            netIncome: "$X.XX million",
+            eps: "$X.XX per share",
+          }
+        : null,
+  }))
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">AI Extracted Details</h2>
-      <Card>
-        <CardHeader>
-          <CardTitle>{extractedData.title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-2">Type: {extractedData.type}</p>
-          <p className="text-sm text-muted-foreground mb-4">Date: {extractedData.date}</p>
-          <h3 className="font-semibold mb-2">Key Points:</h3>
-          <ul className="list-disc pl-5 mb-4">
-            {extractedData.keyPoints.map((point, index) => (
-              <li key={index}>{point}</li>
-            ))}
-          </ul>
-          <h3 className="font-semibold mb-2">Financial Highlights:</h3>
-          <ul className="list-none">
-            <li>Revenue: {extractedData.financialHighlights.revenue}</li>
-            <li>Net Income: {extractedData.financialHighlights.netIncome}</li>
-            <li>EPS: {extractedData.financialHighlights.eps}</li>
-          </ul>
-        </CardContent>
-      </Card>
-    </div>
+    <ScrollArea className="h-[600px] pr-4">
+      {extractedData.map((data, index) => (
+        <Card key={index} className="mb-4">
+          <CardHeader>
+            <CardTitle className="flex justify-between items-center">
+              <span>{data.fileName}</span>
+              <Badge>{data.type}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-2">Generated Title: {data.title}</p>
+            <p className="text-sm text-muted-foreground mb-4">Date: {data.date}</p>
+            <h3 className="font-semibold mb-2">Key Points:</h3>
+            <ul className="list-disc pl-5 mb-4">
+              {data.keyPoints.map((point, idx) => (
+                <li key={idx}>{point}</li>
+              ))}
+            </ul>
+            {data.financialHighlights && (
+              <>
+                <h3 className="font-semibold mb-2">Financial Highlights:</h3>
+                <ul className="list-none">
+                  <li>Revenue: {data.financialHighlights.revenue}</li>
+                  <li>Net Income: {data.financialHighlights.netIncome}</li>
+                  <li>EPS: {data.financialHighlights.eps}</li>
+                </ul>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </ScrollArea>
   )
 }
 

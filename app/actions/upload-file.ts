@@ -56,7 +56,7 @@ const files: File[] = [
 ]
 
 export async function uploadFile(formData: FormData) {
-  const file = formData.get("file") as unknown as File
+  const file = formData.get("file") as File
   const category = formData.get("category") as string
   if (!file) {
     throw new Error("No file uploaded")

@@ -23,7 +23,7 @@ export function MainNav() {
             <div className="container flex h-16 items-center">
                 <Link href="/" className="flex items-center space-x-2">
                     <Icons.logo className="h-6 w-6" />
-                    <span className="font-bold">AiirHub</span>
+                    <span className="font-bold">CorporateHub</span>
                 </Link>
                 <NavigationMenu className="mx-6">
                     <NavigationMenuList>
@@ -38,7 +38,7 @@ export function MainNav() {
                                                 href="/"
                                             >
                                                 <Icons.logo className="h-6 w-6" />
-                                                <div className="mb-2 mt-4 text-lg font-medium">AiirHub</div>
+                                                <div className="mb-2 mt-4 text-lg font-medium">CorporateHub</div>
                                                 <p className="text-sm leading-tight text-muted-foreground">
                                                     Secure document management and collaboration platform for modern enterprises
                                                 </p>
@@ -68,13 +68,25 @@ export function MainNav() {
                                         Flexible plans for businesses of all sizes
                                     </ListItem>
                                     <ListItem href="/testimonials" title="Case Studies">
-                                        See how other companies use AiirHub
+                                        See how other companies use CorporateHub
                                     </ListItem>
                                     <ListItem href="/documentation" title="Documentation">
                                         Detailed guides and API documentation
                                     </ListItem>
                                 </ul>
                             </NavigationMenuContent>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                            <Link href="/ai-doc-builder" legacyBehavior passHref>
+                                <NavigationMenuLink
+                                    className={cn(
+                                        "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50",
+                                        pathname === "/ai-doc-builder" && "bg-accent",
+                                    )}
+                                >
+                                    AI Doc Builder
+                                </NavigationMenuLink>
+                            </Link>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
                             <Link href="/pricing" legacyBehavior passHref>

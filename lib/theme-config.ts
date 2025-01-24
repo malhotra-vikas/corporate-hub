@@ -1,5 +1,5 @@
 export const themeConfig = {
-    name: "CorporateHub",
+    name: "AiirHub",
     description: "Secure corporate document management platform",
     logo: "/logo.svg",
     theme: {

@@ -66,7 +66,7 @@ export function MainNav() {
                     Flexible plans for businesses of all sizes
                   </ListItem>
                   <ListItem href="/testimonials" title="Case Studies">
-                    See how other companies use CorporateHub
+                    See how other companies use AiirHub
                   </ListItem>
                   <ListItem href="/documentation" title="Documentation">
                     Detailed guides and API documentation

@@ -3,8 +3,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = {
-  title: "Terms of Service | CorporateHub",
-  description: "CorporateHub Terms of Service",
+  title: "Terms of Service | AiirHub",
+  description: "AiirHub Terms of Service",
 }
 
 export default function TermsPage() {
@@ -12,7 +12,7 @@ export default function TermsPage() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-6">Terms of Service</h1>
       <div className="space-y-4 mb-6">
-        <p>Welcome to CorporateHub. By using our service, you agree to these terms. Please read them carefully.</p>
+        <p>Welcome to AiirHub. By using our service, you agree to these terms. Please read them carefully.</p>
         <h2 className="text-2xl font-semibold">1. Use of Service</h2>
         <p>
           You must follow any policies made available to you within the Services. Don't misuse our Services. For
@@ -21,8 +21,8 @@ export default function TermsPage() {
         </p>
         <h2 className="text-2xl font-semibold">2. Privacy</h2>
         <p>
-          CorporateHub's privacy policies explain how we treat your personal data and protect your privacy when you use
-          our Services. By using our Services, you agree that CorporateHub can use such data in accordance with our
+        AiirHub's privacy policies explain how we treat your personal data and protect your privacy when you use
+          our Services. By using our Services, you agree that AiirHub can use such data in accordance with our
           privacy policies.
         </p>
         <h2 className="text-2xl font-semibold">3. Modifications</h2>

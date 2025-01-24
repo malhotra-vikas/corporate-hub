@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export const metadata: Metadata = {
-  title: "Testimonials | CorporateHub",
-  description: "What our clients say about CorporateHub",
+  title: "Testimonials | AiirHub",
+  description: "What our clients say about AiirHub",
 }
 
 export default function TestimonialsPage() {
@@ -19,7 +19,7 @@ export default function TestimonialsPage() {
           </CardHeader>
           <CardContent>
             <p>
-              "CorporateHub has revolutionized how we manage our documents. It's secure, efficient, and user-friendly."
+              "AiirHub has revolutionized how we manage our documents. It's secure, efficient, and user-friendly."
             </p>
           </CardContent>
         </Card>
@@ -36,7 +36,7 @@ export default function TestimonialsPage() {
             <CardTitle>Mike Johnson</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>"CorporateHub's security measures give us peace of mind when handling sensitive documents."</p>
+            <p>"AiirHub's security measures give us peace of mind when handling sensitive documents."</p>
           </CardContent>
         </Card>
       </div>

@@ -5,7 +5,7 @@ import Link from "next/link"
 import { FileText, Upload, Vault } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Dashboard | CorporateHub",
+  title: "Dashboard | AiirHub",
   description: "Manage your documents and account",
 }
 

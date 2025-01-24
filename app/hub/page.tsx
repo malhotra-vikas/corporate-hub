@@ -4,8 +4,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CalendarIcon, ArrowUpIcon, ArrowDownIcon } from "lucide-react"
 
 export const metadata: Metadata = {
-    title: "IR Hub | CorporateHub",
-    description: "Investor Relations Hub - Powered by FactSet",
+    title: "IR Hub | Aiir Hub",
+    description: "Investor Relations Hub - Powered by Aiir Hub",
 }
 
 // Mock data for competitors
@@ -57,8 +57,8 @@ export default function HubPage() {
     return (
         <div className="container mx-auto p-6 space-y-6">
             <header className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-blue-900">IR HUB</h1>
-                <p className="text-sm text-gray-500">Powered by FACTSET</p>
+                <h1 className="text-3xl font-bold text-blue-900">AIIR HUB</h1>
+                <p className="text-sm text-gray-500">Powered by Aiir Hub</p>
             </header>
 
             <div className="grid md:grid-cols-2 gap-6">

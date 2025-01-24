@@ -6,7 +6,7 @@ import { SidebarNav } from "@/components/sidebar-nav"
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "Corporate Hub Dashboard",
+  description: "Aiir Hub Dashboard",
 }
 
 const sidebarNavItems = [
@@ -42,7 +42,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex justify-between items-center">
         <div className="space-y-0.5">
           <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
-          <p className="text-muted-foreground">Manage your documents and account</p>
+          <p className="text-muted-foreground">Manage your documents and account with Aiir Hub</p>
         </div>
         <Link href="/" className="text-sm font-medium hover:underline underline-offset-4">
           Back to Home

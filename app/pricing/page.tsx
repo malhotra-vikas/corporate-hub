@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export const metadata: Metadata = {
-  title: "Pricing | CorporateHub",
-  description: "CorporateHub pricing plans",
+  title: "Pricing | AiirHub",
+  description: "AiirHub pricing plans",
 }
 
 export default function PricingPage() {

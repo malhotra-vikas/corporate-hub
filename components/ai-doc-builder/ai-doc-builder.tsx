@@ -86,7 +86,7 @@ const AIDocBuilder = () => {
       <div className="container mx-auto p-4 space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>AI Document Builder</CardTitle>
+            <CardTitle className="text-2xl">AI Document Builder</CardTitle>
             <CardDescription>Select documents to analyze and build with AI assistance</CardDescription>
           </CardHeader>
           <CardContent>
@@ -183,7 +183,7 @@ const AIDocBuilder = () => {
     <div className="container mx-auto p-4">
       <Card className="h-[calc(100vh-2rem)]">
         <CardHeader className="pb-2">
-          <CardTitle>AI Document Analysis</CardTitle>
+          <CardTitle className="text-2xl">AI Document Analysis</CardTitle>
           <CardDescription>Review AI-extracted details and refine with chat assistance</CardDescription>
         </CardHeader>
         <CardContent className="h-[calc(100%-4rem)] p-0">

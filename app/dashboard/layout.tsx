@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { themeConfig } from "@/lib/theme-config"
 
 import { Separator } from "@/components/ui/separator"
 import { SidebarNav } from "@/components/sidebar-nav"
@@ -52,8 +53,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <aside className="hidden w-64 flex-col bg-gray-100 p-4 md:flex">
         <div className="mb-4">
           <Link href="/" className="flex items-center space-x-2">
-            <img src="/logo.svg" alt="CorporateHub" className="h-8 w-auto" />
-            <span className="font-bold text-xl">CorporateHub</span>
+            <img src="/logo.svg" alt={themeConfig.name} className="h-8 w-auto" />
+            <span className="font-bold text-xl">{themeConfig.name}</span>
           </Link>
         </div>
         <SidebarNav items={sidebarNavItems} />

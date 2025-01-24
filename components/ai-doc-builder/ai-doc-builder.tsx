@@ -180,16 +180,18 @@ const AIDocBuilder = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <Card className="h-[calc(100vh-8rem)]">
-        <CardHeader>
+    <div className="container mx-auto p-4">
+      <Card className="h-[calc(100vh-2rem)]">
+        <CardHeader className="pb-2">
           <CardTitle>AI Document Analysis</CardTitle>
           <CardDescription>Review AI-extracted details and refine with chat assistance</CardDescription>
         </CardHeader>
-        <CardContent className="h-[calc(100%-5rem)] overflow-hidden">
+        <CardContent className="h-[calc(100%-4rem)] p-0">
           <div className="flex h-full">
-            <div className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-12" : "w-1/4"}`}>
-              <div className="flex items-center justify-between mb-4">
+            <div
+              className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-10" : "w-1/4"} border-r`}
+            >
+              <div className="flex items-center justify-between p-2">
                 <h3 className={`text-lg font-semibold ${isPastSessionsCollapsed ? "hidden" : "block"}`}>
                   Past Sessions
                 </h3>
@@ -197,27 +199,26 @@ const AIDocBuilder = () => {
                   variant="ghost"
                   size="icon"
                   onClick={togglePastSessions}
+                  className="h-8 w-8"
                   aria-label={isPastSessionsCollapsed ? "Expand past sessions" : "Collapse past sessions"}
                 >
                   {isPastSessionsCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
                 </Button>
               </div>
-              <div className={isPastSessionsCollapsed ? "hidden" : "block"}>
+              <div className={isPastSessionsCollapsed ? "hidden" : "block h-[calc(100%-3rem)] overflow-hidden"}>
                 <PastChatSessions />
               </div>
             </div>
             <div
-              className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-[calc(100%-3rem)]" : "w-3/4"} pl-6`}
+              className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-[calc(100%-2.5rem)]" : "w-3/4"} flex`}
             >
-              <div className="grid grid-rows-2 gap-6 h-full">
-                <div className="row-span-1 overflow-hidden">
-                  <h3 className="text-lg font-semibold mb-4">AI Extracted Details</h3>
-                  <AIExtractedDetails documents={selectedDocuments} />
-                </div>
-                <div className="row-span-1 overflow-hidden">
-                  <h3 className="text-lg font-semibold mb-4">Chat Assistance</h3>
-                  <ChatInterface />
-                </div>
+              <div className="w-1/2 border-r p-4 overflow-hidden">
+                <h3 className="text-lg font-semibold mb-2">AI Extracted Details</h3>
+                <AIExtractedDetails documents={selectedDocuments} />
+              </div>
+              <div className="w-1/2 p-4 overflow-hidden">
+                <h3 className="text-lg font-semibold mb-2">Chat Assistance</h3>
+                <ChatInterface />
               </div>
             </div>
           </div>

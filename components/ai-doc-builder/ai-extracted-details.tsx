@@ -31,28 +31,30 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({ document
   }))
 
   return (
-    <ScrollArea className="h-[calc(100%-2rem)] pr-4">
+    <ScrollArea className="h-[calc(100vh-10rem)]">
       {extractedData.map((data, index) => (
         <Card key={index} className="mb-4">
-          <CardHeader>
-            <CardTitle className="flex justify-between items-center">
-              <span>{data.fileName}</span>
-              <Badge>{data.type}</Badge>
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-base flex justify-between items-center">
+              <span className="truncate">{data.fileName}</span>
+              <Badge variant="secondary" className="ml-2">
+                {data.type}
+              </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-2">Generated Title: {data.title}</p>
-            <p className="text-sm text-muted-foreground mb-4">Date: {data.date}</p>
-            <h3 className="font-semibold mb-2">Key Points:</h3>
-            <ul className="list-disc pl-5 mb-4">
+          <CardContent className="p-4 pt-0">
+            <p className="text-sm text-muted-foreground">Generated Title: {data.title}</p>
+            <p className="text-sm text-muted-foreground mb-2">Date: {data.date}</p>
+            <h4 className="font-semibold text-sm mb-1">Key Points:</h4>
+            <ul className="list-disc pl-5 mb-2 text-sm">
               {data.keyPoints.map((point, idx) => (
                 <li key={idx}>{point}</li>
               ))}
             </ul>
             {data.financialHighlights && (
               <>
-                <h3 className="font-semibold mb-2">Financial Highlights:</h3>
-                <ul className="list-none">
+                <h4 className="font-semibold text-sm mb-1">Financial Highlights:</h4>
+                <ul className="list-none text-sm">
                   <li>Revenue: {data.financialHighlights.revenue}</li>
                   <li>Net Income: {data.financialHighlights.netIncome}</li>
                   <li>EPS: {data.financialHighlights.eps}</li>

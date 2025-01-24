@@ -23,7 +23,7 @@ export function MainNav() {
             <div className="container flex h-16 items-center">
                 <Link href="/" className="flex items-center space-x-2">
                     <Icons.logo className="h-6 w-6" />
-                    <span className="font-bold">CorporateHub</span>
+                    <span className="font-bold">AiirHub</span>
                 </Link>
                 <NavigationMenu className="mx-6">
                     <NavigationMenuList>
@@ -38,7 +38,7 @@ export function MainNav() {
                                                 href="/"
                                             >
                                                 <Icons.logo className="h-6 w-6" />
-                                                <div className="mb-2 mt-4 text-lg font-medium">CorporateHub</div>
+                                                <div className="mb-2 mt-4 text-lg font-medium">AiirHub</div>
                                                 <p className="text-sm leading-tight text-muted-foreground">
                                                     Secure document management and collaboration platform for modern enterprises
                                                 </p>
@@ -68,7 +68,7 @@ export function MainNav() {
                                         Flexible plans for businesses of all sizes
                                     </ListItem>
                                     <ListItem href="/testimonials" title="Case Studies">
-                                        See how other companies use CorporateHub
+                                        See how other companies use AiirHub
                                     </ListItem>
                                     <ListItem href="/documentation" title="Documentation">
                                         Detailed guides and API documentation

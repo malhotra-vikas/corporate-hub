@@ -176,27 +176,25 @@ const AIDocBuilder = () => {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <Card>
+      <Card className="h-[calc(100vh-8rem)]">
         <CardHeader>
           <CardTitle>AI Document Analysis</CardTitle>
           <CardDescription>Review AI-extracted details and refine with chat assistance</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Past Sessions</h3>
+        <CardContent className="h-[calc(100%-5rem)] overflow-hidden">
+          <div className="grid grid-cols-4 gap-6 h-full">
+            <div className="col-span-1 h-full overflow-hidden">
+              <h3 className="text-lg font-semibold mb-4">Past Sessions</h3>
               <PastChatSessions />
             </div>
-            <div className="space-y-4 md:col-span-2">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">AI Extracted Details</h3>
-                  <AIExtractedDetails documents={selectedDocuments} />
-                </div>
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Chat Assistance</h3>
-                  <ChatInterface />
-                </div>
+            <div className="col-span-3 grid grid-rows-2 gap-6 h-full">
+              <div className="row-span-1 overflow-hidden">
+                <h3 className="text-lg font-semibold mb-4">AI Extracted Details</h3>
+                <AIExtractedDetails documents={selectedDocuments} />
+              </div>
+              <div className="row-span-1 overflow-hidden">
+                <h3 className="text-lg font-semibold mb-4">Chat Assistance</h3>
+                <ChatInterface />
               </div>
             </div>
           </div>

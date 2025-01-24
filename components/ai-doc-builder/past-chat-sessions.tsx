@@ -37,7 +37,7 @@ export const PastChatSessions = () => {
   const [selectedSession, setSelectedSession] = useState<string | null>(null)
 
   return (
-    <Card className="h-[600px] md:h-[calc(100vh-12rem)] flex flex-col">
+    <Card className="h-[calc(100%-2rem)] flex flex-col">
       <CardHeader>
         <CardTitle>Past Chat Sessions</CardTitle>
       </CardHeader>

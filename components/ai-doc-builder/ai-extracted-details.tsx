@@ -31,7 +31,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({ document
   }))
 
   return (
-    <ScrollArea className="h-[600px] pr-4">
+    <ScrollArea className="h-[calc(100%-2rem)] pr-4">
       {extractedData.map((data, index) => (
         <Card key={index} className="mb-4">
           <CardHeader>

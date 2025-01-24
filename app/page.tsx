@@ -1,161 +1,137 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link className="flex items-center justify-center" href="/">
-          <Icons.logo className="h-6 w-6" />
-          <span className="ml-2 text-lg font-bold">CorporateHub</span>
-        </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="/features">
-            Features
+    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
+      <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
+        <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
+          <Link href="/hub" className="rounded-2xl bg-muted px-4 py-1.5 text-sm font-medium" target="_blank">
+            New: Access market insights in our IR Hub
           </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="/testimonials">
-            Testimonials
-          </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="/pricing">
-            Pricing
-          </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="/dashboard">
-            Dashboard
-          </Link>
-        </nav>
-      </header>
-      <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-                  Welcome to CorporateHub
-                </h1>
-                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-                  Streamline your corporate document management with our secure and intuitive platform.
-                </p>
-              </div>
-              <div className="space-x-4">
-                <Link href="/dashboard">
-                  <Button>Get Started</Button>
-                </Link>
-                <Link href="/features">
-                  <Button variant="outline">Learn More</Button>
-                </Link>
-              </div>
-            </div>
+          <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl">
+            Secure Document Management for Modern Enterprises
+          </h1>
+          <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8">
+            Streamline your corporate document workflow with enterprise-grade security and intuitive collaboration
+            tools.
+          </p>
+          <div className="space-x-4">
+            <Link href="/dashboard">
+              <Button size="lg" className="h-11 px-8">
+                Get Started
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="h-11 px-8">
+                View Pricing
+              </Button>
+            </Link>
           </div>
-        </section>
-        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
-          <div className="container px-4 md:px-6">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-8">
-              Key Features
-            </h2>
-            <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-3">
-              <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
-                <Icons.logo className="h-10 w-10 mb-2" />
-                <h3 className="text-xl font-bold">Secure Document Storage</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                  Store your corporate documents in our highly secure vault.
-                </p>
-              </div>
-              <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
-                <Icons.logo className="h-10 w-10 mb-2" />
-                <h3 className="text-xl font-bold">Easy Document Creation</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                  Create professional documents with our intuitive interface.
-                </p>
-              </div>
-              <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
-                <Icons.logo className="h-10 w-10 mb-2" />
-                <h3 className="text-xl font-bold">Collaboration Tools</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                  Work together seamlessly with your team on important documents.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-        <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32">
-          <div className="container px-4 md:px-6">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-8">
-              What Our Clients Say
-            </h2>
-            <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-3">
-              <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center italic">
-                  "CorporateHub has revolutionized how we manage our documents. It's secure, efficient, and
-                  user-friendly."
-                </p>
-                <p className="text-sm font-bold">- John Doe, CEO</p>
-              </div>
-              <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center italic">
-                  "The collaboration features have greatly improved our team's productivity. Highly recommended!"
-                </p>
-                <p className="text-sm font-bold">- Jane Smith, CFO</p>
-              </div>
-              <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center italic">
-                  "CorporateHub's security measures give us peace of mind when handling sensitive documents."
-                </p>
-                <p className="text-sm font-bold">- Mike Johnson, CTO</p>
-              </div>
-            </div>
-          </div>
-        </section>
-        <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
-          <div className="container px-4 md:px-6">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-8">
-              Pricing Plans
-            </h2>
-            <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-3">
-              <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg bg-white dark:bg-gray-900">
-                <h3 className="text-xl font-bold">Basic</h3>
-                <p className="text-4xl font-bold">$29/mo</p>
-                <ul className="text-sm text-gray-500 dark:text-gray-400 space-y-2">
-                  <li>5GB Storage</li>
-                  <li>10 Users</li>
-                  <li>Basic Support</li>
-                </ul>
-                <Button className="mt-4">Get Started</Button>
-              </div>
-              <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg bg-white dark:bg-gray-900">
-                <h3 className="text-xl font-bold">Pro</h3>
-                <p className="text-4xl font-bold">$79/mo</p>
-                <ul className="text-sm text-gray-500 dark:text-gray-400 space-y-2">
-                  <li>50GB Storage</li>
-                  <li>Unlimited Users</li>
-                  <li>Priority Support</li>
-                </ul>
-                <Button className="mt-4">Get Started</Button>
-              </div>
-              <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg bg-white dark:bg-gray-900">
-                <h3 className="text-xl font-bold">Enterprise</h3>
-                <p className="text-4xl font-bold">Custom</p>
-                <ul className="text-sm text-gray-500 dark:text-gray-400 space-y-2">
-                  <li>Unlimited Storage</li>
-                  <li>Unlimited Users</li>
-                  <li>24/7 Dedicated Support</li>
-                </ul>
-                <Button className="mt-4">Contact Sales</Button>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-gray-500 dark:text-gray-400">© 2023 CorporateHub. All rights reserved.</p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-xs hover:underline underline-offset-4" href="/terms">
-            Terms of Service
+        </div>
+      </section>
+      <section id="features" className="container space-y-6 bg-slate-50 py-8 dark:bg-transparent md:py-12 lg:py-24">
+        <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
+          <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">Features</h2>
+          <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
+            Everything you need to manage your corporate documents efficiently and securely.
+          </p>
+        </div>
+        <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
+          <Card className="relative overflow-hidden">
+            <CardHeader>
+              <CardTitle>Secure Storage</CardTitle>
+              <CardDescription>Enterprise-grade security for your sensitive documents</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Icons.shield className="h-8 w-8 text-primary" />
+            </CardContent>
+          </Card>
+          <Card className="relative overflow-hidden">
+            <CardHeader>
+              <CardTitle>Real-time Collaboration</CardTitle>
+              <CardDescription>Work together seamlessly with your team</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Icons.users className="h-8 w-8 text-primary" />
+            </CardContent>
+          </Card>
+          <Card className="relative overflow-hidden">
+            <CardHeader>
+              <CardTitle>Version Control</CardTitle>
+              <CardDescription>Track changes and maintain document history</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Icons.git className="h-8 w-8 text-primary" />
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+      <section id="testimonials" className="container py-8 md:py-12 lg:py-24">
+        <div className="mx-auto flex max-w-[58rem] flex-col items-center justify-center gap-4 text-center">
+          <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">Trusted by Industry Leaders</h2>
+          <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
+            See what our customers have to say about CorporateHub
+          </p>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Exceptional Security</CardTitle>
+              <CardDescription>Financial Services Company</CardDescription>
+            </CardHeader>
+            <CardContent>
+              "CorporateHub's security features give us complete confidence in storing our sensitive documents."
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Streamlined Workflow</CardTitle>
+              <CardDescription>Technology Corporation</CardDescription>
+            </CardHeader>
+            <CardContent>"The platform has revolutionized how we manage and collaborate on documents."</CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Intuitive Interface</CardTitle>
+              <CardDescription>Healthcare Provider</CardDescription>
+            </CardHeader>
+            <CardContent>"CorporateHub's user-friendly interface has made document management effortless."</CardContent>
+          </Card>
+        </div>
+      </section>
+      <section id="cta" className="border-t">
+        <div className="container flex flex-col items-center justify-center gap-4 py-8 md:py-12 lg:py-24">
+          <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">Ready to Get Started?</h2>
+          <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
+            Join thousands of companies already using CorporateHub
+          </p>
+          <Link href="/dashboard">
+            <Button size="lg" className="mt-4">
+              Start Free Trial
+            </Button>
           </Link>
-          <Link className="text-xs hover:underline underline-offset-4" href="/privacy">
-            Privacy Policy
-          </Link>
-        </nav>
+        </div>
+      </section>
+      <footer className="border-t py-6 md:py-0">
+        <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+          <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
+            <Icons.logo className="h-6 w-6" />
+            <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
+              Built by{" "}
+              <a href="#" target="_blank" rel="noreferrer" className="font-medium underline underline-offset-4">
+                CorporateHub
+              </a>
+              . The source code is available on{" "}
+              <a href="#" target="_blank" rel="noreferrer" className="font-medium underline underline-offset-4">
+                GitHub
+              </a>
+              .
+            </p>
+          </div>
+        </div>
       </footer>
     </div>
   )

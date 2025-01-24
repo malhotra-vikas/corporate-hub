@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import { AIExtractedDetails } from "./ai-extracted-details"
 import { ChatInterface } from "./chat-interface"
+import { getFiles, type File } from "@/app/actions/upload-file"
 
 type DocumentType = "press_release" | "earnings_statement" | "shareholder_letter" | "other"
 
@@ -19,11 +21,19 @@ interface UploadedDocument {
 const AIDocBuilder = () => {
   const [selectedDocuments, setSelectedDocuments] = useState<UploadedDocument[]>([])
   const [isDocumentSelected, setIsDocumentSelected] = useState(false)
+  const [vaultFiles, setVaultFiles] = useState<File[]>([])
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const newDocuments = Array.from(event.target.files).map((file) => ({
-        file,
+        file: {
+          id: Math.random().toString(),
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          uploadDate: new Date(),
+          category: "other",
+        },
         type: "other" as DocumentType,
       }))
       setSelectedDocuments([...selectedDocuments, ...newDocuments])
@@ -36,9 +46,17 @@ const AIDocBuilder = () => {
     setSelectedDocuments(updatedDocuments)
   }
 
-  const handleVaultSelection = () => {
-    // Simulating vault selection
-    setIsDocumentSelected(true)
+  const handleVaultSelection = async () => {
+    const files = await getFiles()
+    setVaultFiles(files)
+  }
+
+  const handleVaultFileSelection = (file: File, isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedDocuments([...selectedDocuments, { file, type: file.category as DocumentType }])
+    } else {
+      setSelectedDocuments(selectedDocuments.filter((doc) => doc.file.id !== file.id))
+    }
   }
 
   const handleContinue = () => {
@@ -81,18 +99,36 @@ const AIDocBuilder = () => {
                       </Select>
                     </div>
                   ))}
-                  <Button onClick={handleContinue}>Continue</Button>
                 </div>
               )}
             </div>
           </TabsContent>
           <TabsContent value="vault">
             <div className="space-y-4">
-              <p>Select documents from your vault</p>
-              <Button onClick={handleVaultSelection}>Open Vault</Button>
+              <Button onClick={handleVaultSelection}>Load Vault Documents</Button>
+              {vaultFiles.length > 0 && (
+                <div className="space-y-2">
+                  {vaultFiles.map((file) => (
+                    <div key={file.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={file.id}
+                        onCheckedChange={(checked) => handleVaultFileSelection(file, checked as boolean)}
+                      />
+                      <Label htmlFor={file.id}>
+                        {file.name} ({file.category})
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
+        {selectedDocuments.length > 0 && (
+          <Button onClick={handleContinue} className="mt-4">
+            Continue
+          </Button>
+        )}
       </div>
     )
   }

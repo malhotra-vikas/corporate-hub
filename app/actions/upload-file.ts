@@ -8,6 +8,7 @@ export interface File {
   type: string
   size: number
   uploadDate: Date
+  category: string
 }
 
 // This is a mock database. In a real application, you'd use a proper database.
@@ -16,41 +17,47 @@ const files: File[] = [
     id: "1",
     name: "Q2_2023_Financial_Report.pdf",
     type: "application/pdf",
-    size: 2500000, // 2.5 MB
+    size: 2500000,
     uploadDate: new Date("2023-07-15T10:30:00"),
+    category: "Earnings Statement",
   },
   {
     id: "2",
     name: "Employee_Handbook_2023.docx",
     type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    size: 1800000, // 1.8 MB
+    size: 1800000,
     uploadDate: new Date("2023-06-01T14:45:00"),
+    category: "Other",
   },
   {
     id: "3",
     name: "Marketing_Strategy_2024.pptx",
     type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    size: 5200000, // 5.2 MB
+    size: 5200000,
     uploadDate: new Date("2023-08-22T09:15:00"),
+    category: "Other",
   },
   {
     id: "4",
     name: "Product_Launch_Press_Release.txt",
     type: "text/plain",
-    size: 15000, // 15 KB
+    size: 15000,
     uploadDate: new Date("2023-09-05T16:20:00"),
+    category: "Press Release",
   },
   {
     id: "5",
-    name: "Company_Logo_2023.png",
-    type: "image/png",
-    size: 500000, // 500 KB
+    name: "Annual_Shareholder_Letter_2023.pdf",
+    type: "application/pdf",
+    size: 500000,
     uploadDate: new Date("2023-05-10T11:00:00"),
+    category: "Shareholder Letter",
   },
 ]
 
 export async function uploadFile(formData: FormData) {
-  const file = formData.get("file") as File
+  const file = formData.get("file") as unknown as File
+  const category = formData.get("category") as string
   if (!file) {
     throw new Error("No file uploaded")
   }
@@ -63,6 +70,7 @@ export async function uploadFile(formData: FormData) {
     type: file.type,
     size: file.size,
     uploadDate: new Date(),
+    category: category || "Other",
   }
 
   files.push(newFile)

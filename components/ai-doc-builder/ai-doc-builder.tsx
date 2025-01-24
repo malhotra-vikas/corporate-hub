@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Loader2, Upload, FileText } from "lucide-react"
+import { Loader2, Upload, FileText, ChevronLeft, ChevronRight } from "lucide-react"
 import { AIExtractedDetails } from "./ai-extracted-details"
 import { ChatInterface } from "./chat-interface"
 import { PastChatSessions } from "./past-chat-sessions"
@@ -26,6 +26,7 @@ const AIDocBuilder = () => {
   const [isDocumentSelected, setIsDocumentSelected] = useState(false)
   const [vaultFiles, setVaultFiles] = useState<File[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isPastSessionsCollapsed, setIsPastSessionsCollapsed] = useState(false)
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -74,6 +75,10 @@ const AIDocBuilder = () => {
     if (selectedDocuments.length > 0) {
       setIsDocumentSelected(true)
     }
+  }
+
+  const togglePastSessions = () => {
+    setIsPastSessionsCollapsed(!isPastSessionsCollapsed)
   }
 
   if (!isDocumentSelected) {
@@ -182,19 +187,37 @@ const AIDocBuilder = () => {
           <CardDescription>Review AI-extracted details and refine with chat assistance</CardDescription>
         </CardHeader>
         <CardContent className="h-[calc(100%-5rem)] overflow-hidden">
-          <div className="grid grid-cols-4 gap-6 h-full">
-            <div className="col-span-1 h-full overflow-hidden">
-              <h3 className="text-lg font-semibold mb-4">Past Sessions</h3>
-              <PastChatSessions />
-            </div>
-            <div className="col-span-3 grid grid-rows-2 gap-6 h-full">
-              <div className="row-span-1 overflow-hidden">
-                <h3 className="text-lg font-semibold mb-4">AI Extracted Details</h3>
-                <AIExtractedDetails documents={selectedDocuments} />
+          <div className="flex h-full">
+            <div className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-12" : "w-1/4"}`}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`text-lg font-semibold ${isPastSessionsCollapsed ? "hidden" : "block"}`}>
+                  Past Sessions
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={togglePastSessions}
+                  aria-label={isPastSessionsCollapsed ? "Expand past sessions" : "Collapse past sessions"}
+                >
+                  {isPastSessionsCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                </Button>
               </div>
-              <div className="row-span-1 overflow-hidden">
-                <h3 className="text-lg font-semibold mb-4">Chat Assistance</h3>
-                <ChatInterface />
+              <div className={isPastSessionsCollapsed ? "hidden" : "block"}>
+                <PastChatSessions />
+              </div>
+            </div>
+            <div
+              className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-[calc(100%-3rem)]" : "w-3/4"} pl-6`}
+            >
+              <div className="grid grid-rows-2 gap-6 h-full">
+                <div className="row-span-1 overflow-hidden">
+                  <h3 className="text-lg font-semibold mb-4">AI Extracted Details</h3>
+                  <AIExtractedDetails documents={selectedDocuments} />
+                </div>
+                <div className="row-span-1 overflow-hidden">
+                  <h3 className="text-lg font-semibold mb-4">Chat Assistance</h3>
+                  <ChatInterface />
+                </div>
               </div>
             </div>
           </div>

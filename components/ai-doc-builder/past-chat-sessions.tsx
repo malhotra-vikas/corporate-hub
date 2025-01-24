@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, MessageSquare } from "lucide-react"
 
@@ -37,37 +37,30 @@ export const PastChatSessions = () => {
   const [selectedSession, setSelectedSession] = useState<string | null>(null)
 
   return (
-    <Card className="h-[calc(100%-2rem)] flex flex-col">
-      <CardHeader>
-        <CardTitle>Past Chat Sessions</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-grow overflow-hidden">
-        <ScrollArea className="h-full pr-4">
-          {sessions.map((session) => (
-            <Card
-              key={session.id}
-              className={`mb-4 cursor-pointer transition-colors ${selectedSession === session.id ? "bg-muted" : ""}`}
-              onClick={() => setSelectedSession(session.id)}
-            >
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold">{session.title}</h3>
-                  <span className="text-sm text-muted-foreground">{session.date}</span>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">{session.preview}</p>
-                <div className="flex justify-between items-center">
-                  <Button variant="ghost" size="sm" className="px-0">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    View Chat
-                  </Button>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </ScrollArea>
-      </CardContent>
-    </Card>
+    <ScrollArea className="h-[calc(100vh-16rem)]">
+      {sessions.map((session) => (
+        <Card
+          key={session.id}
+          className={`mb-4 cursor-pointer transition-colors ${selectedSession === session.id ? "bg-muted" : ""}`}
+          onClick={() => setSelectedSession(session.id)}
+        >
+          <CardContent className="p-4">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-semibold">{session.title}</h3>
+              <span className="text-sm text-muted-foreground">{session.date}</span>
+            </div>
+            <p className="text-sm text-muted-foreground mb-2">{session.preview}</p>
+            <div className="flex justify-between items-center">
+              <Button variant="ghost" size="sm" className="px-0">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                View Chat
+              </Button>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </ScrollArea>
   )
 }
 

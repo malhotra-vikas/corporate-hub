@@ -22,11 +22,6 @@ const sidebarNavItems = [
     icon: "globe",
   },
   {
-    title: "Documents",
-    href: "/dashboard/documents",
-    icon: "file-text",
-  },
-  {
     title: "Vault",
     href: "/dashboard/vault",
     icon: "lock",

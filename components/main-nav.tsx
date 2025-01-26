@@ -15,9 +15,11 @@ import {
 } from "@/components/ui/navigation-menu"
 import { themeConfig } from "@/lib/theme-config"
 import { UserNav } from "@/components/user-nav"
+import { useAuth } from "@/lib/auth-context"
 
 export function MainNav() {
     const pathname = usePathname()
+    const { user, mockLogin, mockLogout } = useAuth()
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -75,22 +77,26 @@ export function MainNav() {
                                 </ul>
                             </NavigationMenuContent>
                         </NavigationMenuItem>
-                        <NavigationMenuItem>
-                            <Link href="/ai-doc-builder" legacyBehavior passHref>
-                                <NavigationMenuLink
-                                    className={cn(
-                                        "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50",
-                                        pathname === "/ai-doc-builder" && "bg-accent text-accent-foreground",
-                                    )}
-                                >
-                                    AI Doc Builder
-                                </NavigationMenuLink>
-                            </Link>
-                        </NavigationMenuItem>
                     </NavigationMenuList>
                 </NavigationMenu>
                 <div className="ml-auto flex items-center space-x-4">
-                    <UserNav />
+                    {user ? (
+                        <>
+                            <UserNav />
+                            <Button onClick={mockLogout} variant="ghost">
+                                Mock Logout
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <Button onClick={mockLogin} variant="ghost">
+                                Mock Login
+                            </Button>
+                            <Link href="/signup">
+                                <Button>Sign Up</Button>
+                            </Link>
+                        </>
+                    )}
                 </div>
             </div>
         </header>

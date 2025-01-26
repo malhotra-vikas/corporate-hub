@@ -16,6 +16,7 @@ import {
 import { themeConfig } from "@/lib/theme-config"
 import { UserNav } from "@/components/user-nav"
 import { useAuth } from "@/lib/auth-context"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export function MainNav() {
     const pathname = usePathname()
@@ -89,9 +90,15 @@ export function MainNav() {
                         </>
                     ) : (
                         <>
-                            <Button onClick={mockLogin} variant="ghost">
-                                Mock Login
-                            </Button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost">Mock Login</Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => mockLogin("admin")}>Login as Admin</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => mockLogin("companyUser")}>Login as Company User</DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                             <Link href="/signup">
                                 <Button>Sign Up</Button>
                             </Link>

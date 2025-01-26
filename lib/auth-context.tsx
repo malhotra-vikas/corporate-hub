@@ -1,13 +1,22 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useEffect, useState } from "react"
-import type { User } from "firebase/auth"
+import { createContext, useContext, useState } from "react"
+
+type UserRole = "admin" | "companyUser"
+
+interface User {
+    uid: string
+    email: string
+    displayName: string
+    photoURL: string | null
+    role: UserRole
+}
 
 interface AuthContextType {
     user: User | null
     loading: boolean
-    mockLogin: () => void
+    mockLogin: (role: UserRole) => void
     mockLogout: () => void
 }
 
@@ -22,45 +31,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        // Simulate loading delay
-        const timer = setTimeout(() => setLoading(false), 1000)
-        return () => clearTimeout(timer)
-    }, [])
-
-    const mockLogin = () => {
+    const mockLogin = (role: UserRole) => {
         const mockUser: User = {
             uid: "123456",
-            email: "user@example.com",
-            displayName: "John Doe",
+            email: role === "admin" ? "admin@example.com" : "user@example.com",
+            displayName: role === "admin" ? "Admin User" : "Company User",
             photoURL: "/avatars/01.png",
-            emailVerified: true,
-            isAnonymous: false,
-            metadata: {
-                creationTime: "2023-01-01T00:00:00Z",
-                lastSignInTime: "2023-01-01T00:00:00Z",
-            },
-            providerData: [],
-            refreshToken: "",
-            tenantId: null,
-            delete: async () => { },
-            getIdToken: async () => "",
-            getIdTokenResult: async () => ({
-                token: "",
-                authTime: "",
-                issuedAtTime: "",
-                expirationTime: "",
-                signInProvider: null,
-                claims: {},
-            }),
-            reload: async () => { },
-            toJSON: () => ({}),
+            role: role,
         }
         setUser(mockUser)
+        setLoading(false)
     }
 
     const mockLogout = () => {
         setUser(null)
+        setLoading(false)
     }
 
     return <AuthContext.Provider value={{ user, loading, mockLogin, mockLogout }}>{children}</AuthContext.Provider>

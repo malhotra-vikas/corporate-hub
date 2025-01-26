@@ -41,6 +41,7 @@ export function UserNav() {
                     <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{user.displayName}</p>
                         <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                        <p className="text-xs font-medium text-primary">Role: {user.role}</p>
                     </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -61,6 +62,12 @@ export function UserNav() {
                         IR Hub
                         <DropdownMenuShortcut>⌘H</DropdownMenuShortcut>
                     </DropdownMenuItem>
+                    {user.role === "admin" && (
+                        <DropdownMenuItem onClick={() => router.push("/admin")}>
+                            Admin Panel
+                            <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+                    )}
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>

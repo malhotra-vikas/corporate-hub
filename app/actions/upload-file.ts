@@ -12,7 +12,7 @@ export interface File {
 }
 
 // This is a mock database. In a real application, you'd use a proper database.
-const files: File[] = [
+let files: File[] = [
   {
     id: "1",
     name: "Q2_2023_Financial_Report.pdf",
@@ -80,8 +80,37 @@ export async function uploadFile(formData: FormData) {
   return { success: true, file: newFile }
 }
 
-export async function getFiles() {
-  // In a real application, you'd fetch this from your database
-  return files
+export async function getFiles(page = 1, pageSize = 10, search = "") {
+  // In a real application, you'd fetch this from your database with pagination and search
+  let filteredFiles = files
+  if (search) {
+    filteredFiles = files.filter(
+      (file) =>
+        file.name.toLowerCase().includes(search.toLowerCase()) ||
+        file.category.toLowerCase().includes(search.toLowerCase()) ||
+        file.type.toLowerCase().includes(search.toLowerCase())
+    )
+  }
+  const startIndex = (page - 1) * pageSize
+  const endIndex = startIndex + pageSize
+  const paginatedFiles = filteredFiles.slice(startIndex, endIndex)
+  return {
+    files: paginatedFiles,
+    totalPages: Math.ceil(filteredFiles.length / pageSize),
+    currentPage: page,
+  }
+}
+
+export async function deleteFiles(fileIds: string[]) {
+  files = files.filter((file) => !fileIds.includes(file.id))
+  revalidatePath("/dashboard/vault")
+  return { success: true }
+}
+
+export async function getQuarter(date: Date): string {
+  const month = date.getMonth()
+  const year = date.getFullYear()
+  const quarter = Math.floor(month / 3) + 1
+  return `Q${quarter} ${year}`
 }
 

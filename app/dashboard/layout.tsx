@@ -27,11 +27,6 @@ const sidebarNavItems = [
     icon: "lock",
   },
   {
-    title: "AI Doc Builder",
-    href: "/ai-doc-builder",
-    icon: "cpu",
-  },
-  {
     title: "Profile",
     href: "/dashboard/profile",
     icon: "user",
@@ -56,16 +51,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </aside>
       <main className="flex-1 overflow-y-auto">
         <div className="container mx-auto p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">Dashboard</h1>
-              <p className="text-muted-foreground">Manage your documents and account</p>
-            </div>
-            <Link href="/" className="text-sm font-medium hover:underline underline-offset-4">
-              Back to Home
-            </Link>
+          <div>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <p className="text-muted-foreground">Manage your documents and account</p>
           </div>
-          <Separator className="my-6" />
+          <Separator className="my-4" />
           {children}
         </div>
       </main>

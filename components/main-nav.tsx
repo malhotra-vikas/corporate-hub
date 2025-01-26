@@ -14,6 +14,7 @@ import {
     NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
 import { themeConfig } from "@/lib/theme-config"
+import { UserNav } from "@/components/user-nav"
 
 export function MainNav() {
     const pathname = usePathname()
@@ -89,12 +90,7 @@ export function MainNav() {
                     </NavigationMenuList>
                 </NavigationMenu>
                 <div className="ml-auto flex items-center space-x-4">
-                    <Link href="/signin">
-                        <Button variant="ghost">Sign In</Button>
-                    </Link>
-                    <Link href="/signup">
-                        <Button>Sign Up</Button>
-                    </Link>
+                    <UserNav />
                 </div>
             </div>
         </header>

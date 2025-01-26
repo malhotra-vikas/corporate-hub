@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { getFiles, uploadFile, getQuarter } from "@/app/actions/upload-file"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { FileIcon, FileTextIcon, ImageIcon, PresentationIcon, Trash2Icon } from "lucide-react"
+import { SearchBar } from "@/components/search-bar"
+import { DeleteFilesForm } from "@/components/delete-files-form"
 import {
   Pagination,
   PaginationContent,
@@ -17,8 +20,6 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "@/components/ui/pagination"
-import { SearchBar } from "@/components/search-bar"
-import { DeleteFilesForm } from "@/components/delete-files-form"
 
 export const metadata: Metadata = {
   title: "Document Vault",
@@ -121,9 +122,11 @@ export default async function VaultPage({
                 <Trash2Icon className="mr-2 h-4 w-4" />
                 Delete Selected
               </Button>
-              <Pagination totalPages={totalPages} currentPage={currentPage} />
             </div>
           </DeleteFilesForm>
+          <div className="mt-4 flex justify-end">
+            <Pagination totalPages={totalPages} currentPage={currentPage} />
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -19,20 +19,22 @@ export function Pagination({ totalPages, currentPage }: PaginationProps) {
           className="hidden h-8 w-8 p-0 lg:flex"
           disabled={currentPage <= 1}
           aria-label="Go to previous page"
-          as={Link}
-          href={`/dashboard/vault?page=${currentPage - 1}`}
+          asChild
         >
-          <ChevronLeftIcon className="h-4 w-4" />
+          <Link href={`/dashboard/vault?page=${currentPage - 1}`}>
+            <ChevronLeftIcon className="h-4 w-4" />
+          </Link>
         </Button>
         <Button
           variant="outline"
           className="hidden h-8 w-8 p-0 lg:flex"
           disabled={currentPage >= totalPages}
           aria-label="Go to next page"
-          as={Link}
-          href={`/dashboard/vault?page=${currentPage + 1}`}
+          asChild
         >
-          <ChevronRightIcon className="h-4 w-4" />
+          <Link href={`/dashboard/vault?page=${currentPage + 1}`}>
+            <ChevronRightIcon className="h-4 w-4" />
+          </Link>
         </Button>
       </div>
     </div>

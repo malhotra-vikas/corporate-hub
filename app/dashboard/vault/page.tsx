@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { getFiles, uploadFile, deleteFiles, getQuarter } from "@/app/actions/upload-file"
+import { getFiles, uploadFile, getQuarter } from "@/app/actions/upload-file"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -10,8 +10,15 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { FileIcon, FileTextIcon, ImageIcon, PresentationIcon, Trash2Icon } from "lucide-react"
 import {
   Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationEllipsis,
+  PaginationPrevious,
+  PaginationNext,
 } from "@/components/ui/pagination"
 import { SearchBar } from "@/components/search-bar"
+import { DeleteFilesForm } from "@/components/delete-files-form"
 
 export const metadata: Metadata = {
   title: "Document Vault",
@@ -69,7 +76,7 @@ export default async function VaultPage({
           <div className="mb-4">
             <SearchBar />
           </div>
-          <form action={deleteFiles}>
+          <DeleteFilesForm>
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
@@ -116,7 +123,7 @@ export default async function VaultPage({
               </Button>
               <Pagination totalPages={totalPages} currentPage={currentPage} />
             </div>
-          </form>
+          </DeleteFilesForm>
         </CardContent>
       </Card>
     </div>

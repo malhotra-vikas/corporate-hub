@@ -102,6 +102,9 @@ export async function getFiles(page = 1, pageSize = 10, search = "") {
 }
 
 export async function deleteFiles(fileIds: string[]) {
+  if (!Array.isArray(fileIds)) {
+    throw new Error("fileIds must be an array")
+  }
   files = files.filter((file) => !fileIds.includes(file.id))
   revalidatePath("/dashboard/vault")
   return { success: true }

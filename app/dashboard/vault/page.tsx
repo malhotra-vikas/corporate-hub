@@ -33,7 +33,7 @@ export default async function VaultPage({
 }) {
   const page = Number(searchParams.page) || 1
   const search = searchParams.search || ""
-  const { files, totalPages, currentPage } = await getFiles(page, 10, search)
+  const { files, totalPages, currentPage, totalCount } = await getFiles(page, 10, search)
 
   return (
     <div className="space-y-6">
@@ -125,7 +125,7 @@ export default async function VaultPage({
             </div>
           </DeleteFilesForm>
           <div className="mt-4 flex justify-end">
-            <Pagination totalPages={totalPages} currentPage={currentPage} />
+            <Pagination totalPages={totalPages} currentPage={currentPage} totalCount={totalCount} />
           </div>
         </CardContent>
       </Card>

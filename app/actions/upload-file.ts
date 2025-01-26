@@ -257,6 +257,7 @@ export async function getFiles(page = 1, pageSize = 10, search = "") {
     files: paginatedFiles,
     totalPages: Math.ceil(filteredFiles.length / pageSize),
     currentPage: page,
+    totalCount: filteredFiles.length,
   }
 }
 

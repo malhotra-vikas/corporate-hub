@@ -33,6 +33,17 @@ const mockUsers: User[] = [
             industry: "Technology",
             foundedYear: 2000,
             website: "https://acme.com",
+            logoUrl: "/acme-logo.png",
+            aboutCompany: "<p>Acme Corp is a technology leader...</p>",
+            cautionaryNote: "<p>This document contains forward-looking statements...</p>",
+            companyDescriptor: "<p>Leading provider of innovative solutions...</p>",
+            ceoName: "John Acme",
+            contactName: "Jane Acme",
+            contactEmail: "contact@acme.com",
+            irContactName: "Bob Acme",
+            irContactEmail: "ir@acme.com",
+            irContactPhone: "+1 (555) 123-4567",
+            irCompanyName: "Acme Investor Relations",
         },
     },
     {
@@ -48,6 +59,17 @@ const mockUsers: User[] = [
             industry: "Conglomerate",
             foundedYear: 1989,
             website: "https://globex.com",
+            logoUrl: "/globex-logo.png",
+            aboutCompany: "<p>Globex Corporation is a multinational conglomerate...</p>",
+            cautionaryNote: "<p>Investors should carefully consider the risks...</p>",
+            companyDescriptor: "<p>Global leader in synergistic business solutions...</p>",
+            ceoName: "Hank Scorpio",
+            contactName: "Frank Globex",
+            contactEmail: "contact@globex.com",
+            irContactName: "Lisa Globex",
+            irContactEmail: "ir@globex.com",
+            irContactPhone: "+1 (555) 987-6543",
+            irCompanyName: "Globex Investor Relations",
         },
     },
 ]
@@ -87,7 +109,7 @@ export function UserManagement() {
             <Button onClick={() => setIsAddingCompany(true)}>Add New Company</Button>
 
             <Dialog open={isAddingCompany} onOpenChange={setIsAddingCompany}>
-                <DialogContent className="sm:max-w-[600px]">
+                <DialogContent className="sm:max-w-[800px]">
                     <DialogHeader>
                         <DialogTitle>Add New Company</DialogTitle>
                         <DialogDescription>Enter the details of the new company and its primary user.</DialogDescription>
@@ -124,7 +146,7 @@ export function UserManagement() {
                                             Edit
                                         </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="sm:max-w-[425px]">
+                                    <DialogContent className="sm:max-w-[600px]">
                                         <DialogHeader>
                                             <DialogTitle>Edit User</DialogTitle>
                                             <DialogDescription>

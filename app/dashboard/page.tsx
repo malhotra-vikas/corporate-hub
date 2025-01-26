@@ -49,11 +49,8 @@ export default function DashboardPage() {
         </Card>
       </div>
       <div className="flex space-x-4">
-        <Link href="/dashboard/documents">
-          <Button>Manage Documents</Button>
-        </Link>
         <Link href="/dashboard/vault">
-          <Button variant="outline">Access Vault</Button>
+          <Button>Manage Documents</Button>
         </Link>
       </div>
     </div>

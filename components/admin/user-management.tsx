@@ -8,9 +8,9 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
+    DialogFooter,
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
@@ -109,12 +109,12 @@ export function UserManagement() {
             <Button onClick={() => setIsAddingCompany(true)}>Add New Company</Button>
 
             <Dialog open={isAddingCompany} onOpenChange={setIsAddingCompany}>
-                <DialogContent className="sm:max-w-[800px]">
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
                     <DialogHeader>
                         <DialogTitle>Add New Company</DialogTitle>
                         <DialogDescription>Enter the details of the new company and its primary user.</DialogDescription>
                     </DialogHeader>
-                    <AddCompanyForm onSubmit={handleAddCompany} />
+                    <AddCompanyForm onSubmit={handleAddCompany} onCancel={() => setIsAddingCompany(false)} />
                 </DialogContent>
             </Dialog>
 
@@ -141,11 +141,6 @@ export function UserManagement() {
                             </TableCell>
                             <TableCell>
                                 <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Button variant="outline" className="mr-2">
-                                            Edit
-                                        </Button>
-                                    </DialogTrigger>
                                     <DialogContent className="sm:max-w-[600px]">
                                         <DialogHeader>
                                             <DialogTitle>Edit User</DialogTitle>

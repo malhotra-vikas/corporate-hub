@@ -31,7 +31,7 @@ export default function AdminPage() {
                 <CardContent>
                     <Tabs defaultValue="users">
                         <TabsList>
-                            <TabsTrigger value="users">User Management</TabsTrigger>
+                            <TabsTrigger value="users">User & Company Management</TabsTrigger>
                             <TabsTrigger value="settings">Global Settings</TabsTrigger>
                             <TabsTrigger value="logs">System Logs</TabsTrigger>
                         </TabsList>

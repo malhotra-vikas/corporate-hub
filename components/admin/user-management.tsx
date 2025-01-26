@@ -15,25 +15,47 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-
-interface User {
-    id: string
-    name: string
-    email: string
-    role: "admin" | "companyUser"
-    active: boolean
-}
+import type { User, Company } from "@/lib/types"
+import { AddCompanyForm } from "@/components/admin/add-company-form"
 
 const mockUsers: User[] = [
     { id: "1", name: "John Doe", email: "john@example.com", role: "admin", active: true },
-    { id: "2", name: "Jane Smith", email: "jane@example.com", role: "companyUser", active: true },
-    { id: "3", name: "Bob Johnson", email: "bob@example.com", role: "companyUser", active: false },
+    {
+        id: "2",
+        name: "Jane Smith",
+        email: "jane@acme.com",
+        role: "companyUser",
+        active: true,
+        company: {
+            id: "c1",
+            name: "Acme Corp",
+            description: "A leading provider of innovative solutions",
+            industry: "Technology",
+            foundedYear: 2000,
+            website: "https://acme.com",
+        },
+    },
+    {
+        id: "3",
+        name: "Bob Johnson",
+        email: "bob@globex.com",
+        role: "companyUser",
+        active: false,
+        company: {
+            id: "c2",
+            name: "Globex Corporation",
+            description: "Global leader in synergy",
+            industry: "Conglomerate",
+            foundedYear: 1989,
+            website: "https://globex.com",
+        },
+    },
 ]
 
 export function UserManagement() {
     const [users, setUsers] = useState<User[]>(mockUsers)
     const [editingUser, setEditingUser] = useState<User | null>(null)
-    const [newUser, setNewUser] = useState<Omit<User, "id">>({ name: "", email: "", role: "companyUser", active: true })
+    const [isAddingCompany, setIsAddingCompany] = useState(false)
 
     const handleUpdateUser = (updatedUser: User) => {
         setUsers(users.map((user) => (user.id === updatedUser.id ? updatedUser : user)))
@@ -44,10 +66,16 @@ export function UserManagement() {
         setUsers(users.filter((user) => user.id !== userId))
     }
 
-    const handleAddUser = () => {
+    const handleAddCompany = (newCompany: Company, newUser: Omit<User, "id" | "company">) => {
         const id = (users.length + 1).toString()
-        setUsers([...users, { ...newUser, id }])
-        setNewUser({ name: "", email: "", role: "companyUser", active: true })
+        const newUserWithCompany: User = {
+            ...newUser,
+            id,
+            role: "companyUser",
+            company: { ...newCompany, id: `c${id}` },
+        }
+        setUsers([...users, newUserWithCompany])
+        setIsAddingCompany(false)
     }
 
     const handleToggleUserStatus = (userId: string) => {
@@ -56,59 +84,15 @@ export function UserManagement() {
 
     return (
         <div className="space-y-4">
-            <Dialog>
-                <DialogTrigger asChild>
-                    <Button>Add New User</Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+            <Button onClick={() => setIsAddingCompany(true)}>Add New Company</Button>
+
+            <Dialog open={isAddingCompany} onOpenChange={setIsAddingCompany}>
+                <DialogContent className="sm:max-w-[600px]">
                     <DialogHeader>
-                        <DialogTitle>Add New User</DialogTitle>
-                        <DialogDescription>Enter the details of the new user. Click save when you're done.</DialogDescription>
+                        <DialogTitle>Add New Company</DialogTitle>
+                        <DialogDescription>Enter the details of the new company and its primary user.</DialogDescription>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="name" className="text-right">
-                                Name
-                            </Label>
-                            <Input
-                                id="name"
-                                value={newUser.name}
-                                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                                className="col-span-3"
-                            />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="email" className="text-right">
-                                Email
-                            </Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                value={newUser.email}
-                                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                                className="col-span-3"
-                            />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="role" className="text-right">
-                                Role
-                            </Label>
-                            <select
-                                id="role"
-                                value={newUser.role}
-                                onChange={(e) => setNewUser({ ...newUser, role: e.target.value as "admin" | "companyUser" })}
-                                className="col-span-3"
-                            >
-                                <option value="companyUser">Company User</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button type="submit" onClick={handleAddUser}>
-                            Save
-                        </Button>
-                    </DialogFooter>
+                    <AddCompanyForm onSubmit={handleAddCompany} />
                 </DialogContent>
             </Dialog>
 
@@ -118,6 +102,7 @@ export function UserManagement() {
                         <TableHead>Name</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Role</TableHead>
+                        <TableHead>Company</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
@@ -128,6 +113,7 @@ export function UserManagement() {
                             <TableCell>{user.name}</TableCell>
                             <TableCell>{user.email}</TableCell>
                             <TableCell>{user.role}</TableCell>
+                            <TableCell>{user.company?.name || "N/A"}</TableCell>
                             <TableCell>
                                 <Switch checked={user.active} onCheckedChange={() => handleToggleUserStatus(user.id)} />
                             </TableCell>
@@ -169,20 +155,24 @@ export function UserManagement() {
                                                     className="col-span-3"
                                                 />
                                             </div>
-                                            <div className="grid grid-cols-4 items-center gap-4">
-                                                <Label htmlFor="edit-role" className="text-right">
-                                                    Role
-                                                </Label>
-                                                <select
-                                                    id="edit-role"
-                                                    value={editingUser?.role || user.role}
-                                                    onChange={(e) => setEditingUser({ ...user, role: e.target.value as "admin" | "companyUser" })}
-                                                    className="col-span-3"
-                                                >
-                                                    <option value="companyUser">Company User</option>
-                                                    <option value="admin">Admin</option>
-                                                </select>
-                                            </div>
+                                            {user.role === "companyUser" && (
+                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                    <Label htmlFor="edit-company" className="text-right">
+                                                        Company
+                                                    </Label>
+                                                    <Input
+                                                        id="edit-company"
+                                                        value={editingUser?.company?.name || user.company?.name}
+                                                        onChange={(e) =>
+                                                            setEditingUser({
+                                                                ...user,
+                                                                company: { ...user.company!, name: e.target.value },
+                                                            })
+                                                        }
+                                                        className="col-span-3"
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
                                         <DialogFooter>
                                             <Button type="submit" onClick={() => editingUser && handleUpdateUser(editingUser)}>

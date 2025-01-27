@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import type { User, Company } from "@/lib/types"
 import { AddCompanyForm } from "@/components/admin/add-company-form"
+import { Plus, UserPlus } from "lucide-react"
 
 const mockUsers: User[] = [
     { id: "1", name: "John Doe", email: "john@example.com", role: "admin", active: true },
@@ -105,107 +106,63 @@ export function UserManagement() {
     }
 
     return (
-        <div className="space-y-4">
-            <Button onClick={() => setIsAddingCompany(true)}>Add New Company</Button>
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight">User & Company Management</h2>
+                    <p className="text-muted-foreground">Manage your organization's users and companies</p>
+                </div>
+                <Button onClick={() => setIsAddingCompany(true)}>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Add New Company
+                </Button>
+            </div>
 
             <Dialog open={isAddingCompany} onOpenChange={setIsAddingCompany}>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-                    <DialogHeader>
-                        <DialogTitle>Add New Company</DialogTitle>
-                        <DialogDescription>Enter the details of the new company and its primary user.</DialogDescription>
-                    </DialogHeader>
+                <DialogContent className="max-w-4xl h-[90vh] p-0">
                     <AddCompanyForm onSubmit={handleAddCompany} onCancel={() => setIsAddingCompany(false)} />
                 </DialogContent>
             </Dialog>
 
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Company</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {users.map((user) => (
-                        <TableRow key={user.id}>
-                            <TableCell>{user.name}</TableCell>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>{user.role}</TableCell>
-                            <TableCell>{user.company?.name || "N/A"}</TableCell>
-                            <TableCell>
-                                <Switch checked={user.active} onCheckedChange={() => handleToggleUserStatus(user.id)} />
-                            </TableCell>
-                            <TableCell>
-                                <Dialog>
-                                    <DialogContent className="sm:max-w-[600px]">
-                                        <DialogHeader>
-                                            <DialogTitle>Edit User</DialogTitle>
-                                            <DialogDescription>
-                                                Make changes to the user's information here. Click save when you're done.
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <div className="grid gap-4 py-4">
-                                            <div className="grid grid-cols-4 items-center gap-4">
-                                                <Label htmlFor="edit-name" className="text-right">
-                                                    Name
-                                                </Label>
-                                                <Input
-                                                    id="edit-name"
-                                                    value={editingUser?.name || user.name}
-                                                    onChange={(e) => setEditingUser({ ...user, name: e.target.value })}
-                                                    className="col-span-3"
-                                                />
-                                            </div>
-                                            <div className="grid grid-cols-4 items-center gap-4">
-                                                <Label htmlFor="edit-email" className="text-right">
-                                                    Email
-                                                </Label>
-                                                <Input
-                                                    id="edit-email"
-                                                    type="email"
-                                                    value={editingUser?.email || user.email}
-                                                    onChange={(e) => setEditingUser({ ...user, email: e.target.value })}
-                                                    className="col-span-3"
-                                                />
-                                            </div>
-                                            {user.role === "companyUser" && (
-                                                <div className="grid grid-cols-4 items-center gap-4">
-                                                    <Label htmlFor="edit-company" className="text-right">
-                                                        Company
-                                                    </Label>
-                                                    <Input
-                                                        id="edit-company"
-                                                        value={editingUser?.company?.name || user.company?.name}
-                                                        onChange={(e) =>
-                                                            setEditingUser({
-                                                                ...user,
-                                                                company: { ...user.company!, name: e.target.value },
-                                                            })
-                                                        }
-                                                        className="col-span-3"
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <DialogFooter>
-                                            <Button type="submit" onClick={() => editingUser && handleUpdateUser(editingUser)}>
-                                                Save Changes
-                                            </Button>
-                                        </DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
-                                <Button variant="destructive" onClick={() => handleDeleteUser(user.id)}>
-                                    Delete
-                                </Button>
-                            </TableCell>
+            <div className="rounded-md border">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Role</TableHead>
+                            <TableHead>Company</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {users.map((user) => (
+                            <TableRow key={user.id}>
+                                <TableCell className="font-medium">{user.name}</TableCell>
+                                <TableCell>{user.email}</TableCell>
+                                <TableCell>
+                                    <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                        {user.role}
+                                    </span>
+                                </TableCell>
+                                <TableCell>{user.company?.name || "N/A"}</TableCell>
+                                <TableCell>
+                                    <Switch checked={user.active} onCheckedChange={() => handleToggleUserStatus(user.id)} />
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <Button variant="ghost" size="sm" className="mr-2">
+                                        Edit
+                                    </Button>
+                                    <Button variant="destructive" size="sm" onClick={() => handleDeleteUser(user.id)}>
+                                        Delete
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     )
 }

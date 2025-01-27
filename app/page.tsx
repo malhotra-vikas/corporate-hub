@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { StatsDashboard } from "@/components/stats-dashboard"
 import { themeConfig } from "@/lib/theme-config"
 
 export default function HomePage() {
@@ -19,7 +20,7 @@ export default function HomePage() {
             Secure Document Management for Modern Enterprises
           </h1>
           <p className="max-w-[42rem] leading-normal text-white/80 sm:text-xl sm:leading-8">
-            Streamline your corporate document workflow with enterprise-grade security and intuitive collaboration
+            Streamline your corporate document workflow with enterprise-grade security and AI-powered collaboration
             tools.
           </p>
           <div className="space-x-4">
@@ -36,6 +37,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <StatsDashboard />
+
       <section id="features" className="container space-y-6 py-8 md:py-12 lg:py-24">
         <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
           <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">Features</h2>
@@ -78,7 +82,7 @@ export default function HomePage() {
           <div className="mx-auto flex max-w-[58rem] flex-col items-center justify-center gap-4 text-center">
             <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">Trusted by Industry Leaders</h2>
             <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-              See what our customers have to say about AiirHub
+              See what our customers have to say about CorporateHub
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
@@ -88,7 +92,7 @@ export default function HomePage() {
                 <CardDescription>Financial Services Company</CardDescription>
               </CardHeader>
               <CardContent>
-                "AiirHub's security features give us complete confidence in storing our sensitive documents."
+                "CorporateHub's security features give us complete confidence in storing our sensitive documents."
               </CardContent>
             </Card>
             <Card>
@@ -104,7 +108,7 @@ export default function HomePage() {
                 <CardDescription>Healthcare Provider</CardDescription>
               </CardHeader>
               <CardContent>
-                "AiirHub's user-friendly interface has made document management effortless."
+                "CorporateHub's user-friendly interface has made document management effortless."
               </CardContent>
             </Card>
           </div>
@@ -114,7 +118,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-[58rem] flex-col items-center justify-center gap-4 text-center">
           <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">Ready to Get Started?</h2>
           <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-            Join thousands of companies already using AiirHub
+            Join thousands of companies already using CorporateHub
           </p>
           <Link href="/dashboard">
             <Button size="lg" className="mt-4">

@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
-import Link from "next/link"
-import { getFiles, uploadFile, getQuarter } from "@/app/actions/upload-file"
+import { getFiles, uploadFile } from "@/app/actions/upload-file"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -12,6 +11,12 @@ import { SearchBar } from "@/components/search-bar"
 import { DeleteFilesForm } from "@/components/delete-files-form"
 import {
   Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationEllipsis,
+  PaginationPrevious,
+  PaginationNext,
 } from "@/components/ui/pagination"
 
 export const metadata: Metadata = {
@@ -161,5 +166,12 @@ function formatDate(date: Date): string {
     hour: "2-digit",
     minute: "2-digit",
   })
+}
+
+function getQuarter(date: Date): string {
+  const month = date.getMonth()
+  const year = date.getFullYear()
+  const quarter = Math.floor(month / 3) + 1
+  return `Q${quarter} ${year}`
 }
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Trash2Icon } from "lucide-react"
-import { deleteFiles } from "@/lib/api"
+import { deleteFiles } from "@/lib/api/vault"
 
 interface DeleteFilesFormProps {
     files: { id: string; name: string }[]

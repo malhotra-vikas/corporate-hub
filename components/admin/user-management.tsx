@@ -18,7 +18,7 @@ import { Switch } from "@/components/ui/switch"
 import type { User, Company } from "@/lib/types"
 import { AddCompanyForm } from "@/components/admin/add-company-form"
 import { Plus, UserPlus } from "lucide-react"
-import { getUsers, updateUser, deleteUser } from "@/lib/api"
+import { getUsers, updateUser, deleteUser } from "@/lib/api/user"
 import { Loader2 } from "lucide-react"
 
 //const mockUsers: User[] = [

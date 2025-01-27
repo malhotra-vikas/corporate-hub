@@ -10,8 +10,7 @@ import { Label } from "@/components/ui/label"
 interface ExtractedData {
   name: string
   headline: string
-  subHeadline1: string
-  subHeadline2: string
+  subHeadline: string
   summary: string
   keyHighlights: string
   ceoQuote: string
@@ -104,7 +103,11 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
           </Button>
         </div>
         {isRichText ? (
-          <div dangerouslySetInnerHTML={{ __html: value }} className="prose prose-sm max-w-none" />
+          <div
+            dangerouslySetInnerHTML={{ __html: value }}
+            className="prose prose-sm max-w-none"
+            style={{ whiteSpace: "pre-wrap" }}
+          />
         ) : (
           <p className="text-gray-700">{value}</p>
         )}
@@ -127,8 +130,8 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
           <CardContent className="p-4 pt-0 space-y-4">
             {renderEditableField(doc.file.name, "name", false)}
             {renderEditableField(doc.file.name, "headline")}
-            {renderEditableField(doc.file.name, "subHeadline1")}
-            {renderEditableField(doc.file.name, "subHeadline2")}
+            {renderEditableField(doc.file.name, "subHeadline")}
+            {/* {renderEditableField(doc.file.name, "subHeadline2")} */}
             {renderEditableField(doc.file.name, "summary")}
             {renderEditableField(doc.file.name, "keyHighlights")}
             {renderEditableField(doc.file.name, "ceoQuote")}

@@ -59,8 +59,9 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
     }))
   }
 
-  const renderEditableField = (fileName: string, field: string, value: string, isRichText = true) => {
+  const renderEditableField = (fileName: string, field: string, isRichText = true) => {
     const isEditing = editingFields[fileName]?.includes(field)
+    const value = extractedData[fileName]?.[field as keyof ExtractedData] || ""
 
     if (isEditing) {
       return (
@@ -117,20 +118,12 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 space-y-4">
-            {renderEditableField(doc.file.name, "Generated Name", extractedData[doc.file.name]?.name || "", false)}
-            {renderEditableField(doc.file.name, "Generated Headline", extractedData[doc.file.name]?.headline || "")}
-            {renderEditableField(
-              doc.file.name,
-              "Generated Sub Headline",
-              extractedData[doc.file.name]?.subHeadline || "",
-            )}
-            {renderEditableField(doc.file.name, "Generated Summary", extractedData[doc.file.name]?.summary || "")}
-            {renderEditableField(
-              doc.file.name,
-              "Generated Key Highlights",
-              extractedData[doc.file.name]?.keyHighlights || "",
-            )}
-            {renderEditableField(doc.file.name, "Generated CEO Quote", extractedData[doc.file.name]?.ceoQuote || "")}
+            {renderEditableField(doc.file.name, "Generated Name", false)}
+            {renderEditableField(doc.file.name, "Generated Headline")}
+            {renderEditableField(doc.file.name, "Generated Sub Headline")}
+            {renderEditableField(doc.file.name, "Generated Summary")}
+            {renderEditableField(doc.file.name, "Generated Key Highlights")}
+            {renderEditableField(doc.file.name, "Generated CEO Quote")}
           </CardContent>
         </Card>
       ))}

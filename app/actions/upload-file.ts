@@ -261,10 +261,12 @@ export async function getFiles(page = 1, pageSize = 10, search = "") {
   }
 }
 
-export async function deleteFiles(fileIds: string[]) {
-  if (!Array.isArray(fileIds)) {
-    throw new Error("fileIds must be an array")
+export async function deleteFiles(formData: FormData) {
+  const fileIds = formData.getAll("fileIds") as string[]
+  if (!Array.isArray(fileIds) || fileIds.length === 0) {
+    throw new Error("No files selected for deletion")
   }
+
   files = files.filter((file) => !fileIds.includes(file.id))
   revalidatePath("/dashboard/vault")
   return { success: true }

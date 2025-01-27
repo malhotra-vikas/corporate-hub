@@ -1,14 +1,14 @@
 import type { Metadata } from "next"
-import { getFiles, uploadFile } from "@/app/actions/upload-file"
+import { getFiles, uploadFile, deleteFiles } from "@/app/actions/upload-file"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { FileIcon, FileTextIcon, ImageIcon, PresentationIcon } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { FileIcon, FileTextIcon, ImageIcon, PresentationIcon, Trash2Icon } from "lucide-react"
 import { SearchBar } from "@/components/search-bar"
-import { DeleteFilesForm } from "@/components/delete-files-form"
 import {
   Pagination,
   PaginationContent,
@@ -77,45 +77,54 @@ export default async function VaultPage({
           <div className="mb-4">
             <SearchBar />
           </div>
-          <DeleteFilesForm files={files} />
-          <div className="mt-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>File Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Size</TableHead>
-                  <TableHead>Upload Date</TableHead>
-                  <TableHead>Quarter</TableHead>
-                  <TableHead>Category</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {files.map((file) => (
-                  <TableRow key={file.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center space-x-2">
-                        {getFileIcon(file.type)}
-                        <span>{file.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getFileTypeDisplay(file.type)}</TableCell>
-                    <TableCell>{formatFileSize(file.size)}</TableCell>
-                    <TableCell>{formatDate(file.uploadDate)}</TableCell>
-                    <TableCell>{getQuarter(new Date(file.uploadDate))}</TableCell>
-                    <TableCell>
-                      <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-                        {file.category}
-                      </span>
-                    </TableCell>
+          <form action={deleteFiles}>
+            <div className="mt-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[50px]">Select</TableHead>
+                    <TableHead>File Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Size</TableHead>
+                    <TableHead>Upload Date</TableHead>
+                    <TableHead>Quarter</TableHead>
+                    <TableHead>Category</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          <div className="mt-4 flex justify-end">
-            <Pagination totalPages={totalPages} currentPage={currentPage} totalCount={totalCount} />
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {files.map((file) => (
+                    <TableRow key={file.id}>
+                      <TableCell>
+                        <Checkbox name="fileIds" value={file.id} />
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center space-x-2">
+                          {getFileIcon(file.type)}
+                          <span>{file.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getFileTypeDisplay(file.type)}</TableCell>
+                      <TableCell>{formatFileSize(file.size)}</TableCell>
+                      <TableCell>{formatDate(file.uploadDate)}</TableCell>
+                      <TableCell>{getQuarter(new Date(file.uploadDate))}</TableCell>
+                      <TableCell>
+                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                          {file.category}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="mt-4 flex justify-between items-center">
+              <Button type="submit" variant="destructive">
+                <Trash2Icon className="mr-2 h-4 w-4" />
+                Delete Selected
+              </Button>
+              <Pagination totalPages={totalPages} currentPage={currentPage} totalCount={totalCount} />
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

@@ -39,6 +39,5 @@ export async function deleteFiles(formData: FormData) {
 
   await apiDeleteFiles(fileIds)
   revalidatePath("/dashboard/vault")
-  return { success: true }
 }
 

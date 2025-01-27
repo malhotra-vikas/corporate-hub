@@ -7,7 +7,11 @@ import type { File } from "@/lib/types"
 export { getFiles }
 
 export async function uploadFile(formData: FormData) {
-  const file = formData.get("file") as File
+  const file = formData.get("file")
+  if (!(file instanceof File)) {
+    throw new Error("No file uploaded or invalid file type")
+  }
+
   const category = formData.get("category") as string
   if (!file) {
     throw new Error("No file uploaded")

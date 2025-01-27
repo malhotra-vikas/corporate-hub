@@ -11,12 +11,6 @@ import { FileIcon, FileTextIcon, ImageIcon, PresentationIcon, Trash2Icon, ArrowU
 import { SearchBar } from "@/components/search-bar"
 import {
   Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationEllipsis,
-  PaginationPrevious,
-  PaginationNext,
 } from "@/components/ui/pagination"
 import Link from "next/link"
 

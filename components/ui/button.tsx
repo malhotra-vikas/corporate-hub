@@ -13,6 +13,9 @@ const buttonVariants = cva(
         secondary: "bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded",
         danger: "bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded",
         default: "bg-[#cdf683] text-black hover:bg-[#b8e15e]",      
+        ghost: "bg-transparent hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-transparent rounded",
+        outline: "bg-transparent hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded",
+
       },
       size: {
         default: "h-10 px-4 py-2",

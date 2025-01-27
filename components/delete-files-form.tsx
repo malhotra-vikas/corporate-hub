@@ -67,7 +67,7 @@ export function DeleteFilesForm({ files }: DeleteFilesFormProps) {
                 </table>
             </div>
             <div className="mt-4 flex justify-between items-center">
-                <Button type="submit" variant="destructive" disabled={isPending || selectedFiles.length === 0}>
+                <Button type="submit" variant="danger" disabled={isPending || selectedFiles.length === 0}>
                     <Trash2Icon className="mr-2 h-4 w-4" />
                     Delete Selected ({selectedFiles.length})
                 </Button>

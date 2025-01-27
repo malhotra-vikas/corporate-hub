@@ -187,7 +187,7 @@ export function UserManagement() {
                                         <Button variant="ghost" size="sm" className="mr-2">
                                             Edit
                                         </Button>
-                                        <Button variant="destructive" size="sm" onClick={() => handleDeleteUser(user.id)}>
+                                        <Button variant="danger" size="sm" onClick={() => handleDeleteUser(user.id)}>
                                             Delete
                                         </Button>
                                     </TableCell>

@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
+//import { getFiles, uploadFile, deleteFiles } from "@/lib/api/vault"
 import { getFiles, uploadFile, deleteFiles } from "@/app/actions/upload-file"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -10,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { FileIcon, FileTextIcon, ImageIcon, PresentationIcon, Trash2Icon, ArrowUpDown } from "lucide-react"
 import { SearchBar } from "@/components/search-bar"
 import {
-  Pagination,
+  Pagination
 } from "@/components/ui/pagination"
 import Link from "next/link"
 
@@ -110,7 +112,10 @@ export default async function VaultPage({
                       </Link>
                     </TableHead>
                     <TableHead>
+                      <Link href={toggleSort("quarter")} className="flex items-center">
                         Quarter
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Link>
                     </TableHead>
                     <TableHead>Category</TableHead>
                   </TableRow>
@@ -142,7 +147,7 @@ export default async function VaultPage({
               </Table>
             </div>
             <div className="mt-4 flex justify-between items-center">
-              <Button type="submit" variant="destructive">
+              <Button type="submit" variant="danger">
                 <Trash2Icon className="mr-2 h-4 w-4" />
                 Delete Selected
               </Button>

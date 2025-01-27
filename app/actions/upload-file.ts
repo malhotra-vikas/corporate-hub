@@ -29,8 +29,6 @@ export async function uploadFile(formData: FormData) {
   await apiUploadFile(newFile)
 
   revalidatePath("/dashboard/vault")
-
-  return { success: true, file: newFile }
 }
 
 export async function deleteFiles(formData: FormData) {

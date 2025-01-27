@@ -121,9 +121,9 @@ const AIDocBuilder = () => {
   if (!isDocumentSelected) {
     return (
       <div className="container mx-auto p-4 space-y-6">
-        <Card>
+        <Card className="bg-white shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl">AI Document Builder</CardTitle>
+            <CardTitle className="text-2xl text-primary">AI Document Builder</CardTitle>
             <CardDescription>Select documents to analyze and build with AI assistance</CardDescription>
           </CardHeader>
           <CardContent>
@@ -140,10 +140,10 @@ const AIDocBuilder = () => {
                 {selectedDocuments.length > 0 && (
                   <div className="space-y-4">
                     {selectedDocuments.map((doc, index) => (
-                      <Card key={index}>
+                      <Card key={index} className="bg-gray-50">
                         <CardContent className="flex items-center justify-between p-4">
                           <div className="flex items-center space-x-4">
-                            <FileText className="h-6 w-6 text-gray-500" />
+                            <FileText className="h-6 w-6 text-primary" />
                             <span>{doc.file.name}</span>
                           </div>
                           <Select
@@ -167,7 +167,7 @@ const AIDocBuilder = () => {
                 )}
               </TabsContent>
               <TabsContent value="vault" className="space-y-4">
-                <Button onClick={handleVaultSelection} disabled={isLoading}>
+                <Button onClick={handleVaultSelection} disabled={isLoading} className="bg-primary text-white">
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -183,7 +183,7 @@ const AIDocBuilder = () => {
                 {vaultFiles.length > 0 && (
                   <div className="space-y-2">
                     {vaultFiles.map((file) => (
-                      <Card key={file.id}>
+                      <Card key={file.id} className="bg-gray-50">
                         <CardContent className="flex items-center justify-between p-4">
                           <div className="flex items-center space-x-4">
                             <Checkbox
@@ -208,7 +208,7 @@ const AIDocBuilder = () => {
           </CardContent>
         </Card>
         {selectedDocuments.length > 0 && (
-          <Button onClick={handleContinue} className="w-full">
+          <Button onClick={handleContinue} className="w-full bg-primary text-white">
             Continue with {selectedDocuments.length} selected document{selectedDocuments.length > 1 ? "s" : ""}
           </Button>
         )}
@@ -218,25 +218,26 @@ const AIDocBuilder = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <Card className="h-[calc(100vh-2rem)]">
+      <Card className="h-[calc(100vh-2rem)] bg-white shadow-lg">
         <CardHeader className="pb-2">
-          <CardTitle className="text-2xl">AI Document Analysis</CardTitle>
+          <CardTitle className="text-2xl text-primary">AI Document Analysis</CardTitle>
           <CardDescription>Review AI-extracted details and refine with chat assistance</CardDescription>
         </CardHeader>
         <CardContent className="h-[calc(100%-4rem)] p-0">
           <div className="flex h-full">
             <div
-              className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-10" : "w-1/4"} border-r`}
+              className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-10" : "w-1/4"
+                } border-r border-gray-200`}
             >
-              <div className="flex items-center justify-between p-2">
-                <h3 className={`text-lg font-semibold ${isPastSessionsCollapsed ? "hidden" : "block"}`}>
+              <div className="flex items-center justify-between p-2 bg-gray-50">
+                <h3 className={`text-lg font-semibold text-primary ${isPastSessionsCollapsed ? "hidden" : "block"}`}>
                   Past Sessions
                 </h3>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={togglePastSessions}
-                  className="h-8 w-8"
+                  className="h-8 w-8 text-primary"
                   aria-label={isPastSessionsCollapsed ? "Expand past sessions" : "Collapse past sessions"}
                 >
                   {isPastSessionsCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -247,18 +248,19 @@ const AIDocBuilder = () => {
               </div>
             </div>
             <div
-              className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-[calc(100%-2.5rem)]" : "w-3/4"} flex`}
+              className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-[calc(100%-2.5rem)]" : "w-3/4"
+                } flex`}
             >
-              <div className="w-1/2 border-r p-4 overflow-hidden">
-                <h3 className="text-lg font-semibold mb-2">AI Extracted Details</h3>
+              <div className="w-1/2 border-r border-gray-200 p-4 overflow-hidden">
+                <h3 className="text-lg font-semibold mb-2 text-primary">AI Extracted Details</h3>
                 <AIExtractedDetails
                   documents={selectedDocuments}
                   extractedData={extractedData}
                   onUpdateExtractedData={handleUpdateExtractedData}
                 />
               </div>
-              <div className="w-1/2 p-4 overflow-hidden">
-                <h3 className="text-lg font-semibold mb-2">Chat Assistance</h3>
+              <div className="w-1/2 p-4 overflow-hidden bg-gray-50">
+                <h3 className="text-lg font-semibold mb-2 text-primary">Chat Assistance</h3>
                 <ChatInterface />
               </div>
             </div>

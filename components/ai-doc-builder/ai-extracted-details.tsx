@@ -83,7 +83,9 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
             </div>
           )}
           <div className="space-x-2">
-            <Button onClick={() => handleSave(fileName, field, value)}>Save</Button>
+            <Button onClick={() => handleSave(fileName, field, value)} className="bg-primary text-white">
+              Save
+            </Button>
             <Button variant="outline" onClick={() => handleCancel(fileName, field)}>
               Cancel
             </Button>
@@ -95,12 +97,16 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
     return (
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <h4 className="font-semibold">{field}</h4>
+          <h4 className="font-semibold text-primary">{field}</h4>
           <Button variant="outline" size="sm" onClick={() => handleEdit(fileName, field)}>
             Edit
           </Button>
         </div>
-        {isRichText ? <div dangerouslySetInnerHTML={{ __html: value }} /> : <p>{value}</p>}
+        {isRichText ? (
+          <div dangerouslySetInnerHTML={{ __html: value }} className="prose prose-sm max-w-none" />
+        ) : (
+          <p className="text-gray-700">{value}</p>
+        )}
       </div>
     )
   }
@@ -108,10 +114,10 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   return (
     <ScrollArea className="h-[calc(100vh-10rem)]">
       {documents.map((doc, index) => (
-        <Card key={index} className="mb-4">
+        <Card key={index} className="mb-4 bg-white shadow-sm">
           <CardHeader className="p-4 pb-2">
             <CardTitle className="text-base flex justify-between items-center">
-              <span className="truncate">{doc.file.name}</span>
+              <span className="truncate text-primary">{doc.file.name}</span>
               <Badge variant="secondary" className="ml-2">
                 {doc.type}
               </Badge>

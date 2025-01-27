@@ -23,6 +23,16 @@ interface UploadedDocument {
 
 const AIDocBuilder = () => {
   const [selectedDocuments, setSelectedDocuments] = useState<UploadedDocument[]>([])
+  const [extractedData, setExtractedData] = useState<{
+    [key: string]: {
+      name: string
+      headline: string
+      subHeadline: string
+      summary: string
+      keyHighlights: string
+      ceoQuote: string
+    }
+  }>({})
   const [isDocumentSelected, setIsDocumentSelected] = useState(false)
   const [vaultFiles, setVaultFiles] = useState<File[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -74,11 +84,38 @@ const AIDocBuilder = () => {
   const handleContinue = () => {
     if (selectedDocuments.length > 0) {
       setIsDocumentSelected(true)
+      // Generate placeholder extracted data
+      const newExtractedData = selectedDocuments.reduce(
+        (acc, doc) => {
+          acc[doc.file.name] = {
+            name: "AI-Generated Name for " + doc.file.name,
+            headline: "AI-Generated Headline for " + doc.file.name,
+            subHeadline: "AI-Generated Sub Headline for " + doc.file.name,
+            summary: "AI-Generated Summary for " + doc.file.name,
+            keyHighlights:
+              "- AI-Generated Key Highlight 1\n- AI-Generated Key Highlight 2\n- AI-Generated Key Highlight 3",
+            ceoQuote: "AI-Generated CEO Quote for " + doc.file.name,
+          }
+          return acc
+        },
+        {} as typeof extractedData,
+      )
+      setExtractedData(newExtractedData)
     }
   }
 
   const togglePastSessions = () => {
     setIsPastSessionsCollapsed(!isPastSessionsCollapsed)
+  }
+
+  const handleUpdateExtractedData = (fileName: string, field: string, value: string) => {
+    setExtractedData((prev) => ({
+      ...prev,
+      [fileName]: {
+        ...prev[fileName],
+        [field]: value,
+      },
+    }))
   }
 
   if (!isDocumentSelected) {
@@ -214,7 +251,11 @@ const AIDocBuilder = () => {
             >
               <div className="w-1/2 border-r p-4 overflow-hidden">
                 <h3 className="text-lg font-semibold mb-2">AI Extracted Details</h3>
-                <AIExtractedDetails documents={selectedDocuments} />
+                <AIExtractedDetails
+                  documents={selectedDocuments}
+                  extractedData={extractedData}
+                  onUpdateExtractedData={handleUpdateExtractedData}
+                />
               </div>
               <div className="w-1/2 p-4 overflow-hidden">
                 <h3 className="text-lg font-semibold mb-2">Chat Assistance</h3>

@@ -222,8 +222,6 @@ export async function uploadFile(formData: FormData) {
     throw new Error("No file uploaded")
   }
 
-  // In a real application, you'd upload the file to a storage service here
-  // For this example, we'll just store the file metadata
   const newFile = {
     id: Math.random().toString(36).substr(2, 9),
     name: file.name,
@@ -240,8 +238,7 @@ export async function uploadFile(formData: FormData) {
   return { success: true, file: newFile }
 }
 
-export async function getFiles(page = 1, pageSize = 10, search = "") {
-  // In a real application, you'd fetch this from your database with pagination and search
+export async function getFiles(page = 1, pageSize = 10, search = "", sort = "uploadDate", order = "desc") {
   let filteredFiles = files
   if (search) {
     filteredFiles = files.filter(
@@ -250,6 +247,21 @@ export async function getFiles(page = 1, pageSize = 10, search = "") {
         file.category.toLowerCase().includes(search.toLowerCase()),
     )
   }
+
+  // Sort the files
+  filteredFiles.sort((a, b) => {
+    if (sort === "name" || sort === "type" || sort === "category") {
+      return order === "asc" ? a[sort].localeCompare(b[sort]) : b[sort].localeCompare(a[sort])
+    } else if (sort === "size" || sort === "uploadDate") {
+      return order === "asc" ? a[sort] - b[sort] : b[sort] - a[sort]
+    } else if (sort === "quarter") {
+      const quarterA = getQuarter(new Date(a.uploadDate))
+      const quarterB = getQuarter(new Date(b.uploadDate))
+      return order === "asc" ? quarterA.localeCompare(quarterB) : quarterB.localeCompare(quarterA)
+    }
+    return 0
+  })
+
   const startIndex = (page - 1) * pageSize
   const endIndex = startIndex + pageSize
   const paginatedFiles = filteredFiles.slice(startIndex, endIndex)

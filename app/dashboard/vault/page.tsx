@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { FileIcon, FileTextIcon, ImageIcon, PresentationIcon, Trash2Icon } from "lucide-react"
+import { FileIcon, FileTextIcon, ImageIcon, PresentationIcon, Trash2Icon, ArrowUpDown } from "lucide-react"
 import { SearchBar } from "@/components/search-bar"
 import {
   Pagination,
@@ -18,6 +18,7 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "@/components/ui/pagination"
+import Link from "next/link"
 
 export const metadata: Metadata = {
   title: "Document Vault",
@@ -27,11 +28,18 @@ export const metadata: Metadata = {
 export default async function VaultPage({
   searchParams,
 }: {
-  searchParams: { page: string; search: string }
+  searchParams: { page: string; search: string; sort: string; order: string }
 }) {
   const page = Number(searchParams.page) || 1
   const search = searchParams.search || ""
-  const { files, totalPages, currentPage, totalCount } = await getFiles(page, 10, search)
+  const sort = searchParams.sort || "uploadDate"
+  const order = searchParams.order || "desc"
+  const { files, totalPages, currentPage, totalCount } = await getFiles(page, 10, search, sort, order)
+
+  const toggleSort = (column: string) => {
+    const newOrder = sort === column && order === "asc" ? "desc" : "asc"
+    return `?page=${page}&search=${search}&sort=${column}&order=${newOrder}`
+  }
 
   return (
     <div className="space-y-6">
@@ -83,11 +91,36 @@ export default async function VaultPage({
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[50px]">Select</TableHead>
-                    <TableHead>File Name</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Size</TableHead>
-                    <TableHead>Upload Date</TableHead>
-                    <TableHead>Quarter</TableHead>
+                    <TableHead>
+                      <Link href={toggleSort("name")} className="flex items-center">
+                        File Name
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Link>
+                    </TableHead>
+                    <TableHead>
+                      <Link href={toggleSort("type")} className="flex items-center">
+                        Type
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Link>
+                    </TableHead>
+                    <TableHead>
+                      <Link href={toggleSort("size")} className="flex items-center">
+                        Size
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Link>
+                    </TableHead>
+                    <TableHead>
+                      <Link href={toggleSort("uploadDate")} className="flex items-center">
+                        Upload Date
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Link>
+                    </TableHead>
+                    <TableHead>
+                      <Link href={toggleSort("quarter")} className="flex items-center">
+                        Quarter
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </Link>
+                    </TableHead>
                     <TableHead>Category</TableHead>
                   </TableRow>
                 </TableHeader>

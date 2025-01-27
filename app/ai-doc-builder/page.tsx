@@ -1,11 +1,6 @@
-import { Metadata } from "next"
-import AIDocBuilder from "@/components/ai-doc-builder/ai-doc-builder"
-
-export const metadata: Metadata = {
-  title: "AI Doc Builder | AiirHub",
-  description: "Create corporate documents with AI assistance",
-}
+import { WelcomeScreen } from "@/components/ai-doc-builder/welcome-screen"
 
 export default function AIDocBuilderPage() {
-  return <AIDocBuilder />
+  return <WelcomeScreen />
 }
+

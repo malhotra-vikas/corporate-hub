@@ -21,7 +21,11 @@ interface UploadedDocument {
   type: DocumentType
 }
 
-const AIDocBuilder = () => {
+interface AIDocBuilderProps {
+  defaultType?: "press_release" | "earnings_statement" | "other"
+}
+
+const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [selectedDocuments, setSelectedDocuments] = useState<UploadedDocument[]>([])
   const [extractedData, setExtractedData] = useState<{
     [key: string]: {
@@ -57,7 +61,7 @@ const AIDocBuilder = () => {
 
   const handleDocumentTypeChange = (index: number, type: DocumentType) => {
     const updatedDocuments = [...selectedDocuments]
-    updatedDocuments[index].type = type
+    updatedDocuments[index].type = type || defaultType
     setSelectedDocuments(updatedDocuments)
   }
 

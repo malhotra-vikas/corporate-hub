@@ -116,10 +116,7 @@ export default async function VaultPage({
                       </Link>
                     </TableHead>
                     <TableHead>
-                      <Link href={toggleSort("quarter")} className="flex items-center">
                         Quarter
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                      </Link>
                     </TableHead>
                     <TableHead>Category</TableHead>
                   </TableRow>

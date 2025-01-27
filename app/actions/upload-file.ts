@@ -288,6 +288,6 @@ export async function getQuarter(date: Date): string {
   const month = date.getMonth()
   const year = date.getFullYear()
   const quarter = Math.floor(month / 3) + 1
-  return `Q${quarter} ${year}`
+  return `${year}-Q${quarter}`
 }
 

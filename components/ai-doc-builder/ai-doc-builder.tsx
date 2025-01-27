@@ -27,7 +27,8 @@ const AIDocBuilder = () => {
     [key: string]: {
       name: string
       headline: string
-      subHeadline: string
+      subHeadline1: string
+      subHeadline2: string
       summary: string
       keyHighlights: string
       ceoQuote: string
@@ -84,16 +85,21 @@ const AIDocBuilder = () => {
   const handleContinue = () => {
     if (selectedDocuments.length > 0) {
       setIsDocumentSelected(true)
-      // Generate placeholder extracted data
+      // Generate default extracted data
       const newExtractedData = selectedDocuments.reduce(
         (acc, doc) => {
           acc[doc.file.name] = {
-            name: "AI-Generated Name for " + doc.file.name,
-            headline: "AI-Generated Headline for " + doc.file.name,
-            subHeadline: "AI-Generated Sub Headline for " + doc.file.name,
-            summary: "AI-Generated Summary for " + doc.file.name,
+            name: doc.file.name,
+            headline:
+              "LuxUrban Hotels Announces Strategic Joint Venture with Lockwood Development and Bright Hospitality, Projecting $130 Million Revenue Potential and Enhanced Market Presence in NYC",
+            subHeadline1:
+              "LuxUrban Hotels, in partnership with Lockwood and Bright, aims to launch a joint venture expected to generate $36.7 million in annual revenue from two pilot hotels.",
+            subHeadline2:
+              "Projected total revenue could reach $130 million across nine Lux properties, enhancing shareholder value and bolstering financial stability through strategic partnerships and advanced technology.",
+            summary:
+              "LuxUrban Hotels Inc. (Nasdaq: LUXH), a hospitality company that leases entire hotels on a long-term basis, manages these hotels, and rents out rooms to guests in the properties it leases, has initiated a strategic joint venture (JV) with Lockwood Development Partners LLC and The Bright Hospitality Management, LLC. This collaboration aims to enhance operational efficiencies and profitability through the integration of advanced hotel management technology and the introduction of Lockwood's Vitality brand into the New York City market. The Pilot JV will initially focus on two Lux hotels—Herald Hotel and Tuscany Hotel—laying the groundwork for potentially expanding the partnership to encompass Lux's full portfolio of nine hotels, contingent upon favorable evaluations and necessary approvals. The joint venture represents a critical step in Lux's broader strategy to address existing financial challenges, including substantial arrears with landlords and unions. With an initial investment of $2 million from Lockwood, the parties project a top-line revenue of approximately $36.7 million for the two pilot hotels, and an estimated $130 million for the entire Lux portfolio once fully integrated into the JV framework. The collaboration with Bright is expected to leverage its proprietary technology platform to enhance revenue management and operational efficiencies, potentially increasing overall profits by $42 million for the full portfolio. However, the successful realization of these forecasts will depend on securing requisite consents from stakeholders, including landlords and noteholders. While the proposed JV provides a promising opportunity for LuxUrban Hotels to revitalize its operations and financial standing, it also acknowledges inherent challenges, particularly in obtaining necessary approvals and addressing existing arrears. The cautious optimism surrounding this venture underscores the company's commitment to sustainable growth and stakeholder value enhancement. As Lux moves forward with these initiatives, effective management of stakeholder expectations and clear communication of progress will be vital for fostering confidence among shareholders, investors, and potential partners.",
             keyHighlights:
-              "- AI-Generated Key Highlight 1\n- AI-Generated Key Highlight 2\n- AI-Generated Key Highlight 3",
+              "1. Joint Venture Launch: LuxUrban Hotels Inc. is poised to establish a strategic joint venture with Lockwood Development Partners and Bright Hospitality Management, targeting the launch of two pilot hotels in New York City, aligning with Lux's growth strategy in a lucrative market.\n2. Revenue Potential: Projected annual revenue for the two pilot hotels is estimated at $36.7 million, with potential growth to $130 million across all nine Lux properties once fully integrated into the joint venture framework.\n3. Financial Backing: Lockwood's initial investment of $2 million will address current arrears for the pilot hotels, with a total investment expectation of $35 to $42 million, indicating strong financial commitment and confidence in the venture's success.\n4. Operational Innovation: Utilization of Bright's proprietary technology platform aims to enhance operational efficiency and guest experience, positioning Lux for improved profitability with anticipated bottom-line gains of $8.7 million for pilot hotels and $42 million for the full portfolio.\n5. Expansion and Compliance: The joint venture includes a clear roadmap for potential expansion to all Lux hotels, contingent upon necessary consents from stakeholders, emphasizing a cautious yet optimistic approach to growth amid existing challenges.",
             ceoQuote: "AI-Generated CEO Quote for " + doc.file.name,
           }
           return acc

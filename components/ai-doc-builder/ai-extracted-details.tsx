@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label"
 interface ExtractedData {
   name: string
   headline: string
-  subHeadline: string
+  subHeadline1: string
+  subHeadline2: string
   summary: string
   keyHighlights: string
   ceoQuote: string
@@ -124,12 +125,13 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 space-y-4">
-            {renderEditableField(doc.file.name, "Generated Name", false)}
-            {renderEditableField(doc.file.name, "Generated Headline")}
-            {renderEditableField(doc.file.name, "Generated Sub Headline")}
-            {renderEditableField(doc.file.name, "Generated Summary")}
-            {renderEditableField(doc.file.name, "Generated Key Highlights")}
-            {renderEditableField(doc.file.name, "Generated CEO Quote")}
+            {renderEditableField(doc.file.name, "name", false)}
+            {renderEditableField(doc.file.name, "headline")}
+            {renderEditableField(doc.file.name, "subHeadline1")}
+            {renderEditableField(doc.file.name, "subHeadline2")}
+            {renderEditableField(doc.file.name, "summary")}
+            {renderEditableField(doc.file.name, "keyHighlights")}
+            {renderEditableField(doc.file.name, "ceoQuote")}
           </CardContent>
         </Card>
       ))}

@@ -31,65 +31,124 @@ export function MainNav() {
                 </Link>
                 <NavigationMenu className="mx-6">
                     <NavigationMenuList>
-                        <NavigationMenuItem>
-                            <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
-                            <NavigationMenuContent>
-                                <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr] bg-white rounded-md shadow-md">
-                                    <li className="row-span-3">
-                                        <NavigationMenuLink asChild>
-                                            <a
-                                                className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/50 to-primary p-6 no-underline outline-none focus:shadow-md"
-                                                href="/"
-                                            >
-                                                <img src="/logo.svg" alt={themeConfig.name} className="h-6 w-auto mb-2" />
-                                                <div className="mb-2 mt-4 text-lg font-medium text-white">{themeConfig.name}</div>
-                                                <p className="text-sm leading-tight text-white/90">{themeConfig.description}</p>
-                                            </a>
+                        {user ? (
+                            // Logged in navigation items
+                            <>
+                                <NavigationMenuItem>
+                                    <Link href="/hub" legacyBehavior passHref>
+                                        <NavigationMenuLink
+                                            className={cn(
+                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
+                                                pathname === "/hub" ? "bg-accent" : "bg-transparent",
+                                            )}
+                                        >
+                                            IR Hub
                                         </NavigationMenuLink>
-                                    </li>
-                                    <ListItem href="/features" title="Document Management">
-                                        Secure storage and organization of corporate documents
-                                    </ListItem>
-                                    <ListItem href="/features" title="Collaboration">
-                                        Real-time collaboration and version control
-                                    </ListItem>
-                                    <ListItem href="/features" title="Security">
-                                        Enterprise-grade security and compliance
-                                    </ListItem>
-                                </ul>
-                            </NavigationMenuContent>
-                        </NavigationMenuItem>
-                        <NavigationMenuItem>
-                            <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
-                            <NavigationMenuContent>
-                                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-white rounded-md shadow-md">
-                                    <ListItem href="/hub" title="IR Hub">
-                                        Access market data and investor relations tools
-                                    </ListItem>
-                                    <ListItem href="/pricing" title="Pricing">
-                                        Flexible plans for businesses of all sizes
-                                    </ListItem>
-                                    <ListItem href="/testimonials" title="Case Studies">
-                                        See how other companies use CorporateHub
-                                    </ListItem>
-                                    <ListItem href="/documentation" title="Documentation">
-                                        Detailed guides and API documentation
-                                    </ListItem>
-                                </ul>
-                            </NavigationMenuContent>
-                        </NavigationMenuItem>
-                        <NavigationMenuItem>
-                            <Link href="/ai-doc-builder" legacyBehavior passHref>
-                                <NavigationMenuLink
-                                    className={cn(
-                                        "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
-                                        pathname === "/ai-doc-builder" ? "bg-accent" : "bg-transparent",
-                                    )}
-                                >
-                                    AI-Doc-Builder
-                                </NavigationMenuLink>
-                            </Link>
-                        </NavigationMenuItem>
+                                    </Link>
+                                </NavigationMenuItem>
+                                <NavigationMenuItem>
+                                    <Link href="/dashboard/vault" legacyBehavior passHref>
+                                        <NavigationMenuLink
+                                            className={cn(
+                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
+                                                pathname === "/dashboard/vault" ? "bg-accent" : "bg-transparent",
+                                            )}
+                                        >
+                                            Vault
+                                        </NavigationMenuLink>
+                                    </Link>
+                                </NavigationMenuItem>
+                                <NavigationMenuItem>
+                                    <Link href="/ai-doc-builder" legacyBehavior passHref>
+                                        <NavigationMenuLink
+                                            className={cn(
+                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
+                                                pathname === "/ai-doc-builder" ? "bg-accent" : "bg-transparent",
+                                            )}
+                                        >
+                                            AI-Doc-Builder
+                                        </NavigationMenuLink>
+                                    </Link>
+                                </NavigationMenuItem>
+                                <NavigationMenuItem>
+                                    <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
+                                    <NavigationMenuContent>
+                                        <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                                            <li className="row-span-3">
+                                                <NavigationMenuLink asChild>
+                                                    <a className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/50 to-primary p-6 no-underline outline-none focus:shadow-md">
+                                                        <div className="mb-2 mt-4 text-lg font-medium text-white">Features</div>
+                                                        <p className="text-sm leading-tight text-white/90">
+                                                            Explore our comprehensive suite of corporate document management solutions
+                                                        </p>
+                                                    </a>
+                                                </NavigationMenuLink>
+                                            </li>
+                                            <ListItem href="/features" title="Document Management">
+                                                Secure storage and organization
+                                            </ListItem>
+                                            <ListItem href="/features" title="AI Assistance">
+                                                Smart document generation and analysis
+                                            </ListItem>
+                                            <ListItem href="/features" title="Collaboration">
+                                                Team workflows and sharing
+                                            </ListItem>
+                                        </ul>
+                                    </NavigationMenuContent>
+                                </NavigationMenuItem>
+                            </>
+                        ) : (
+                            // Original navigation items for non-logged in users
+                            <>
+                                <NavigationMenuItem>
+                                    <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
+                                    <NavigationMenuContent>
+                                        <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr] bg-white rounded-md shadow-md">
+                                            <li className="row-span-3">
+                                                <NavigationMenuLink asChild>
+                                                    <a
+                                                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/50 to-primary p-6 no-underline outline-none focus:shadow-md"
+                                                        href="/"
+                                                    >
+                                                        <img src="/logo.svg" alt={themeConfig.name} className="h-6 w-auto mb-2" />
+                                                        <div className="mb-2 mt-4 text-lg font-medium text-white">{themeConfig.name}</div>
+                                                        <p className="text-sm leading-tight text-white/90">{themeConfig.description}</p>
+                                                    </a>
+                                                </NavigationMenuLink>
+                                            </li>
+                                            <ListItem href="/features" title="Document Management">
+                                                Secure storage and organization of corporate documents
+                                            </ListItem>
+                                            <ListItem href="/features" title="Collaboration">
+                                                Real-time collaboration and version control
+                                            </ListItem>
+                                            <ListItem href="/features" title="Security">
+                                                Enterprise-grade security and compliance
+                                            </ListItem>
+                                        </ul>
+                                    </NavigationMenuContent>
+                                </NavigationMenuItem>
+                                <NavigationMenuItem>
+                                    <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
+                                    <NavigationMenuContent>
+                                        <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-white rounded-md shadow-md">
+                                            <ListItem href="/hub" title="IR Hub">
+                                                Access market data and investor relations tools
+                                            </ListItem>
+                                            <ListItem href="/pricing" title="Pricing">
+                                                Flexible plans for businesses of all sizes
+                                            </ListItem>
+                                            <ListItem href="/testimonials" title="Case Studies">
+                                                See how other companies use CorporateHub
+                                            </ListItem>
+                                            <ListItem href="/documentation" title="Documentation">
+                                                Detailed guides and API documentation
+                                            </ListItem>
+                                        </ul>
+                                    </NavigationMenuContent>
+                                </NavigationMenuItem>
+                            </>
+                        )}
                     </NavigationMenuList>
                 </NavigationMenu>
                 <div className="ml-auto flex items-center space-x-4">

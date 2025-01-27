@@ -34,7 +34,7 @@ export function MainNav() {
                         <NavigationMenuItem>
                             <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
                             <NavigationMenuContent>
-                                <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                                <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr] bg-white rounded-md shadow-md">
                                     <li className="row-span-3">
                                         <NavigationMenuLink asChild>
                                             <a
@@ -62,7 +62,7 @@ export function MainNav() {
                         <NavigationMenuItem>
                             <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
                             <NavigationMenuContent>
-                                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-white rounded-md shadow-md">
                                     <ListItem href="/hub" title="IR Hub">
                                         Access market data and investor relations tools
                                     </ListItem>
@@ -77,6 +77,18 @@ export function MainNav() {
                                     </ListItem>
                                 </ul>
                             </NavigationMenuContent>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                            <Link href="/ai-doc-builder" legacyBehavior passHref>
+                                <NavigationMenuLink
+                                    className={cn(
+                                        "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
+                                        pathname === "/ai-doc-builder" ? "bg-accent" : "bg-transparent",
+                                    )}
+                                >
+                                    AI-Doc-Builder
+                                </NavigationMenuLink>
+                            </Link>
                         </NavigationMenuItem>
                     </NavigationMenuList>
                 </NavigationMenu>
@@ -123,7 +135,7 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, React.ComponentPropsWit
                         )}
                         {...props}
                     >
-                        <div className="text-sm font-medium leading-none">{title}</div>
+                        <div className="text-sm font-medium leading-none text-foreground">{title}</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">{children}</p>
                     </a>
                 </NavigationMenuLink>

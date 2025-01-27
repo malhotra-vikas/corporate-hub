@@ -66,12 +66,12 @@ export default function SignUp() {
                                 required
                             />
                         </div>
-                        <Button type="submit" className="w-full">
+                        <Button type="submit" className="w-full bg-[#cdf683] text-black hover:bg-[#b8e15e]">
                             Sign Up
                         </Button>
                     </form>
                     <div className="mt-4">
-                        <Button variant="outline" className="w-full" onClick={handleGoogleSignUp}>
+                        <Button variant="outline" className="w-full border-[#cdf683]" onClick={handleGoogleSignUp}>
                             Sign Up with Google
                         </Button>
                     </div>

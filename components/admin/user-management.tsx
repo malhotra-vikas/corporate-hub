@@ -112,7 +112,7 @@ export function UserManagement() {
                     <h2 className="text-2xl font-bold tracking-tight">User & Company Management</h2>
                     <p className="text-muted-foreground">Manage your organization's users and companies</p>
                 </div>
-                <Button onClick={() => setIsAddingCompany(true)}>
+                <Button onClick={() => setIsAddingCompany(true)} className="bg-[#cdf683] text-black hover:bg-[#b8e15e]">
                     <UserPlus className="mr-2 h-4 w-4" />
                     Add New Company
                 </Button>

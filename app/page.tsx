@@ -25,12 +25,12 @@ export default function HomePage() {
           </p>
           <div className="space-x-4">
             <Link href="/dashboard">
-              <Button size="lg" className="bg-white text-primary hover:bg-white/90">
+              <Button size="lg" className="bg-[#cdf683] text-black hover:bg-[#b8e15e]">
                 Get Started
               </Button>
             </Link>
             <Link href="/pricing">
-              <Button size="lg" variant="outline" className="bg-white/10 text-white hover:bg-white/20">
+              <Button size="lg" variant="outline" className="bg-white/10 text-white hover:bg-white/20 border-[#cdf683]">
                 View Pricing
               </Button>
             </Link>
@@ -121,7 +121,7 @@ export default function HomePage() {
             Join thousands of companies already using CorporateHub
           </p>
           <Link href="/dashboard">
-            <Button size="lg" className="mt-4">
+            <Button size="lg" className="mt-4 bg-[#cdf683] text-black hover:bg-[#b8e15e]">
               Start Free Trial
             </Button>
           </Link>
@@ -131,17 +131,6 @@ export default function HomePage() {
         <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
           <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
             <img src="/logo.svg" alt={themeConfig.name} className="h-6 w-auto" />
-            <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-              Built by{" "}
-              <a href="#" target="_blank" rel="noreferrer" className="font-medium underline underline-offset-4">
-                {themeConfig.name}
-              </a>
-              . The source code is available on{" "}
-              <a href="#" target="_blank" rel="noreferrer" className="font-medium underline underline-offset-4">
-                GitHub
-              </a>
-              .
-            </p>
           </div>
         </div>
       </footer>

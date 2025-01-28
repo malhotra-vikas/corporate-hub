@@ -20,6 +20,7 @@ export default function SignUp() {
         e.preventDefault()
         try {
             await createUserWithEmailAndPassword(auth, email, password)
+            
             router.push("/dashboard")
         } catch (error) {
             setError("Failed to create an account. Please try again.")

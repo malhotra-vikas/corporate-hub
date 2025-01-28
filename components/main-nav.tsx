@@ -16,11 +16,11 @@ import {
 import { themeConfig } from "@/lib/theme-config"
 import { UserNav } from "@/components/user-nav"
 import { useAuth } from "@/lib/auth-context"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { LoginButton } from "@/components/login-button"
 
 export function MainNav() {
     const pathname = usePathname()
-    const { user, mockLogin, mockLogout } = useAuth()
+    const { user } = useAuth()
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -153,23 +153,10 @@ export function MainNav() {
                 </NavigationMenu>
                 <div className="ml-auto flex items-center space-x-4">
                     {user ? (
-                        <>
-                            <UserNav />
-                            <Button onClick={mockLogout} variant="ghost">
-                                Mock Logout
-                            </Button>
-                        </>
+                        <UserNav />
                     ) : (
                         <>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost">Mock Login</Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem onClick={() => mockLogin("admin")}>Login as Admin</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => mockLogin("companyUser")}>Login as Company User</DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            <LoginButton />
                             <Link href="/signup">
                                 <Button>Sign Up</Button>
                             </Link>

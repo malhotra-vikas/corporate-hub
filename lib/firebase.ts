@@ -10,8 +10,15 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
+console.log("Firebase confifgs ", firebaseConfig)
+
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
+
+console.log("Firebase app ", app)
+
 const auth = getAuth(app)
+
+console.log("Firebase auth ", auth)
 
 export { auth }
 

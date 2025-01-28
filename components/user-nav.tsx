@@ -17,10 +17,10 @@ import { useAuth } from "@/lib/auth-context"
 
 export function UserNav() {
     const router = useRouter()
-    const { user, mockLogout } = useAuth()
+    const { user, signOut } = useAuth()
 
     const handleSignOut = async () => {
-        mockLogout()
+        await signOut()
         router.push("/")
     }
 

@@ -3,10 +3,11 @@ import * as yup from "yup";
 export class CreateUserDto {
   companyName?: string;
   email?: string;
-  PRchatInstruction?: string;
-  ECSchatInstruction?: string;
-  QnAchatInstruction?: string;
+  firebase_uid?: string;
+  companyTicker?: string;
   companyInfo?: string;
+  role?: string;
+  
   img?: any;
   userId?: string;
   companyAbout?: string;

@@ -1,39 +1,35 @@
 "use client"
 
 import { useState } from "react"
-import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
-import { auth } from "@/lib/firebase"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card"
+import { useAuth } from "@/lib/auth-context"
 
 export default function SignUp() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [companyTicker, setCompanyTicker] = useState("")
+    const [companyName, setCompanyName] = useState("")
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()
+    const { signUp } = useAuth()
 
     const handleEmailSignUp = async (e: React.FormEvent) => {
         e.preventDefault()
+        setError(null)
         try {
-            await createUserWithEmailAndPassword(auth, email, password)
-            
+            await signUp(email, password, companyName, companyTicker)
             router.push("/dashboard")
         } catch (error) {
-            setError("Failed to create an account. Please try again.")
-        }
-    }
-
-    const handleGoogleSignUp = async () => {
-        const provider = new GoogleAuthProvider()
-        try {
-            await signInWithPopup(auth, provider)
-            router.push("/dashboard")
-        } catch (error) {
-            setError("Failed to sign up with Google.")
+            if (error instanceof Error) {
+                setError(error.message)
+            } else {
+                setError("An unexpected error occurred. Please try again later.")
+            }
         }
     }
 
@@ -46,6 +42,26 @@ export default function SignUp() {
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleEmailSignUp} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Company Name</Label>
+                            <Input
+                                id="companyName"
+                                value={companyName}
+                                onChange={(e) => setCompanyName(e.target.value)}
+                                placeholder="Enter your Company name"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Company Ticker</Label>
+                            <Input
+                                id="companyTicker"
+                                value={companyTicker}
+                                onChange={(e) => setCompanyTicker(e.target.value)}
+                                placeholder="Enter your Company Ticker"
+                            />
+                        </div>
+
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <Input
@@ -71,11 +87,6 @@ export default function SignUp() {
                             Sign Up
                         </Button>
                     </form>
-                    <div className="mt-4">
-                        <Button variant="outline" className="w-full border-[#cdf683]" onClick={handleGoogleSignUp}>
-                            Sign Up with Google
-                        </Button>
-                    </div>
                     {error && <p className="text-red-500 mt-4">{error}</p>}
                 </CardContent>
                 <CardFooter>

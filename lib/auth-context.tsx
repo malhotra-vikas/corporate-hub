@@ -3,12 +3,7 @@
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 import { auth } from "@/lib/firebase"
-import {
-    onAuthStateChanged,
-    User as FirebaseUser,
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-} from "firebase/auth"
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
 import UserApi from "@/lib/api/user.api"
 
 type UserRole = "admin" | "companyUser"
@@ -17,6 +12,8 @@ interface User {
     uid: string
     email: string | null
     displayName: string | null
+    displayTicker: string | null
+
     photoURL: string | null
     role: UserRole
     _id?: string
@@ -27,7 +24,7 @@ interface AuthContextType {
     user: User | null
     loading: boolean
     signIn: (email: string, password: string) => Promise<void>
-    signUp: (email: string, password: string, name: string) => Promise<void>
+    signUp: (email: string, password: string, companyName: string, companyTicker: string) => Promise<void>
     signOut: () => Promise<void>
     getToken: () => Promise<string | null>
 }
@@ -49,13 +46,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
                 const token = await firebaseUser.getIdToken()
-                // Here you would typically fetch additional user data from your backend
                 const userApi = new UserApi()
                 const userData = await userApi.getClientByEmail(firebaseUser.email || "")
                 setUser({
                     uid: firebaseUser.uid,
                     email: firebaseUser.email,
-                    displayName: firebaseUser.displayName,
+                    displayName: userData.displayName,
+                    displayTicker: userData.displayTicker,
                     photoURL: firebaseUser.photoURL,
                     role: userData.role || "companyUser",
                     _id: userData._id,
@@ -76,25 +73,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const userCredential = await signInWithEmailAndPassword(auth, email, password)
             const firebaseUser = userCredential.user
 
-            console.log("In Auth firebaseUser ", firebaseUser)
-
-            // Call your backend API
             const userApi = new UserApi()
-            console.log("In Auth userApi ", userApi)
-
             const loginResponse = await userApi.login({ username: email, password })
-            console.log("In Auth loginResponse ", loginResponse)
+            console.log("Logged is user ", loginResponse)
 
-            // Combine Firebase user data with your backend data
             setUser({
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
-                displayName: firebaseUser.displayName,
+                displayName: loginResponse.data.displayName,
+                displayTicker: loginResponse.data.displayTicker,
                 photoURL: firebaseUser.photoURL,
                 role: loginResponse.data.role || "companyUser",
                 _id: loginResponse.data._id,
             })
-            // After successful sign in, update the user state with the token
             const token = await auth.currentUser?.getIdToken()
             setUser((prevUser) => (prevUser ? { ...prevUser, token } : null))
         } catch (error) {
@@ -115,36 +106,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }
 
-    const signUp = async (email: string, password: string, name: string) => {
+    const signUp = async (email: string, password: string, companyName: string, companyTicker: string) => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password)
             const firebaseUser = userCredential.user
 
-            console.log("in signup ", firebaseUser)
-
-            // Call your backend API
             const userApi = new UserApi()
             const createUserResponse = await userApi.createUser({
-                email
+                email,
+                companyName,
+                companyTicker,
+                firebase_uid: firebaseUser.uid,
+                role: "companyUser", // Default role for new users
             })
-            console.log("in signup createUserResponse ", createUserResponse)
 
-            // Combine Firebase user data with your backend data
             setUser({
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
-                displayName: name,
+                displayName: companyName,
+                displayTicker: companyTicker,
                 photoURL: firebaseUser.photoURL,
                 role: createUserResponse.data.role || "companyUser",
                 _id: createUserResponse.data._id,
             })
-            // After successful sign up, update the user state with the token
             const token = await auth.currentUser?.getIdToken()
             setUser((prevUser) => (prevUser ? { ...prevUser, token } : null))
         } catch (error) {
             console.error("Error signing up:", error)
             if (error instanceof Error) {
-                throw new Error("An error occurred during sign up. Please try again later.")
+                if (error.message.includes("auth/email-already-in-use")) {
+                    throw new Error("This email is already in use. Please try signing in or use a different email.")
+                } else {
+                    throw new Error("An error occurred during sign up. Please try again later.")
+                }
             } else {
                 throw new Error("An unexpected error occurred. Please try again later.")
             }
@@ -166,19 +160,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         return token || null
     }
-
-    const testFirebaseAuth = async () => {
-        try {
-            const testUser = await signInWithEmailAndPassword(auth, "test@example.com", "testpassword")
-            console.log("Test authentication successful:", testUser)
-        } catch (error) {
-            console.error("Test authentication failed:", error)
-        }
-    }
-
-    useEffect(() => {
-        testFirebaseAuth()
-    }, [auth]) // Added auth to dependencies
 
     return (
         <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, getToken }}>{children}</AuthContext.Provider>

@@ -16,13 +16,13 @@ import type React from "react"
 
 interface CompanyDetails {
     name: string
-    industry: string
-    foundedYear: number
+    foundedYear: string
     ceoName: string
     companyTicker: string
     exchange: string
-    // Add any additional properties from companyAbout, newsResults, companyFinancials, and companyDiscoverMore
 }
+
+
 
 export default function SignUp() {
     const [email, setEmail] = useState("")
@@ -30,6 +30,9 @@ export default function SignUp() {
     const [companyTicker, setCompanyTicker] = useState("")
     const [companyExchange, setCompanyExchange] = useState("")
     const [companyName, setCompanyName] = useState("")
+    let [companyCEOName, setCompanyCEOName] = useState("")
+    let [companyFounded, setCompanyFounded] = useState("")
+
     const [companyDetails, setCompanyDetails] = useState<CompanyDetails | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -72,14 +75,7 @@ export default function SignUp() {
                         serpCompanyDetails.data.companySummary.exchange ||
                         (serpCompanyDetails.data.companySummary.exchange === EXCHANGE_DOW ? EXCHANGE_DOW : EXCHANGE_NASDAQ)
                     setCompanyExchange(exchangeFound)
-                    setCompanyDetails({
-                        ...serpCompanyDetails.data.companySummary,
-                        ...serpCompanyDetails.data.companyKnowledgeGraph,
-                        ...serpCompanyDetails.data.newsResults,
-                        ...serpCompanyDetails.data.companyFinancials,
-                        ...serpCompanyDetails.data.companyDiscoverMore,
-                        companyTicker: ticker,
-                    })
+
 
                     console.log(exchangeFound)
                     console.log("companySummary : ", serpCompanyDetails.data.companySummary)
@@ -87,8 +83,47 @@ export default function SignUp() {
                     console.log("newsResults :", serpCompanyDetails.data.newsResults)
                     console.log("companyFinancials :", serpCompanyDetails.data.companyFinancials)
                     console.log("companyDiscoverMore :", serpCompanyDetails.data.companyDiscoverMore)
+                    console.log(serpCompanyDetails.data.companySummary.title)
 
-                    setCompanyName(serpCompanyDetails.data.companySummary.name)
+                    setCompanyName(serpCompanyDetails.data.companySummary.title)
+
+                    const ceoInfo = serpCompanyDetails.data.companyKnowledgeGraph.about[0]?.info.find((item: { label: string }) => item.label === "CEO");
+                    console.log("ceoInfo ", ceoInfo)
+                    
+                    if (ceoInfo) {
+                        const nameParts = ceoInfo.value.trim().split(" "); // Split by space
+                        // If the first and second part are the same, remove the duplicate
+                        companyCEOName = nameParts[0] === nameParts[1] ? nameParts[0] : ceoInfo.value.trim();
+                    } else {
+                        companyCEOName = "CEO not found"
+                    }
+                    
+                    console.log("CEO Name: ", companyCEOName); 
+
+                    setCompanyCEOName(companyCEOName)
+
+                    const foundedInfo = serpCompanyDetails.data.companyKnowledgeGraph.about[0]?.info.find((item: { label: string }) => item.label === "Founded");
+                    console.log("foundedInfo ", foundedInfo)
+                    
+                    if (foundedInfo) {
+                        companyFounded = foundedInfo.value.trim();
+                    } else {
+                        companyFounded = "Data not found"
+                    }
+                    setCompanyFounded(companyFounded)
+                    console.log("companyFounded: ", companyFounded); 
+
+                    setCompanyDetails({
+                        ...serpCompanyDetails.data.companySummary,
+                        ...serpCompanyDetails.data.companyKnowledgeGraph,
+                        ...serpCompanyDetails.data.newsResults,
+                        ...serpCompanyDetails.data.companyFinancials,
+                        ...serpCompanyDetails.data.companyDiscoverMore,
+                        companyTicker: ticker,
+                        ceoName: companyCEOName,
+                        exchange: exchangeFound,
+                        foundedYear: companyFounded
+                    })                    
                 } else {
                     setCompanyDetails(null)
                     setError("No company found for the provided ticker")
@@ -130,7 +165,7 @@ export default function SignUp() {
         try {
             await signUp(email, password, companyName, companyTicker, companyDetails)
             toast.success("Account created successfully!")
-            router.push("/dashboard")
+            router.push("/hub")
         } catch (error) {
             if (error instanceof Error) {
                 setError(error.message)

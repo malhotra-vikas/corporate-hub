@@ -8,6 +8,14 @@ import UserApi from "@/lib/api/user.api"
 
 type UserRole = "admin" | "companyUser"
 
+interface CompanyDetails {
+    name: string
+    foundedYear: string
+    ceoName: string
+    companyTicker: string
+    exchange: string
+}
+
 interface User {
     uid: string
     email: string | null
@@ -18,13 +26,13 @@ interface User {
     role: UserRole
     _id?: string
     token?: string
-}
+    }
 
 interface AuthContextType {
     user: User | null
     loading: boolean
     signIn: (email: string, password: string) => Promise<void>
-    signUp: (email: string, password: string, companyName: string, companyTicker: string, companyDetails: any) => Promise<void>
+    signUp: (email: string, password: string, companyName: string, companyTicker: string, companyDetails: CompanyDetails) => Promise<void>
     signOut: () => Promise<void>
     getToken: () => Promise<string | null>
 }
@@ -106,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }
 
-    const signUp = async (email: string, password: string, companyName: string, companyTicker: string) => {
+    const signUp = async (email: string, password: string, companyName: string, companyTicker: string, companyDetails: CompanyDetails) => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password)
             const firebaseUser = userCredential.user
@@ -117,6 +125,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 companyName,
                 companyTicker,
                 firebase_uid: firebaseUser.uid,
+                companyCEOName: companyDetails.ceoName,
+                foundedYear: companyDetails.foundedYear,
+                companyExchange: companyDetails.exchange,
                 role: "companyUser", // Default role for new users
             })
 

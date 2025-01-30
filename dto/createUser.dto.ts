@@ -5,6 +5,7 @@ export class CreateUserDto {
   email?: string;
   firebase_uid?: string;
   companyTicker?: string;
+  companyExchange?: string;
   companyInfo?: string;
   role?: string;
   
@@ -13,6 +14,8 @@ export class CreateUserDto {
   companyAbout?: string;
   companyCautionaryNote?: string;
   companyCEOName?: string;
+  foundedYear?: string;
+
   companyContactName?: string;
   companyContactEmail?: string;
   companyInvestorRelationsContactName?: string;

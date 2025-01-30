@@ -28,7 +28,7 @@ export function LoginButton() {
         try {
             await signIn(email, password)
             setIsOpen(false)
-            router.push("/dashboard")
+            router.push("/hub")
         } catch (error) {
             console.error("Failed to sign in:", error)
             // Here you would typically show an error message to the user

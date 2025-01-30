@@ -20,7 +20,7 @@ export default function SignIn() {
         e.preventDefault()
         try {
             await signInWithEmailAndPassword(auth, email, password)
-            router.push("/dashboard")
+            router.push("/hub")
         } catch (error) {
             setError("Failed to sign in. Please check your credentials.")
         }
@@ -30,7 +30,7 @@ export default function SignIn() {
         const provider = new GoogleAuthProvider()
         try {
             await signInWithPopup(auth, provider)
-            router.push("/dashboard")
+            router.push("/hub")
         } catch (error) {
             setError("Failed to sign in with Google.")
         }

@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { MainNav } from "@/components/main-nav"
 import { AuthProvider } from "@/lib/auth-context"
 import { UIProvider } from "@/lib/ui-context"
+import { ToastContainer } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -38,6 +40,7 @@ export default function RootLayout({
             </ThemeProvider>
           </UIProvider>
         </AuthProvider>
+        <ToastContainer position="top-right" autoClose={5000} />
       </body>
     </html>
   )

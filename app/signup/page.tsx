@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,10 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card"
 import { useAuth } from "@/lib/auth-context"
 import SerpApi from "@/lib/api/serp.api"
-import { toast } from "react-toastify"
+import { ToastContainer, toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
+import { Loader2 } from "lucide-react"
+import type React from "react"
 
 interface CompanyDetails {
     name: string
@@ -17,14 +20,14 @@ interface CompanyDetails {
     foundedYear: number
     ceoName: string
     companyTicker: string
-    // Add other relevant fields
+    exchange: string
 }
 
 export default function SignUp() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [companyTicker, setCompanyTicker] = useState("")
-    const [companyExchange, setCompanyExchange] = useState("") 
+    const [companyExchange, setCompanyExchange] = useState("")
     const [companyName, setCompanyName] = useState("")
     const [companyDetails, setCompanyDetails] = useState<CompanyDetails | null>(null)
     const [error, setError] = useState<string | null>(null)
@@ -36,83 +39,103 @@ export default function SignUp() {
     const EXCHANGE_NASDAQ = "NASDAQ"
     const EXCHANGE_DOW = "DJI"
 
+    const fetchCompanyDetails = useCallback(
+        async (ticker: string) => {
+            if (ticker.length < 2) {
+                setCompanyDetails(null)
+                return
+            }
+
+            setIsLoading(true)
+            setError(null)
+
+            try {
+                let serpCompanyDetails = null
+
+                // Try fetching company details from EXCHANGE_DOW
+                serpCompanyDetails = await serpApi.getCompanyDetails({
+                    companyTicker: ticker,
+                    exchange: EXCHANGE_DOW,
+                })
+
+                // If company not found in EXCHANGE_DOW, try EXCHANGE_NASDAQ
+                if (!serpCompanyDetails || !serpCompanyDetails.data || !serpCompanyDetails.data.companySummary) {
+                    serpCompanyDetails = await serpApi.getCompanyDetails({
+                        companyTicker: ticker,
+                        exchange: EXCHANGE_NASDAQ,
+                    })
+                }
+
+                if (serpCompanyDetails && serpCompanyDetails.data && serpCompanyDetails.data.companySummary) {
+                    const exchangeFound =
+                        serpCompanyDetails.data.companySummary.exchange ||
+                        (serpCompanyDetails.data.companySummary.exchange === EXCHANGE_DOW ? EXCHANGE_DOW : EXCHANGE_NASDAQ)
+                    setCompanyExchange(exchangeFound)
+                    setCompanyDetails({
+                        ...serpCompanyDetails.data.companySummary,
+                        ...serpCompanyDetails.data.companyAbout,
+                        ...serpCompanyDetails.data.newsResults,
+                        ...serpCompanyDetails.data.companyFinancials,
+                        ...serpCompanyDetails.data.companyDiscoverMore,
+                        companyTicker: ticker,
+                    })
+                    setCompanyName(serpCompanyDetails.data.companySummary.name)
+                } else {
+                    setCompanyDetails(null)
+                    setError("No company found for the provided ticker")
+                    toast.error("No company found for the provided ticker")
+                }
+            } catch (error) {
+                console.error("Error fetching company details:", error)
+                setCompanyDetails(null)
+                setError("Error fetching company details. Please try again.")
+                toast.error("Error fetching company details. Please try again.")
+            } finally {
+                setIsLoading(false)
+            }
+        },
+        [serpApi],
+    )
+
+    const debouncedCompanyTicker = useMemo(() => {
+        return companyTicker
+    }, [companyTicker])
 
     useEffect(() => {
-        const fetchCompanyDetails = async () => {
-            if (companyTicker.length > 2) {
-                setIsLoading(true)
-                try {
-                    let serpCompanyDetails = null;
-
-                    // Try fetching company details from EXCHANGE_DOW
-                    serpCompanyDetails = await serpApi.getCompanyDetails({
-                        companyTicker: companyTicker,
-                        exchange: EXCHANGE_DOW,
-                    });
-
-                    // If company not found in EXCHANGE_DOW, try EXCHANGE_NASDAQ
-                    if (!serpCompanyDetails || !serpCompanyDetails.data || !serpCompanyDetails.data.companySummary) {
-                        serpCompanyDetails = await serpApi.getCompanyDetails({
-                            companyTicker: companyTicker,
-                            exchange: EXCHANGE_NASDAQ,
-                        });
-                    }
-
-                    let exchangeFound = null
-                    if (serpCompanyDetails && serpCompanyDetails.data && serpCompanyDetails.data.companySummary) {
-                        // Set company exchange based on successful response
-                        exchangeFound = serpCompanyDetails.data.companySummary.exchange || (serpCompanyDetails.data.companySummary.exchange === EXCHANGE_DOW ? EXCHANGE_DOW : EXCHANGE_NASDAQ);
-                        setCompanyExchange(exchangeFound);
-
-                        // Optionally, set the company details in state
-                        setCompanyDetails(serpCompanyDetails.data);
-                    } else {
-                        toast.error("No company found for Ticker");
-                        setCompanyDetails(null); // Clear company details
-                        setCompanyExchange("");
-                    }
-
-                    console.log("Company Exchange:", exchangeFound);
-                    console.log("Company Details:", serpCompanyDetails);
-
-                    //if (serpCompanyDetails.data.summary)
-
-
-
-                    //setCompanyDetails(serpCompanyDetails)
-                } catch (error) {
-                    console.error("Error fetching company details:", error)
-                    setCompanyDetails(null)
-                } finally {
-                    setIsLoading(false)
-                }
-            } else {
-                setCompanyDetails(null)
+        const timer = setTimeout(() => {
+            if (debouncedCompanyTicker.length >= 2 && debouncedCompanyTicker !== companyDetails?.companyTicker) {
+                fetchCompanyDetails(debouncedCompanyTicker)
             }
-        }
+        }, 500)
 
-        const debounceTimer = setTimeout(fetchCompanyDetails, 500)
-        return () => clearTimeout(debounceTimer)
-    }, [companyTicker, serpApi.getCompanyDetails]) // Added userApi.getCompanyDetails to dependencies
+        return () => clearTimeout(timer)
+    }, [debouncedCompanyTicker, fetchCompanyDetails, companyDetails])
 
     const handleEmailSignUp = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
+        if (!companyDetails) {
+            setError("Please enter a valid company ticker")
+            return
+        }
         try {
-            //await signUp(email, password, name, companyDetails)
             await signUp(email, password, companyName, companyTicker, companyDetails)
+            toast.success("Account created successfully!")
             router.push("/dashboard")
         } catch (error) {
             if (error instanceof Error) {
                 setError(error.message)
+                toast.error(error.message)
             } else {
                 setError("An unexpected error occurred. Please try again later.")
+                toast.error("An unexpected error occurred. Please try again later.")
             }
         }
     }
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <ToastContainer position="top-right" autoClose={5000} />
             <Card className="w-[400px]">
                 <CardHeader>
                     <CardTitle>Sign Up</CardTitle>
@@ -121,34 +144,44 @@ export default function SignUp() {
                 <CardContent>
                     <form onSubmit={handleEmailSignUp} className="space-y-4">
                         <div className="space-y-2">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Company Stock Ticker</Label>
-                                <Input
-                                    id="companyTicker"
-                                    value={companyTicker}
-                                    onChange={(e) => setCompanyTicker(e.target.value)}
-                                    placeholder="Enter your Company Stock Ticker"
-                                    required
-                                />
+                            <Label htmlFor="companyTicker">Company Stock Ticker</Label>
+                            <Input
+                                id="companyTicker"
+                                value={companyTicker}
+                                onChange={(e) => setCompanyTicker(e.target.value.toUpperCase())}
+                                onBlur={() => {
+                                    if (companyTicker.length >= 2 && companyTicker !== companyDetails?.companyTicker) {
+                                        fetchCompanyDetails(companyTicker)
+                                    }
+                                }}
+                                placeholder="Enter your Company Stock Ticker"
+                                required
+                            />
+                        </div>
+                        {isLoading ? (
+                            <div className="flex items-center justify-center">
+                                <Loader2 className="h-6 w-6 animate-spin" />
+                                <span className="ml-2">Fetching company details...</span>
                             </div>
-                            {isLoading && <p className="text-sm text-gray-500">Fetching company details...</p>}
-                            {companyDetails && (
-                                <div className="text-sm">
-                                    <p>
-                                        <strong>Name:</strong> {companyDetails.name}
-                                    </p>
-                                    <p>
-                                        <strong>Industry:</strong> {companyDetails.industry}
-                                    </p>
-                                    <p>
-                                        <strong>CEO:</strong> {companyDetails.ceoName}
-                                    </p>
-                                    <p>
-                                        <strong>Founded:</strong> {companyDetails.foundedYear}
-                                    </p>
-                                    {/* Add other company details here */}
-                                </div>
-                            )}
+                        ) : companyDetails ? (
+                            <div className="text-sm bg-gray-50 p-3 rounded-md">
+                                <p>
+                                    <strong>Name:</strong> {companyDetails.name}
+                                </p>
+                                <p>
+                                    <strong>CEO:</strong> {companyDetails.ceoName}
+                                </p>
+                                <p>
+                                    <strong>Founded:</strong> {companyDetails.foundedYear}
+                                </p>
+                                <p>
+                                    <strong>Exchange:</strong> {companyDetails.exchange}
+                                </p>
+                            </div>
+                        ) : error ? (
+                            <p className="text-red-500 text-sm">{error}</p>
+                        ) : null}
+                        <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <Input
                                 id="email"
@@ -169,11 +202,14 @@ export default function SignUp() {
                                 required
                             />
                         </div>
-                        <Button type="submit" className="w-full bg-[#cdf683] text-black hover:bg-[#b8e15e]">
+                        <Button
+                            type="submit"
+                            className="w-full bg-[#cdf683] text-black hover:bg-[#b8e15e]"
+                            disabled={isLoading || !companyDetails}
+                        >
                             Sign Up
                         </Button>
                     </form>
-                    {error && <p className="text-red-500 mt-4">{error}</p>}
                 </CardContent>
                 <CardFooter>
                     <p className="text-sm text-center w-full">
@@ -187,4 +223,3 @@ export default function SignUp() {
         </div>
     )
 }
-

@@ -24,7 +24,7 @@ interface AuthContextType {
     user: User | null
     loading: boolean
     signIn: (email: string, password: string) => Promise<void>
-    signUp: (email: string, password: string, companyName: string, companyTicker: string) => Promise<void>
+    signUp: (email: string, password: string, companyName: string, companyTicker: string, companyDetails: any) => Promise<void>
     signOut: () => Promise<void>
     getToken: () => Promise<string | null>
 }

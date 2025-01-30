@@ -21,6 +21,7 @@ interface CompanyDetails {
     ceoName: string
     companyTicker: string
     exchange: string
+    // Add any additional properties from companyAbout, newsResults, companyFinancials, and companyDiscoverMore
 }
 
 export default function SignUp() {
@@ -73,12 +74,20 @@ export default function SignUp() {
                     setCompanyExchange(exchangeFound)
                     setCompanyDetails({
                         ...serpCompanyDetails.data.companySummary,
-                        ...serpCompanyDetails.data.companyAbout,
+                        ...serpCompanyDetails.data.companyKnowledgeGraph,
                         ...serpCompanyDetails.data.newsResults,
                         ...serpCompanyDetails.data.companyFinancials,
                         ...serpCompanyDetails.data.companyDiscoverMore,
                         companyTicker: ticker,
                     })
+
+                    console.log(exchangeFound)
+                    console.log("companySummary : ", serpCompanyDetails.data.companySummary)
+                    console.log("companyKnowledgeGraph :", serpCompanyDetails.data.companyKnowledgeGraph)
+                    console.log("newsResults :", serpCompanyDetails.data.newsResults)
+                    console.log("companyFinancials :", serpCompanyDetails.data.companyFinancials)
+                    console.log("companyDiscoverMore :", serpCompanyDetails.data.companyDiscoverMore)
+
                     setCompanyName(serpCompanyDetails.data.companySummary.name)
                 } else {
                     setCompanyDetails(null)
@@ -106,7 +115,7 @@ export default function SignUp() {
             if (debouncedCompanyTicker.length >= 2 && debouncedCompanyTicker !== companyDetails?.companyTicker) {
                 fetchCompanyDetails(debouncedCompanyTicker)
             }
-        }, 500)
+        }, 750)
 
         return () => clearTimeout(timer)
     }, [debouncedCompanyTicker, fetchCompanyDetails, companyDetails])
@@ -223,3 +232,4 @@ export default function SignUp() {
         </div>
     )
 }
+

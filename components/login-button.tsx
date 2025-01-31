@@ -16,6 +16,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/lib/auth-context"
 
+import { toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
+
 export function LoginButton() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -31,6 +34,8 @@ export function LoginButton() {
             router.push("/hub")
         } catch (error) {
             console.error("Failed to sign in:", error)
+            toast.error("Failed to sign in. Please check your credentials and try again.")
+
             // Here you would typically show an error message to the user
         }
     }

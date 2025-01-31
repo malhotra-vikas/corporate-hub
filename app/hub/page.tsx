@@ -182,77 +182,15 @@ export default function HubPage() {
                                         <div className="text-sm text-gray-500">
                                             {item.source} • {item.time}
                                         </div>
-                                        <div className="font-medium">{item.title}</div>
-                                    </div>
-                                    <div className="w-16 h-16 bg-gray-100 rounded">
-                                        <img
-                                            src={item.image || "/placeholder.svg"}
-                                            alt={item.title}
-                                            className="w-full h-full object-cover rounded"
-                                        />
+                                        <div className="font-medium">
+                                            <a href={item.link} target="_blank" rel="noopener noreferrer">
+                                                {item.title}
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    </CardContent>
-                </Card>
-
-                {/* Social Hub Section */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>SOCIAL HUB</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex gap-2 mb-4">
-                            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Industry</span>
-                            <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">Investors</span>
-                        </div>
-                        <div className="space-y-4">
-                            {/* Social media posts would go here */}
-                            <div className="border rounded-lg p-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                                    <div>
-                                        <div className="font-medium">@investor</div>
-                                        <div className="text-sm text-gray-500">2h ago</div>
-                                    </div>
-                                </div>
-                                <p className="text-sm">Market analysis shows strong potential for growth in the tech sector...</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Estimates Hub Section */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>ESTIMATES HUB</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Company</TableHead>
-                                    <TableHead>Est. Date</TableHead>
-                                    <TableHead>EPS</TableHead>
-                                    <TableHead>Change</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                <TableRow>
-                                    <TableCell>AAPL</TableCell>
-                                    <TableCell>Jan 24</TableCell>
-                                    <TableCell>2.11</TableCell>
-                                    <TableCell className="text-green-600">+0.05</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>MSFT</TableCell>
-                                    <TableCell>Jan 25</TableCell>
-                                    <TableCell>1.89</TableCell>
-                                    <TableCell className="text-red-600">-0.02</TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
                     </CardContent>
                 </Card>
             </div>

@@ -57,6 +57,7 @@ export interface EarningsEvent {
 }
 
 export interface NewsItem {
+  link: string | undefined
   source: string
   time: string
   title: string

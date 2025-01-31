@@ -14,6 +14,28 @@ export default class HubApi extends BaseApi {
     }
 
 
+    async buildNews(newsData: any) {
+        console.log("newsData is ", newsData);
+        let transformedData: { source: any; time: any; link: any; title: any; image: any; }[] = [];
+
+        newsData.forEach(news => {
+            if (news.items && Array.isArray(news.items)) {  // Ensure items exists and is an array
+                news.items.forEach(item => {
+                    transformedData.push({
+                        source: item.source,
+                        time: item.date,
+                        title: item.snippet,
+                        link: item.link,
+                        image: item.thumbnail || 'default-image-url.png', // You can add a fallback for images
+                    });
+                });
+            }
+        });
+                
+        return transformedData
+        
+    }
+
     async buildCompetitorsFromSearchedList(data: any[]): Promise<Competitor[]> {
         // Safety check for undefined or non-array data
         if (!Array.isArray(data)) {
@@ -69,8 +91,12 @@ export default class HubApi extends BaseApi {
 
         console.log("competitors are ", competitors);
 
+        // Build competitors from the given data
+        const news = await this.buildNews(companyDetails.data.newsResults);
+        console.log('Transformed News:', news);
+
         const hubData = {
-            company: companyDetails,
+            company: companyDetails.data.companySummary,
             competitors: competitors,
             earningsCalendar: [
                 { date: "JAN 21", company: "Netflix", time: "Jan 21, 2025, 4:00 PM" },
@@ -80,33 +106,12 @@ export default class HubApi extends BaseApi {
                 { date: "JAN 23", company: "Intuitive", time: "Jan 23, 2025" },
                 { date: "JAN 23", company: "Texas Instruments", time: "Jan 23, 2025" },
             ],
-            news: [
-                {
-                    source: "Forbes",
-                    time: "5 hours ago",
-                    title: "Donald Trump Launches $TRUMP Meme Coin—Token Exceeds $12 Billion Market Cap",
-                    image:
-                        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/AIIRHUB%20-%20IR%20Hub%20Page%20Mockup-M7FEQO7G1Bk4Y0c7rXesd8x9qcd4Y2.png",
-                },
-                {
-                    source: "Forbes",
-                    time: "3 hours ago",
-                    title: "TikTok Ban: Apple Issues 'Unprecedented' Response For iPhone Users",
-                    image:
-                        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/AIIRHUB%20-%20IR%20Hub%20Page%20Mockup-M7FEQO7G1Bk4Y0c7rXesd8x9qcd4Y2.png",
-                },
-                {
-                    source: "Axios",
-                    time: "9 hours ago",
-                    title: "Behind the Curtain: Ph.D.-level AI breakthrough expected very soon",
-                    image:
-                        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/AIIRHUB%20-%20IR%20Hub%20Page%20Mockup-M7FEQO7G1Bk4Y0c7rXesd8x9qcd4Y2.png",
-                },
-            ],
+            news: news,
         }
 
         return hubData;
     }
+
 
 }
 

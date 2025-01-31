@@ -82,7 +82,7 @@ export default function HomePage() {
           <div className="mx-auto flex max-w-[58rem] flex-col items-center justify-center gap-4 text-center">
             <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">Trusted by Industry Leaders</h2>
             <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-              See what our customers have to say about CorporateHub
+              See what our customers have to say about AiirHub
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
@@ -92,7 +92,7 @@ export default function HomePage() {
                 <CardDescription>Financial Services Company</CardDescription>
               </CardHeader>
               <CardContent>
-                "CorporateHub's security features give us complete confidence in storing our sensitive documents."
+                "AiirHub's security features give us complete confidence in storing our sensitive documents."
               </CardContent>
             </Card>
             <Card>
@@ -108,7 +108,7 @@ export default function HomePage() {
                 <CardDescription>Healthcare Provider</CardDescription>
               </CardHeader>
               <CardContent>
-                "CorporateHub's user-friendly interface has made document management effortless."
+                "AiirHub's user-friendly interface has made document management effortless."
               </CardContent>
             </Card>
           </div>
@@ -118,7 +118,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-[58rem] flex-col items-center justify-center gap-4 text-center">
           <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">Ready to Get Started?</h2>
           <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-            Join thousands of companies already using CorporateHub
+            Join thousands of companies already using AiirHub
           </p>
           <Link href="/dashboard">
             <Button size="lg" className="mt-4 bg-[#cdf683] text-black hover:bg-[#b8e15e]">
@@ -130,7 +130,7 @@ export default function HomePage() {
       <footer className="border-t py-6 md:py-0">
         <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
           <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-            <img src="/logo.svg" alt={themeConfig.name} className="h-6 w-auto" />
+            <img src="/airhub-logo.png" alt={themeConfig.name} className="h-6 w-auto" />
           </div>
         </div>
       </footer>

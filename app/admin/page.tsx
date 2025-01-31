@@ -26,7 +26,7 @@ export default function AdminPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Admin Panel</CardTitle>
-                    <CardDescription>Manage your CorporateHub instance</CardDescription>
+                    <CardDescription>Manage your AiirHub instance</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue="users">

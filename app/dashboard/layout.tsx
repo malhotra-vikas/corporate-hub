@@ -43,7 +43,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <aside className="hidden w-64 flex-col bg-gray-100 p-4 md:flex">
         <div className="mb-4">
           <Link href="/" className="flex items-center space-x-2">
-            <img src="/logo.svg" alt={themeConfig.name} className="h-8 w-auto" />
+            <img src="/airhub-logo.png" alt={themeConfig.name} className="h-8 w-auto" />
             <span className="font-bold text-xl">{themeConfig.name}</span>
           </Link>
         </div>

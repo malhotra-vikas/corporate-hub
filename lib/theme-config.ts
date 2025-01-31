@@ -1,31 +1,30 @@
 export const themeConfig = {
-    name: "CorporateHub",
     description: "Secure corporate document management platform",
-    logo: "/logo.svg",
+    logo: "/airhub-logo.png",
     theme: {
         primary: {
-            light: "#3B82F6",
-            DEFAULT: "#2563EB",
-            dark: "#1D4ED8",
+            light: "#00B6D1", // Light blue
+            DEFAULT: "#4E9FC4", // Primary blue
+            dark: "#2563EB", // Dark blue
         },
         secondary: {
-            light: "#A855F7",
-            DEFAULT: "#9333EA",
-            dark: "#7E22CE",
+            light: "#A855F7", // Light purple
+            DEFAULT: "#4C71B2", // Blue
+            dark: "#2C3E50", // Dark purple/blue
         },
         accent: {
-            light: "#F59E0B",
-            DEFAULT: "#D97706",
-            dark: "#B45309",
+            light: "#F59E0B", // Accent color (optional orange/yellow)
+            DEFAULT: "#D97706", // Accent for highlights
+            dark: "#B45309", // Dark accent
         },
-        background: "#FFFFFF",
-        foreground: "#1F2937",
-        muted: "#F3F4F6",
-        "muted-foreground": "#6B7280",
-        border: "#E5E7EB",
+        background: "#FFFFFF", // White background
+        foreground: "#1F2937", // Dark gray foreground for text
+        muted: "#F3F4F6", // Light gray muted background
+        "muted-foreground": "#6B7280", // Muted text (gray)
+        border: "#E5E7EB", // Border color
         button: {
-            background: "#cdf683",
-            text: "#000000", // Assuming black text for contrast
+            background: "#00B6D1", // Matching button background with the primary light
+            text: "#FFFFFF", // White button text for contrast
         },
     },
 }

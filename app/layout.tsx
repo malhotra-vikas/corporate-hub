@@ -15,8 +15,8 @@ const inter = Inter({
 
 export const metadata = {
   title: {
-    default: "CorporateHub - Secure Document Management",
-    template: "%s | CorporateHub",
+    default: "AiirHub - Secure Document Management",
+    template: "%s | AiirHub",
   },
   description: "Professional corporate document management platform",
   keywords: ["document management", "corporate", "secure", "professional"],

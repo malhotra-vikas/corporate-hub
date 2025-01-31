@@ -12,6 +12,8 @@ import UserApi from "@/lib/api/user.api"
 import { CustomBadge } from "@/components/ui/custom-badge"
 import { HubData } from "@/lib/types"
 
+import { toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 
 async function fetchHubData(companyTicker: string, companyExchange: string): Promise<HubData> {
     const hubApi = new HubApi()
@@ -40,6 +42,17 @@ export default function HubPage() {
     const userApi = new UserApi()
 
     async function loadHubData() {
+
+/*  TODO - Add checks for is logged in
+        if (!user) {
+            setError("You need to be logged in.");
+            setIsLoading(false);
+
+            setToastError("You need to be logged in.");
+
+            return
+        }
+*/            
         const companyUser = await userApi.getClientByEmail(user?.email || "")
         console.log("companyUser is ", companyUser)
 
@@ -98,7 +111,7 @@ export default function HubPage() {
 
             <div className="grid md:grid-cols-2 gap-6">
                 {/* Competitors Section */}
-                <Card>
+                <Card className="border-primary border">
                     <CardHeader>
                         <CardTitle>Top Competitors</CardTitle>
                     </CardHeader>
@@ -142,7 +155,7 @@ export default function HubPage() {
                 </Card>
 
                 {/* Earnings Hub Section */}
-                <Card>
+                <Card className="border-primary border">
                     <CardHeader>
                         <CardTitle>EARNINGS HUB</CardTitle>
                     </CardHeader>
@@ -170,7 +183,7 @@ export default function HubPage() {
                 </Card>
 
                 {/* News Hub Section */}
-                <Card className="md:col-span-2">
+                <Card className="md:col-span-2 border-primary border">
                     <CardHeader>
                         <CardTitle>NEWS HUB (Industry-specific)</CardTitle>
                     </CardHeader>
@@ -196,5 +209,9 @@ export default function HubPage() {
             </div>
         </div>
     )
+}
+
+function setToastError(message: string) {
+    toast.error(message)
 }
 

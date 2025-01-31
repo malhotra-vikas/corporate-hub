@@ -16,6 +16,11 @@ module.exports = {
     extend: {
       colors: {
         ...themeConfig.theme,
+        primary: {
+          DEFAULT: "#4E9FC4",
+          light: "#00B6D1",
+          dark: "#2563EB",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
@@ -38,3 +43,4 @@ module.exports = {
   },
   plugins: [require("tailwindcss-animate")],
 }
+

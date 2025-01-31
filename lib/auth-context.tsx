@@ -21,7 +21,10 @@ interface User {
     email: string | null
     displayName: string | null
     displayTicker: string | null
-
+    companyName: string | null
+    companyTicker: string | null
+    companyExchange: string | null
+    companyCEOName: string | null
     photoURL: string | null
     role: UserRole
     _id?: string
@@ -56,16 +59,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const token = await firebaseUser.getIdToken()
                 const userApi = new UserApi()
                 const userData = await userApi.getClientByEmail(firebaseUser.email || "")
+                console.log("User Email  is ", firebaseUser.email)
+
+                console.log("My User Data is ", userData)
                 setUser({
                     uid: firebaseUser.uid,
                     email: firebaseUser.email,
                     displayName: userData.displayName,
                     displayTicker: userData.displayTicker,
+                    companyName: userData.companyName,
+                    companyTicker: userData.companyTicker,
+                    companyExchange: userData.companyExchange,
+                    companyCEOName: userData.companyCEOName,
                     photoURL: firebaseUser.photoURL,
                     role: userData.role || "companyUser",
                     _id: userData._id,
                     token: token,
                 })
+
+                console.log("My User Data from getUsr ", user?.companyExchange)
+
             } else {
                 setUser(null)
             }
@@ -84,12 +97,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const userApi = new UserApi()
             const loginResponse = await userApi.login({ username: email, password })
             console.log("Logged is user ", loginResponse)
+            console.log("Logged is user ticker ", loginResponse.data.user_info.companyTicker)
+            console.log("Logged is user exchange ", loginResponse.data.user_info.companyExchange)
 
             setUser({
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
-                displayName: loginResponse.data.displayName,
-                displayTicker: loginResponse.data.displayTicker,
+                displayName: loginResponse.data.user_info.companyName,
+                displayTicker: loginResponse.data.user_info.displayTicker,
+                companyName: loginResponse.data.user_info.companyName,
+                companyTicker: loginResponse.data.user_info.companyTicker,
+                companyExchange: loginResponse.data.user_info.companyExchange,
+                companyCEOName: loginResponse.data.user_info.companyCEOName,                
                 photoURL: firebaseUser.photoURL,
                 role: loginResponse.data.role || "companyUser",
                 _id: loginResponse.data._id,
@@ -136,6 +155,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 email: firebaseUser.email,
                 displayName: companyName,
                 displayTicker: companyTicker,
+                companyName: companyName,
+                companyTicker: companyTicker,
+                companyExchange: companyDetails.exchange,
+                companyCEOName: companyDetails.ceoName,
+
                 photoURL: firebaseUser.photoURL,
                 role: createUserResponse.data.role || "companyUser",
                 _id: createUserResponse.data._id,

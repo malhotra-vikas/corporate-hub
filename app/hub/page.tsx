@@ -1,71 +1,106 @@
-import type { Metadata } from "next"
+"use client"
+
+import { useAuth } from "@/lib/auth-context"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CalendarIcon, ArrowUpIcon, ArrowDownIcon } from "lucide-react"
+import { useEffect, useState } from "react"
+import HubApi from "@/lib/api/hub"
+import UserApi from "@/lib/api/user.api"
 
-export const metadata: Metadata = {
-    title: "IR Hub | Aiir Hub",
-    description: "Investor Relations Hub - Powered by Aiir Hub",
+import { CustomBadge } from "@/components/ui/custom-badge"
+import { HubData } from "@/lib/types"
+
+
+async function fetchHubData(companyTicker: string, companyExchange: string): Promise<HubData> {
+    const hubApi = new HubApi()
+
+    try {
+        const hubDetails = await hubApi.getCompanyHubDetails(companyTicker, companyExchange)
+
+        console.log("hubDetails is here as ", hubDetails)
+        return hubDetails
+    } catch (error) {
+        console.error("Error fetching hub data:", error)
+        throw error
+    }
 }
 
-// Mock data for competitors
-const competitors = [
-    { symbol: "INTC", name: "Intel Corp", price: 21.49, change: 1.82, percentChange: 9.25 },
-    { symbol: "PYPL", name: "PayPal Holdings Inc", price: 91.81, change: 2.89, percentChange: 3.25 },
-    { symbol: "BIDU", name: "Baidu Inc", price: 82.92, change: 2.19, percentChange: 2.71 },
-    { symbol: "QCOM", name: "Qualcomm Inc", price: 164.56, change: 3.13, percentChange: 1.94 },
-    { symbol: "GM", name: "General Motors Co", price: 50.97, change: -0.86, percentChange: -1.66 },
-    { symbol: "GOOGL", name: "Alphabet Inc Class A", price: 196.0, change: 3.09, percentChange: 1.6 },
-]
-
-// Mock data for earnings calendar
-const earningsCalendar = [
-    { date: "JAN 21", company: "Netflix", time: "Jan 21, 2025, 4:00 PM" },
-    { date: "JAN 22", company: "Johnson & Johnson", time: "Jan 22, 2025, 6:45 AM" },
-    { date: "JAN 22", company: "Procter & Gamble", time: "Jan 22, 2025" },
-    { date: "JAN 22", company: "GE Vernova", time: "Jan 22, 2025, 9:30 AM" },
-    { date: "JAN 23", company: "Intuitive", time: "Jan 23, 2025" },
-    { date: "JAN 23", company: "Texas Instruments", time: "Jan 23, 2025" },
-]
-
-// Mock data for news
-const news = [
-    {
-        source: "Forbes",
-        time: "5 hours ago",
-        title: "Donald Trump Launches $TRUMP Meme Coin—Token Exceeds $12 Billion Market Cap",
-        image:
-            "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/AIIRHUB%20-%20IR%20Hub%20Page%20Mockup-M7FEQO7G1Bk4Y0c7rXesd8x9qcd4Y2.png",
-    },
-    {
-        source: "Forbes",
-        time: "3 hours ago",
-        title: "TikTok Ban: Apple Issues 'Unprecedented' Response For iPhone Users",
-        image:
-            "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/AIIRHUB%20-%20IR%20Hub%20Page%20Mockup-M7FEQO7G1Bk4Y0c7rXesd8x9qcd4Y2.png",
-    },
-    {
-        source: "Axios",
-        time: "9 hours ago",
-        title: "Behind the Curtain: Ph.D.-level AI breakthrough expected very soon",
-        image:
-            "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/AIIRHUB%20-%20IR%20Hub%20Page%20Mockup-M7FEQO7G1Bk4Y0c7rXesd8x9qcd4Y2.png",
-    },
-]
-
 export default function HubPage() {
+    const { user, loading } = useAuth()
+
+    const [hubData, setHubData] = useState<HubData | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    let [companyTicker, setCompanyTicker] = useState("")
+    let [companyExchange, setCompanyExchange] = useState("")
+    let [companyName, setCompanyName] = useState("")
+
+    const userApi = new UserApi()
+
+    async function loadHubData() {
+        const companyUser = await userApi.getClientByEmail(user?.email || "")
+        console.log("companyUser is ", companyUser)
+
+        const companyTicker = companyUser?.companyTicker || ""
+        const companyExchange = companyUser?.companyExchange  || ""
+        const companyName = companyUser?.companyName  || ""
+        //const userFName = user?.firstName
+        //const userLName = user?.lastName
+
+        setCompanyExchange(companyExchange)
+        setCompanyName(companyName)
+        setCompanyTicker(companyTicker)
+
+        console.log("companyTicker is ", companyTicker)
+        console.log("companyExchange is ", companyExchange)
+
+        if (!companyTicker || !companyExchange) {
+            setError("Company ticker or exchange is missing.");
+            setIsLoading(false);
+            return; // Exit if any required value is missing
+        }
+
+        try {
+            const data = await fetchHubData(companyTicker, companyExchange)
+            setHubData(data)
+        } catch (err) {
+            setError("Failed to load hub data. Please try again later.")
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+
+    useEffect(() => {
+        loadHubData()
+    }, [])
+
+    if (isLoading) {
+        return <div className="container mx-auto p-6">Loading...</div>
+    }
+
+    if (error) {
+        return <div className="container mx-auto p-6 text-red-500">{error}</div>
+    }
+
+    if (!hubData) {
+        return <div className="container mx-auto p-6">No data available</div>
+    }
+
     return (
         <div className="container mx-auto p-6 space-y-6">
             <header className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-blue-900">AIIR HUB</h1>
-                <p className="text-sm text-gray-500">Powered by Aiir Hub</p>
+                <h1 className="text-3xl font-bold text-blue-900">Welcome {companyName}</h1>
+                <p className="text-sm text-gray-500">Powered by AiirHub</p>
             </header>
 
             <div className="grid md:grid-cols-2 gap-6">
                 {/* Competitors Section */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>COMPETITORS</CardTitle>
+                        <CardTitle>Top Competitors</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -78,11 +113,11 @@ export default function HubPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {competitors.map((comp) => (
+                                {hubData.competitors.map((comp) => (
                                     <TableRow key={comp.symbol}>
                                         <TableCell className="font-medium">
                                             <div className="flex items-center gap-2">
-                                                <span className="w-16 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{comp.symbol}</span>
+                                                <CustomBadge variant="secondary">{comp.symbol}</CustomBadge>
                                                 <span className="text-sm">{comp.name}</span>
                                             </div>
                                         </TableCell>
@@ -114,7 +149,7 @@ export default function HubPage() {
                     <CardContent>
                         <div className="text-sm text-gray-500 mb-4">Based on popular stocks</div>
                         <div className="space-y-4">
-                            {earningsCalendar.map((event, index) => (
+                            {hubData.earningsCalendar.map((event, index) => (
                                 <div key={index} className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
                                         <div className="text-blue-600 w-12">
@@ -141,7 +176,7 @@ export default function HubPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {news.map((item, index) => (
+                            {hubData.news.map((item, index) => (
                                 <div key={index} className="flex items-start gap-4">
                                     <div className="flex-1">
                                         <div className="text-sm text-gray-500">
@@ -149,7 +184,13 @@ export default function HubPage() {
                                         </div>
                                         <div className="font-medium">{item.title}</div>
                                     </div>
-                                    <div className="w-16 h-16 bg-gray-100 rounded"></div>
+                                    <div className="w-16 h-16 bg-gray-100 rounded">
+                                        <img
+                                            src={item.image || "/placeholder.svg"}
+                                            alt={item.title}
+                                            className="w-full h-full object-cover rounded"
+                                        />
+                                    </div>
                                 </div>
                             ))}
                         </div>

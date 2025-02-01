@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { HubData } from "@/lib/types"
+import { CreateUserDto } from "@/dto/createUser.dto"
 
 async function fetchHubData(companyTicker: string, companyExchange: string): Promise<HubData> {
     const hubApi = new HubApi()
@@ -46,6 +47,7 @@ export default function HubPage() {
     const [companyName, setCompanyName] = useState("")
     const [newTickerSymbol, setNewTickerSymbol] = useState("")
     const [isAddingTicker, setIsAddingTicker] = useState(false)
+    const [currentTickers, setCurrentTickers] = useState<string[]>([])
 
     const userApi = new UserApi()
     const hubApi = new HubApi()
@@ -53,12 +55,23 @@ export default function HubPage() {
     const handleAddTicker = async () => {
         if (!newTickerSymbol) return
         try {
-            // In a real app, this would call your API to add the competitor
             const newCompetitorData = await hubApi.addCompetitor(newTickerSymbol)
+            const updatedTickers = [...currentTickers, newTickerSymbol]
             setHubData((prev) => ({
                 ...prev!,
                 competitors: [...prev!.competitors, newCompetitorData],
             }))
+            setCurrentTickers(updatedTickers)
+
+            if (!user?.email) {
+                throw "no user found"
+            }
+
+            const updateUser: CreateUserDto = {
+                email: user?.email,
+                interestTickers: updatedTickers
+            }
+            await userApi.updateUserByEmail(updateUser)
             setNewTickerSymbol("")
             setIsAddingTicker(false)
             toast.success(`Added ${newTickerSymbol} to competitors`)
@@ -69,30 +82,31 @@ export default function HubPage() {
 
     const handleDeleteTicker = async (symbol: string) => {
         try {
-            // In a real app, this would call your API to remove the competitor
             await hubApi.removeCompetitor(symbol)
+            const updatedTickers = currentTickers.filter((ticker) => ticker !== symbol)
             setHubData((prev) => ({
                 ...prev!,
                 competitors: prev!.competitors.filter((comp) => comp.symbol !== symbol),
             }))
+            setCurrentTickers(updatedTickers)
+
+
+            if (!user?.email) {
+                throw "no user found"
+            }
+
+            const updateUser: CreateUserDto = {
+                email: user?.email,
+                interestTickers: updatedTickers
+            }
+            await userApi.updateUserByEmail(updateUser)            
             toast.success(`Removed ${symbol} from competitors`)
         } catch (error) {
             toast.error("Failed to remove competitor")
         }
     }
 
-    async function loadHubData() {
-
-/*  TODO - Add checks for is logged in
-        if (!user) {
-            setError("You need to be logged in.");
-            setIsLoading(false);
-
-            setToastError("You need to be logged in.");
-
-            return
-        }
-*/            
+    const loadHubData = async () => {
         const companyUser = await userApi.getClientByEmail(user?.email || "")
         console.log("companyUser is ", companyUser)
 
@@ -113,6 +127,7 @@ export default function HubPage() {
         try {
             const data = await fetchHubData(companyTicker, companyExchange)
             setHubData(data)
+            setCurrentTickers(data.competitors.map((comp) => comp.symbol))
         } catch (err) {
             setError("Failed to load hub data. Please try again later.")
         } finally {
@@ -121,10 +136,12 @@ export default function HubPage() {
     }
 
     useEffect(() => {
-        loadHubData()
+        if (user) {
+            loadHubData()
+        }
     }, []) // Added loadHubData to dependencies
 
-    if (isLoading) {
+    if (loading || isLoading) {
         return <div className="container mx-auto p-6">Loading...</div>
     }
 
@@ -137,11 +154,21 @@ export default function HubPage() {
     }
 
     const isVerified = user?.is_verified || false
-
     console.log("Fetch and read isVerified from user ", user)
 
     return (
-        <div className={`container mx-auto p-6 space-y-6`}>
+        <div className={`container mx-auto p-6 space-y-6 ${!isVerified ? "blur-sm pointer-events-none" : ""}`}>
+            {!isVerified && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 pointer-events-auto">
+                    <div className="bg-white p-6 rounded-lg shadow-lg">
+                        <h2 className="text-xl font-bold mb-4">Account Not Verified</h2>
+                        <p>Your account is not verified. Please contact support to gain full access.</p>
+                        <Button className="mt-4" onClick={() => alert("Contact support at support@airhub.com")}>
+                            Contact Support
+                        </Button>
+                    </div>
+                </div>
+            )}
             <header className="text-center mb-8">
                 <h1 className="text-3xl font-bold text-blue-900">Welcome {companyName}</h1>
                 <p className="text-sm text-gray-500">Powered by AiirHub</p>

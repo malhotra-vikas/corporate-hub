@@ -6,13 +6,34 @@ import { Company, Competitor } from "../types";
 
 
 export default class HubApi extends BaseApi {
-
     baseUrl: string = "serp/";
     getUniqueFieldValues: any;
     constructor() {
         super();
     }
 
+    async addCompetitor(newTickerSymbol: string) {
+        // Build the competitor structure
+        const competitor: Competitor = {
+            symbol: newTickerSymbol,  // Extract symbol from 'stock' (before the colon)
+            name: newTickerSymbol,
+            price: 0,
+            change: 0,
+            percentChange: 0,
+            link: "",
+
+            //name: item.name,
+            //price: parseFloat(item.price.replace(/[^\d.-]/g, '')),  // Remove currency symbol and parse as float
+            //change: item.price_movement ? parseFloat(item.price_movement.percentage.toFixed(2)) : 0,  // Change in price (percentage)
+            //percentChange: item.price_movement ? parseFloat(item.price_movement.percentage.toFixed(2)) : 0,  // Percent change
+            //link: item.link,
+        };
+        return competitor     
+    }
+
+    async removeCompetitor(newTickerSymbol: string) {
+
+    }
 
     async buildNews(newsData: any) {
         console.log("newsData is ", newsData);

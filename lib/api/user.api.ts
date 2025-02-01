@@ -4,6 +4,7 @@ import { LoginDto } from "@/dto/login.dto";
 import { VerifyUserDto } from "@/dto/verifyUser.dto";
 
 export default class UserApi extends BaseApi {
+
   baseUrl: string = "users/";
   getUniqueFieldValues: any;
   constructor() {
@@ -70,6 +71,12 @@ export default class UserApi extends BaseApi {
     const data = await UserApi.post(`${this.baseUrl}update-user`, payload);
     return data;
   }
+
+  async updateUserByEmail(payload: CreateUserDto) {
+    const data = await UserApi.post(`${this.baseUrl}update-user-by-email`, payload);
+    return data;
+  }  
+
   async updateAdminInstruction(payload: {
     user_id: string;
     PRchatInstruction: string;

@@ -14,6 +14,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { HubData } from "@/lib/types"
 import { CreateUserDto } from "@/dto/createUser.dto"
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs"
 
 async function fetchHubData(companyTicker: string, companyExchange: string): Promise<HubData> {
     const hubApi = new HubApi()
@@ -98,7 +104,7 @@ export default function HubPage() {
                 email: user?.email,
                 interestTickers: updatedTickers
             }
-            await userApi.updateUserByEmail(updateUser)            
+            await userApi.updateUserByEmail(updateUser)
             toast.success(`Removed ${symbol} from competitors`)
         } catch (error) {
             toast.error("Failed to remove competitor")
@@ -141,8 +147,8 @@ export default function HubPage() {
                 setCurrentTickers(interestTickers)
             } else {
                 setHubData(data)
-                setCurrentTickers(data.competitors.map((comp) => comp.symbol))    
-            }          
+                setCurrentTickers(data.competitors.map((comp) => comp.symbol))
+            }
         } catch (err) {
             setError("Failed to load hub data. Please try again later.")
         } finally {
@@ -181,7 +187,7 @@ export default function HubPage() {
                 {/* Competitors Section */}
                 <Card className="border-primary border">
                     <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>COMPS / PEERS</CardTitle>
+                        <CardTitle>Competitors / Peers</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                         <div className="rounded-md border border-input">
@@ -256,7 +262,7 @@ export default function HubPage() {
                 {/* Earnings Hub Section */}
                 <Card className="border-primary border">
                     <CardHeader>
-                        <CardTitle>EARNINGS HUB</CardTitle>
+                        <CardTitle>Earnings Hub</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-sm text-gray-500 mb-4">Based on popular stocks</div>
@@ -284,27 +290,59 @@ export default function HubPage() {
                 {/* News Hub Section */}
                 <Card className="md:col-span-2 border-primary border">
                     <CardHeader>
-                        <CardTitle>NEWS HUB (Industry-specific)</CardTitle>
+                        <CardTitle>News Hub</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-4">
-                            {hubData.news.map((item, index) => (
-                                <div key={index} className="flex items-start gap-4">
-                                    <div className="flex-1">
-                                        <div className="text-sm text-gray-500">
-                                            {item.source} • {item.time}
+                        <Tabs defaultValue="company-news">
+                            <TabsList>
+                                {/* Tabs for switching between Company News and Trending News */}
+                                <TabsTrigger value="company-news">Company News</TabsTrigger>
+                                <TabsTrigger value="trending-news">Trending News</TabsTrigger>
+                            </TabsList>
+
+                            {/* Tab content for Company News */}
+                            <TabsContent value="company-news">
+                                <div className="space-y-4">
+                                    {hubData.news.map((item, index) => (
+                                        <div key={index} className="flex items-start gap-4">
+                                            <div className="flex-1">
+                                                <div className="text-sm text-gray-500">
+                                                    {item.source} • {item.time}
+                                                </div>
+                                                <div className="font-medium">
+                                                    <a href={item.link} target="_blank" rel="noopener noreferrer">
+                                                        {item.title}
+                                                    </a>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="font-medium">
-                                            <a href={item.link} target="_blank" rel="noopener noreferrer">
-                                                {item.title}
-                                            </a>
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            </TabsContent>
+
+                            {/* Tab content for Trending News */}
+                            <TabsContent value="trending-news">
+                                <div className="space-y-4">
+                                    {hubData.news.map((item, index) => (
+                                        <div key={index} className="flex items-start gap-4">
+                                            <div className="flex-1">
+                                                <div className="text-sm text-gray-500">
+                                                    {item.source} • {item.time}
+                                                </div>
+                                                <div className="font-medium">
+                                                    <a href={item.link} target="_blank" rel="noopener noreferrer">
+                                                        {item.title}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </TabsContent>
+                        </Tabs>
                     </CardContent>
                 </Card>
+
             </div>
         </div>
     )

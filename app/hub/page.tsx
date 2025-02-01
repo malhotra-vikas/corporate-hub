@@ -82,7 +82,6 @@ export default function HubPage() {
 
     const handleDeleteTicker = async (symbol: string) => {
         try {
-            await hubApi.removeCompetitor(symbol)
             const updatedTickers = currentTickers.filter((ticker) => ticker !== symbol)
             setHubData((prev) => ({
                 ...prev!,
@@ -113,6 +112,7 @@ export default function HubPage() {
         const companyTicker = companyUser?.companyTicker || ""
         const companyExchange = companyUser?.companyExchange || ""
         const companyName = companyUser?.companyName || ""
+        const interestTickers = companyUser?.interestTickers || []
 
         setCompanyExchange(companyExchange)
         setCompanyName(companyName)
@@ -126,8 +126,23 @@ export default function HubPage() {
 
         try {
             const data = await fetchHubData(companyTicker, companyExchange)
-            setHubData(data)
-            setCurrentTickers(data.competitors.map((comp) => comp.symbol))
+
+            if (!user?.email) {
+                throw "User not found"
+            }
+            if (interestTickers && interestTickers.length > 0) {
+                // Filter competitors based on interest tickers
+                const filteredCompetitors = data.competitors.filter((comp) => interestTickers.includes(comp.symbol))
+                setHubData({
+                    ...data,
+                    competitors: filteredCompetitors,
+                })
+
+                setCurrentTickers(interestTickers)
+            } else {
+                setHubData(data)
+                setCurrentTickers(data.competitors.map((comp) => comp.symbol))    
+            }          
         } catch (err) {
             setError("Failed to load hub data. Please try again later.")
         } finally {
@@ -154,21 +169,9 @@ export default function HubPage() {
     }
 
     const isVerified = user?.is_verified || false
-    console.log("Fetch and read isVerified from user ", user)
 
     return (
-        <div className={`container mx-auto p-6 space-y-6 ${!isVerified ? "blur-sm pointer-events-none" : ""}`}>
-            {!isVerified && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 pointer-events-auto">
-                    <div className="bg-white p-6 rounded-lg shadow-lg">
-                        <h2 className="text-xl font-bold mb-4">Account Not Verified</h2>
-                        <p>Your account is not verified. Please contact support to gain full access.</p>
-                        <Button className="mt-4" onClick={() => alert("Contact support at support@airhub.com")}>
-                            Contact Support
-                        </Button>
-                    </div>
-                </div>
-            )}
+        <div className={`container mx-auto p-6 space-y-6`}>
             <header className="text-center mb-8">
                 <h1 className="text-3xl font-bold text-blue-900">Welcome {companyName}</h1>
                 <p className="text-sm text-gray-500">Powered by AiirHub</p>

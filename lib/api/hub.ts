@@ -13,6 +13,7 @@ export default class HubApi extends BaseApi {
     }
 
     async addCompetitor(newTickerSymbol: string) {
+
         // Build the competitor structure
         const competitor: Competitor = {
             symbol: newTickerSymbol,  // Extract symbol from 'stock' (before the colon)
@@ -29,10 +30,6 @@ export default class HubApi extends BaseApi {
             //link: item.link,
         };
         return competitor     
-    }
-
-    async removeCompetitor(newTickerSymbol: string) {
-
     }
 
     async buildNews(newsData: any) {

@@ -26,6 +26,7 @@ interface User {
     companyExchange: string | null
     companyCEOName: string | null
     photoURL: string | null
+    is_verified: boolean,
     role: UserRole
     _id?: string
     token?: string
@@ -62,7 +63,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.log("User Email  is ", firebaseUser.email)
 
                 console.log("My User Data is ", userData)
-                setUser({
+
+                const localUser = {
                     uid: firebaseUser.uid,
                     email: firebaseUser.email,
                     displayName: userData.displayName,
@@ -71,13 +73,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     companyTicker: userData.companyTicker,
                     companyExchange: userData.companyExchange,
                     companyCEOName: userData.companyCEOName,
+                    is_verified: userData.is_verified,
                     photoURL: firebaseUser.photoURL,
                     role: userData.role || "companyUser",
                     _id: userData._id,
                     token: token,
-                })
+                }
+                setUser(localUser)
 
-                console.log("My User Data from getUsr ", user?.companyExchange)
+                console.log("My User Data from getUsr ", localUser)
 
             } else {
                 setUser(null)
@@ -100,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.log("Logged is user ticker ", loginResponse.data.user_info.companyTicker)
             console.log("Logged is user exchange ", loginResponse.data.user_info.companyExchange)
 
-            setUser({
+            const localUser = {
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
                 displayName: loginResponse.data.user_info.companyName,
@@ -110,9 +114,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 companyExchange: loginResponse.data.user_info.companyExchange,
                 companyCEOName: loginResponse.data.user_info.companyCEOName,                
                 photoURL: firebaseUser.photoURL,
+                is_verified: loginResponse.data.user_info.is_verified,
                 role: loginResponse.data.role || "companyUser",
                 _id: loginResponse.data._id,
-            })
+            }
+
+            setUser(localUser)
             const token = await auth.currentUser?.getIdToken()
             setUser((prevUser) => (prevUser ? { ...prevUser, token } : null))
         } catch (error) {
@@ -150,7 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 role: "companyUser", // Default role for new users
             })
 
-            setUser({
+            const localUser = {
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
                 displayName: companyName,
@@ -159,11 +166,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 companyTicker: companyTicker,
                 companyExchange: companyDetails.exchange,
                 companyCEOName: companyDetails.ceoName,
-
+                is_verified: false,
                 photoURL: firebaseUser.photoURL,
                 role: createUserResponse.data.role || "companyUser",
                 _id: createUserResponse.data._id,
-            })
+            }
+
+            setUser(localUser)
             const token = await auth.currentUser?.getIdToken()
             setUser((prevUser) => (prevUser ? { ...prevUser, token } : null))
         } catch (error) {

@@ -40,8 +40,9 @@ export default function SignUp() {
     const { signUp } = useAuth()
     const serpApi = new SerpApi()
 
+    const EXCHANGE_OTC = "OTCMKTS"
     const EXCHANGE_NASDAQ = "NASDAQ"
-    const EXCHANGE_DOW = "DJI"
+    const EXCHANGE_NYSE = "NYSE"
 
     const fetchCompanyDetails = useCallback(
         async (ticker: string) => {
@@ -56,13 +57,13 @@ export default function SignUp() {
             try {
                 let serpCompanyDetails = null
 
-                // Try fetching company details from EXCHANGE_DOW
+                // Try fetching company details from EXCHANGE_OTC
                 serpCompanyDetails = await serpApi.getCompanyDetails({
                     companyTicker: ticker,
-                    exchange: EXCHANGE_DOW,
+                    exchange: EXCHANGE_OTC,
                 })
 
-                // If company not found in EXCHANGE_DOW, try EXCHANGE_NASDAQ
+                // If company not found in EXCHANGE_OTC, try EXCHANGE_NASDAQ
                 if (!serpCompanyDetails || !serpCompanyDetails.data || !serpCompanyDetails.data.companySummary) {
                     serpCompanyDetails = await serpApi.getCompanyDetails({
                         companyTicker: ticker,
@@ -70,10 +71,17 @@ export default function SignUp() {
                     })
                 }
 
+                // If company not found in EXCHANGE_NASDAQ, try EXCHANGE_NYSE
+                if (!serpCompanyDetails || !serpCompanyDetails.data || !serpCompanyDetails.data.companySummary) {
+                    serpCompanyDetails = await serpApi.getCompanyDetails({
+                        companyTicker: ticker,
+                        exchange: EXCHANGE_NYSE,
+                    })
+                }
+
                 if (serpCompanyDetails && serpCompanyDetails.data && serpCompanyDetails.data.companySummary) {
                     const exchangeFound =
-                        serpCompanyDetails.data.companySummary.exchange ||
-                        (serpCompanyDetails.data.companySummary.exchange === EXCHANGE_DOW ? EXCHANGE_DOW : EXCHANGE_NASDAQ)
+                        serpCompanyDetails.data.companySummary.exchange
                     setCompanyExchange(exchangeFound)
 
 
@@ -127,7 +135,7 @@ export default function SignUp() {
                 } else {
                     setCompanyDetails(null)
                     setError("No company found for the provided ticker")
-                    toast.error("No company found for the provided ticker")
+                    toast.error(`Company with ticker ${ticker} not found in any of the exchanges ${EXCHANGE_NASDAQ}, ${EXCHANGE_NYSE} or ${EXCHANGE_OTC}.`);
                 }
             } catch (error) {
                 console.error("Error fetching company details:", error)

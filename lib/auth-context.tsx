@@ -18,6 +18,7 @@ interface CompanyDetails {
 
 interface User {
     uid: string
+    fireBaseUid: string
     email: string | null
     displayName: string | null
     displayTicker: string | null
@@ -30,7 +31,7 @@ interface User {
     role: UserRole
     _id?: string
     token?: string
-    }
+}
 
 interface AuthContextType {
     user: User | null
@@ -65,7 +66,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.log("My User Data is ", userData)
 
                 const localUser = {
-                    uid: firebaseUser.uid,
+                    fireBaseUid: firebaseUser.uid,
+                    uid: userData._id,
                     email: firebaseUser.email,
                     displayName: userData.displayName,
                     displayTicker: userData.displayTicker,
@@ -105,14 +107,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.log("Logged is user exchange ", loginResponse.data.user_info.companyExchange)
 
             const localUser = {
-                uid: firebaseUser.uid,
+                fireBaseUid: firebaseUser.uid,
+                uid: loginResponse.data.user_info._id,
                 email: firebaseUser.email,
                 displayName: loginResponse.data.user_info.companyName,
                 displayTicker: loginResponse.data.user_info.displayTicker,
                 companyName: loginResponse.data.user_info.companyName,
                 companyTicker: loginResponse.data.user_info.companyTicker,
                 companyExchange: loginResponse.data.user_info.companyExchange,
-                companyCEOName: loginResponse.data.user_info.companyCEOName,                
+                companyCEOName: loginResponse.data.user_info.companyCEOName,
                 photoURL: firebaseUser.photoURL,
                 is_verified: loginResponse.data.user_info.is_verified,
                 role: loginResponse.data.role || "companyUser",
@@ -158,7 +161,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             })
 
             const localUser = {
-                uid: firebaseUser.uid,
+                fireBaseUid: firebaseUser.uid,
+                uid: createUserResponse.data.user_info._id,
                 email: firebaseUser.email,
                 displayName: companyName,
                 displayTicker: companyTicker,
@@ -210,5 +214,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     )
 }
 
-export const useAuth = () => useContext(AuthContext)
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error("useAuth must be used within an AuthProvider");
+    }
+    return context;
+};
+
 

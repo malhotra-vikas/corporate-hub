@@ -27,11 +27,14 @@ export interface User {
   company?: Company
 }
 
-export interface File {
-  id: string
-  name: string
+export interface VaultFile {
+  _id: string
+  originalName: string
+  serverFileName: string
   type: string
+  mimetype: string
   size: number
+  filePath: string
   uploadDate: Date
   category: string
 }

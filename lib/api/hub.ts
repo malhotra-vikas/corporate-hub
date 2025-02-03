@@ -34,6 +34,11 @@ export default class HubApi extends BaseApi {
         return competitor
     }
 
+        // Utility function to escape any regex special characters in the company name
+    async escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }  
+  
     async buildNews(newsData: any, companyName: string) {
         console.log("newsData is ", newsData);
 
@@ -41,7 +46,8 @@ export default class HubApi extends BaseApi {
         let trendingNews: { source: any; time: any; link: any; title: any; image: any; }[] = [];
     
         const normalizedCompanyName = companyName.toLowerCase();
-        console.log("normalizedCompanyName is ", normalizedCompanyName)
+        // Create a regex that matches the company name as a whole word (case-insensitive)
+        const companyRegex = new RegExp(`\\b${this.escapeRegExp(normalizedCompanyName)}\\b`, 'i');
 
         // Example logic for separating into categories (can be customized as needed)
         newsData.forEach(news => {
@@ -55,14 +61,20 @@ export default class HubApi extends BaseApi {
                         image: item.thumbnail || 'default-image-url.png', // Fallback for images
                     };
 
-                    // Separate into CompanyNews and TrendingNews based on content
-                    console.log("item.snippet is ", item.snippet)
+                    if (item.snippet) {
+                        // Separate into CompanyNews and TrendingNews based on content
+                        console.log("normalizedCompanyName is ", normalizedCompanyName)
 
-                    if (item.snippet && item.snippet.toLowerCase().includes(normalizedCompanyName)) {
-                        companyNews.push(newsItem);
-                    } else {
-                        trendingNews.push(newsItem);
-                    }
+                        const normalizedSnippet = item.snippet.toLowerCase()
+                        console.log("normalizedSnippet is ", normalizedSnippet)
+
+                        // Use regex to test for the company name as a whole word
+                        if (companyRegex.test(normalizedSnippet)) {
+                            companyNews.push(newsItem);
+                        } else {
+                            trendingNews.push(newsItem);
+                        }
+                      }
                 });
             } else {
                 console.warn('No items found in news data', news); // Log warning if no items

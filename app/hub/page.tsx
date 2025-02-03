@@ -303,7 +303,7 @@ export default function HubPage() {
                             {/* Tab content for Company News */}
                             <TabsContent value="company-news">
                                 <div className="space-y-4">
-                                    {hubData.news.map((item, index) => (
+                                    {hubData.companyNews.map((item, index) => (
                                         <div key={index} className="flex items-start gap-4">
                                             <div className="flex-1">
                                                 <div className="text-sm text-gray-500">
@@ -323,7 +323,7 @@ export default function HubPage() {
                             {/* Tab content for Trending News */}
                             <TabsContent value="trending-news">
                                 <div className="space-y-4">
-                                    {hubData.news.map((item, index) => (
+                                    {hubData.trendingNews.map((item, index) => (
                                         <div key={index} className="flex items-start gap-4">
                                             <div className="flex-1">
                                                 <div className="text-sm text-gray-500">

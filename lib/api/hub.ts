@@ -3,6 +3,8 @@ import { LoginDto } from "@/dto/login.dto";
 import { VerifyUserDto } from "@/dto/verifyUser.dto";
 import SerpApi from "./serp.api";
 import { Company, Competitor } from "../types";
+import moment from 'moment';
+import { compareAsc } from "date-fns";
 
 
 export default class HubApi extends BaseApi {
@@ -29,32 +31,90 @@ export default class HubApi extends BaseApi {
             //percentChange: item.price_movement ? parseFloat(item.price_movement.percentage.toFixed(2)) : 0,  // Percent change
             //link: item.link,
         };
-        return competitor     
+        return competitor
     }
 
-    async buildNews(newsData: any) {
+    async buildNews(newsData: any, companyName: string) {
         console.log("newsData is ", newsData);
-        let transformedData: { source: any; time: any; link: any; title: any; image: any; }[] = [];
 
+        let companyNews: { source: any; time: any; link: any; title: any; image: any; }[] = [];
+        let trendingNews: { source: any; time: any; link: any; title: any; image: any; }[] = [];
+    
+        const normalizedCompanyName = companyName.toLowerCase();
+        console.log("normalizedCompanyName is ", normalizedCompanyName)
+
+        // Example logic for separating into categories (can be customized as needed)
         newsData.forEach(news => {
             if (news.items && Array.isArray(news.items)) {  // Ensure items exists and is an array
                 news.items.forEach(item => {
-                    transformedData.push({
+                    const newsItem = {
                         source: item.source,
                         time: item.date,
                         title: item.snippet,
                         link: item.link,
-                        image: item.thumbnail || 'default-image-url.png', // You can add a fallback for images
-                    });
+                        image: item.thumbnail || 'default-image-url.png', // Fallback for images
+                    };
+
+                    // Separate into CompanyNews and TrendingNews based on content
+                    console.log("item.snippet is ", item.snippet)
+
+                    if (item.snippet && item.snippet.toLowerCase().includes(normalizedCompanyName)) {
+                        companyNews.push(newsItem);
+                    } else {
+                        trendingNews.push(newsItem);
+                    }
                 });
+            } else {
+                console.warn('No items found in news data', news); // Log warning if no items
             }
         });
-                
-        return transformedData
+
+        // Function to parse relative time like "1 day ago", "4 hours ago"
+        const parseRelativeTime = (relativeTime: string): Date => {
+            const currentTime = new Date();
+            let timeValue: number;
+
+            if (relativeTime.includes("day")) {
+                timeValue = parseInt(relativeTime.split(" ")[0]);
+                return new Date(currentTime.setDate(currentTime.getDate() - timeValue));
+            }
+            if (relativeTime.includes("hour")) {
+                timeValue = parseInt(relativeTime.split(" ")[0]);
+                return new Date(currentTime.setHours(currentTime.getHours() - timeValue));
+            }
+            if (relativeTime.includes("minute")) {
+                timeValue = parseInt(relativeTime.split(" ")[0]);
+                return new Date(currentTime.setMinutes(currentTime.getMinutes() - timeValue));
+            }
+            if (relativeTime.includes("second")) {
+                timeValue = parseInt(relativeTime.split(" ")[0]);
+                return new Date(currentTime.setSeconds(currentTime.getSeconds() - timeValue));
+            }            
+
+            return currentTime;
+        }
+
+
+        const sortByDate = (a: { time: string }, b: { time: string }) => {
+            const dateA = parseRelativeTime(a.time);
+            const dateB = parseRelativeTime(b.time);
+            return compareAsc(dateB, dateA); // Sort latest first
+        };
         
+        companyNews.sort(sortByDate);
+        trendingNews.sort(sortByDate);
+
+        // Combine them into an object to return both categories
+        return {
+            companyNews: companyNews,
+            trendingNews: trendingNews
+        };
+
     }
 
     async buildCompetitorsFromSearchedList(data: any[]): Promise<Competitor[]> {
+
+        console.log(" in buildCompetitorsFromSearchedList data is ", data)
         // Safety check for undefined or non-array data
         if (!Array.isArray(data)) {
             console.error("Expected an array but got: ", data);
@@ -86,10 +146,10 @@ export default class HubApi extends BaseApi {
                 percentChange: item.price_movement ? parseFloat(item.price_movement.percentage.toFixed(2)) : 0,  // Percent change
                 link: item.link,
             };
-    
+
             competitors.push(competitor);
         });
-    
+
         return competitors;
     }
 
@@ -105,12 +165,12 @@ export default class HubApi extends BaseApi {
 
 
         // Build competitors from the given data
-        const competitors = await this.buildCompetitorsFromSearchedList([companyDetails.data.companyDiscoverMore[1].items]);
+        const competitors = await this.buildCompetitorsFromSearchedList([companyDetails.data.companyDiscoverMore[0].items]);
 
         console.log("competitors are ", competitors);
 
         // Build competitors from the given data
-        const news = await this.buildNews(companyDetails.data.newsResults);
+        const news = await this.buildNews(companyDetails.data.newsResults, companyDetails.data.companySummary.title);
         console.log('Transformed News:', news);
 
         const hubData = {
@@ -124,7 +184,8 @@ export default class HubApi extends BaseApi {
                 { date: "JAN 23", company: "Intuitive", time: "Jan 23, 2025" },
                 { date: "JAN 23", company: "Texas Instruments", time: "Jan 23, 2025" },
             ],
-            news: news,
+            companyNews: news.companyNews,
+            trendingNews: news.trendingNews,
         }
 
         return hubData;

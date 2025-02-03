@@ -67,5 +67,6 @@ export interface NewsItem {
 export interface HubData {
   competitors: Competitor[]
   earningsCalendar: EarningsEvent[]
-  news: NewsItem[]
+  companyNews: NewsItem[]
+  trendingNews: NewsItem[]
 }

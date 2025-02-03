@@ -36,6 +36,13 @@ export default function VaultPage() {
 
   const vaultApi = new VaultApi();
 
+  const deleteFile = async (fileId: string) => {
+    const response = await vaultApi.deleteFile({fileId: fileId});
+
+    return response;
+  }
+
+
   const loadFiles = async () => {
     if (!user) return
 
@@ -88,7 +95,8 @@ export default function VaultPage() {
     const formData = new FormData(event.currentTarget)
     const fileIds = formData.getAll("fileIds") as string[]
     try {
-      //await Promise.all(fileIds.map((id) => deleteFile(user.uid, id)))
+      await Promise.all(fileIds.map((id) => deleteFile(id))); // `deleteFile` expects a string (fileId)
+
       toast.success("Files deleted successfully")
       loadFiles()
     } catch (error) {
@@ -210,4 +218,7 @@ function formatFileSize(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
 }
+
+
+
 

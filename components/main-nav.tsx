@@ -71,30 +71,7 @@ export function MainNav() {
                                     </Link>
                                 </NavigationMenuItem>
                                 <NavigationMenuItem>
-                                    <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
-                                    <NavigationMenuContent>
-                                        <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                                            <li className="row-span-3">
-                                                <NavigationMenuLink asChild>
-                                                    <a className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/50 to-primary p-6 no-underline outline-none focus:shadow-md">
-                                                        <div className="mb-2 mt-4 text-lg font-medium text-white">Features</div>
-                                                        <p className="text-sm leading-tight text-white/90">
-                                                            Explore our comprehensive suite of corporate document management solutions
-                                                        </p>
-                                                    </a>
-                                                </NavigationMenuLink>
-                                            </li>
-                                            <ListItem href="/features" title="Document Management">
-                                                Secure storage and organization
-                                            </ListItem>
-                                            <ListItem href="/features" title="AI Assistance">
-                                                Smart document generation and analysis
-                                            </ListItem>
-                                            <ListItem href="/features" title="Collaboration">
-                                                Team workflows and sharing
-                                            </ListItem>
-                                        </ul>
-                                    </NavigationMenuContent>
+                                    <NavigationMenuTrigger>Chat</NavigationMenuTrigger>
                                 </NavigationMenuItem>
                             </>
                         ) : (

@@ -278,10 +278,10 @@ async function fetchCompanyPastDocuments(ticker: string) {
         const pastS1Docs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_S1, duration })
 
 
-        const past10KDocuments = past10KDocs?.data.filings || null
-        const past8KDocuments = past8KDocs?.data.filings || null
-        const pastS1Documents = pastS1Docs?.data.filings || null
-        const past10QDocuments = past10QDocs?.data.filings || null
+        const past10KDocuments = past10KDocs?.data || null
+        const past8KDocuments = past8KDocs?.data || null
+        const pastS1Documents = pastS1Docs?.data || null
+        const past10QDocuments = past10QDocs?.data || null
 
         console.log(" duration is ", duration)
         console.log(" past10KDocs is ", past10KDocuments)

@@ -28,7 +28,7 @@ export default function VaultPage() {
   const [search, setSearch] = useState("")
   const [sort, setSort] = useState("uploadDate")
   const [order, setOrder] = useState("desc")
-  let { user, loading } = useAuth()
+  const { user, loading, signIn } = useAuth()
   
   console.log("in VaultPage user os ", user)
 
@@ -38,7 +38,7 @@ export default function VaultPage() {
     if (user) {
       loadFiles()
     }
-  }, [user, page, search, sort, order])
+  }, [])
 
   const vaultApi = new VaultApi();
 
@@ -89,10 +89,10 @@ export default function VaultPage() {
 
     setIsLoading(true)
     try {
-      const user_id = user._id || ''
-      console.log("Gettng vaultFilesResponse for User ", user)
+      const companyUser = await userApi.getClientByEmail(user?.email || "")
+      console.log("companyUser is ", companyUser)
 
-      const vaultFilesResponse = await vaultApi.getSpecificFiles({ user_id: user_id})
+      const vaultFilesResponse = await vaultApi.getSpecificFiles({ user_id: companyUser._id})
 
       console.log("vaultFilesResponse is ", vaultFilesResponse)
 

@@ -1,17 +1,20 @@
-import { Input } from "@/components/ui/input";
-import { VerifyUserDto } from "@/dto/verifyUser.dto";
-import UserApi from "@/lib/api/user.api";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+"use client"
+
+import { useEffect, useState } from "react";
 import { Button } from "react-day-picker";
 import { toast } from "react-toastify";
-import AiirHubIcon from "@public/airhub-logo.png";
-import bgImg from "@assets/VerifyBg.png";
 import { useFormik } from "formik";
 import { useRouter } from "next/router"; // Use Next.js Router for navigation
 import { IoEyeOutline } from "react-icons/io5";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { useMutation } from "react-query"; // Import useMutation
+import UserApi from "@/lib/api/user.api";
+import { VerifyUserDto } from "@/dto/verifyUser.dto";
+import { Input } from "@/components/ui/input";
+
+
+import { useParams } from "next/navigation";
+
 
 interface VerifyUser {
   userId: string;
@@ -21,8 +24,25 @@ interface VerifyUser {
 const VerifyPage = () => {
   const [isShowPassword, setIsShowPassword] = useState<boolean>(false);
   const [isShowConfirmPass, setIsShowConfirmPass] = useState<boolean>(false);
-  const { id } = useParams<{ id: string }>();
+  const [id, setId] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Delay usage of useRouter until the component is mounted on the client side
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
   const router = useRouter();
+
+  // Check if user_id is available in query params after component is mounted
+  useEffect(() => {
+    if (isMounted && router.query.verify) {
+      setId(router.query.verify as string);
+      console.log("In verify ID is - 1  ", router.query.verify);
+    }
+  }, [router.query.user_id, isMounted]);
+
+  console.log("In verify ID is - 2 ", id);
 
   const userApi = new UserApi();
 
@@ -42,11 +62,10 @@ const VerifyPage = () => {
         return;
       }
 
-      console.log(id);  // Check if id is correctly extracted
-
+      console.log("IN Verify user ID is ", id);  // Check if id is correctly extracted
 
       const payload: VerifyUser = {
-        userId: id,
+        userId: id as string,  // Ensure the id is treated as a string
         password: password,
       };
 
@@ -90,13 +109,13 @@ const VerifyPage = () => {
     <div
       className="h-screen w-screen flex justify-center items-center bg-contain bg-no-repeat"
       style={{
-        backgroundImage: `url(${bgImg})`,
+        //backgroundImage: `url(${bgImg})`,
         backgroundSize: "100% 100%",
       }}
     >
       <div className="w-[35%] p-4 backdrop-blur-lg flex flex-col px-3 rounded-3xl border-2 border-solid border-white ">
         <div className="flex justify-center items-center ">
-          <img src={AiirHubIcon} alt="hippo icon" className="h-32 w-32 " />
+          <img src={"../../../public/airhub-logo.png"} alt="hippo icon" className="h-32 w-32 " />
         </div>
         <h2 className="text-[#1B2559] font-bold text-3xl pb-4 text-center font-PlusJakartaSans">
           Set Your Password

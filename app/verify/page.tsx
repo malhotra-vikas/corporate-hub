@@ -42,6 +42,9 @@ const VerifyPage = () => {
         return;
       }
 
+      console.log(id);  // Check if id is correctly extracted
+
+
       const payload: VerifyUser = {
         userId: id,
         password: password,

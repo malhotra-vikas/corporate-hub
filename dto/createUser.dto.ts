@@ -3,7 +3,7 @@ import * as yup from "yup";
 export class CreateUserDto {
   companyName?: string;
   email?: string;
-  firebase_uid?: string;
+  fireBaseUid?: string;
   companyTicker?: string;
   interestTickers?: string[];
   companyExchange?: string;

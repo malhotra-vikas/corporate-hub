@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth-context"
 import VaultApi from "@/lib/api/vault.api"
+import UserApi from "@/lib/api/user.api"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -17,7 +19,7 @@ import Link from "next/link"
 import { toast } from "react-toastify"
 import { getFiles } from "@/lib/api/vault"
 import { VaultFile } from "@/lib/types"
-
+import { File } from "buffer"
 
 export default function VaultPage() {
   const [files, setFiles] = useState<VaultFile[]>([]);
@@ -26,7 +28,11 @@ export default function VaultPage() {
   const [search, setSearch] = useState("")
   const [sort, setSort] = useState("uploadDate")
   const [order, setOrder] = useState("desc")
-  const { user } = useAuth()
+  let { user, loading } = useAuth()
+  
+  console.log("in VaultPage user os ", user)
+
+  const userApi = new UserApi()
 
   useEffect(() => {
     if (user) {
@@ -42,15 +48,51 @@ export default function VaultPage() {
     return response;
   }
 
+  const uploadFile = async (userId: string, file: File, category: string) => {
+    const formData = new FormData();
+    formData.append("originalName", file.name);
+    formData.append("serverFileName", file.name)
+    formData.append("files", file as Blob);
+    formData.append("category", category);
+    formData.append("user_id", userId);
+
+    let filesTag: any = [];
+    let tempObj = {
+      [file.name]: {
+        docType: category,
+        useFull: "Both",
+      },
+    };
+    filesTag?.push(tempObj);
+
+    formData.append("tags", JSON.stringify(filesTag));
+
+    // Log form data manually to inspect it (FormData cannot be logged directly)
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
+    try {
+      const response = await vaultApi.uploadDocuments(formData)
+      return response;
+    } catch (error) {
+      console.error("Error Response:", error.response.data);
+
+      throw error;  // rethrow the error after logging for further handling if necessary
+
+    }
+  
+  }
 
   const loadFiles = async () => {
     if (!user) return
 
     setIsLoading(true)
     try {
-      console.log("Gettng vaultFilesResponse for User ", user.uid)
+      const user_id = user._id || ''
+      console.log("Gettng vaultFilesResponse for User ", user)
 
-      const vaultFilesResponse = await vaultApi.getSpecificFiles({ user_id: user.uid})
+      const vaultFilesResponse = await vaultApi.getSpecificFiles({ user_id: user_id})
 
       console.log("vaultFilesResponse is ", vaultFilesResponse)
 
@@ -77,14 +119,19 @@ export default function VaultPage() {
     event.preventDefault()
     if (!user) return
     const formData = new FormData(event.currentTarget)
-    const file = formData.get("file") as File
+    const file = formData.get("file") as unknown as File
     const category = formData.get("category") as string
+
+    console.log("File is ", file)
+    console.log("File Category is ", category)
+
     try {
       
-      //await uploadFile(user.uid, file, category)
+      await uploadFile(user._id || '', file, category)
       toast.success("File uploaded successfully")
       loadFiles()
     } catch (error) {
+      console.log("Err ror is ", error)
       toast.error("Failed to upload file")
     }
   }
@@ -184,7 +231,9 @@ export default function VaultPage() {
                       {file.type === "document" && <FileTextIcon className="mr-2 h-4 w-4" />}
                       {file.type === "image" && <ImageIcon className="mr-2 h-4 w-4" />}
                       {file.type === "presentation" && <PresentationIcon className="mr-2 h-4 w-4" />}
-                      {file.originalName}
+                      <a href={file.filePath} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                        {file.originalName}
+                      </a>
                     </div>
                   </TableCell>
                   <TableCell>{file.mimetype}</TableCell>

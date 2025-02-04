@@ -13,6 +13,17 @@ import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { Loader2 } from "lucide-react"
 import type React from "react"
+import VaultApi from "@/lib/api/vault.api"
+
+const EXCHANGE_OTC = "OTCMKTS"
+const EXCHANGE_NASDAQ = "NASDAQ"
+const EXCHANGE_NYSE = "NYSE"
+
+const DOCUMENT_8_K = "8-K"
+const DOCUMENT_10_Q = "10-Q"
+const DOCUMENT_10_K = "10-K"
+const DOCUMENT_S1 = "S1"
+
 
 interface CompanyDetails {
     name: string
@@ -21,7 +32,6 @@ interface CompanyDetails {
     companyTicker: string
     exchange: string
 }
-
 
 
 export default function SignUp() {
@@ -33,16 +43,77 @@ export default function SignUp() {
     let [companyCEOName, setCompanyCEOName] = useState("")
     let [companyFounded, setCompanyFounded] = useState("")
 
+    let [past8KDocuments, setPast8KDocuments] = useState("")
+    let [past10KDocuments, setPast10KDocuments] = useState("")
+    let [past10QDocuments, setPast10QDocuments] = useState("")
+    let [pastS1Documents, setPastS1Documents] = useState("")
+
     const [companyDetails, setCompanyDetails] = useState<CompanyDetails | null>(null)
+
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
     const { signUp } = useAuth()
     const serpApi = new SerpApi()
+    const vaultApi = new VaultApi()
 
-    const EXCHANGE_OTC = "OTCMKTS"
-    const EXCHANGE_NASDAQ = "NASDAQ"
-    const EXCHANGE_NYSE = "NYSE"
+    const fetchCompanyPastDocuments = async (ticker: string) => {
+        if (ticker.length < 2) {
+            setPast10KDocuments("")
+            setPast10QDocuments("")
+            setPast8KDocuments("")
+            setPastS1Documents("")
+            return
+        }
+
+        setIsLoading(true)
+        setError(null)
+
+        try {
+
+            const duration = getLastTwoYearsRange()
+            const past10KDocs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_10_K, duration })
+            const past10QDocs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_10_Q, duration })
+            const past8KDocs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_8_K, duration })
+            const pastS1Docs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_S1, duration })
+
+
+            past10KDocuments = past10KDocs?.data.filings || null,
+                past8KDocuments = past8KDocs?.data.filings || null,
+                pastS1Documents = pastS1Docs?.data.filings || null,
+                past10QDocuments = past10QDocs?.data.filings || null
+
+            console.log(" duration is ", duration)
+            console.log(" past10KDocs is ", past10KDocuments)
+            console.log(" past10QDocs is ", past10QDocuments)
+            console.log(" past8KDocs is ", past8KDocuments)
+            console.log(" pastS1Docs is ", pastS1Documents)
+
+            setPast10KDocuments(past10KDocuments)
+            setPast10QDocuments(past10QDocuments)
+            setPast8KDocuments(past8KDocuments)
+            setPastS1Documents(pastS1Documents)
+
+            return {
+                past10KDocuments: past10KDocuments,
+                past8KDocuments: past8KDocuments,
+                pastS1Documents: pastS1Documents,
+                past10QDocuments: past10QDocuments
+            }
+
+        } catch (error) {
+            console.error("Error fetching company details:", error)
+            setPast10KDocuments("")
+            setPast10QDocuments("")
+            setPast8KDocuments("")
+            setPastS1Documents("")
+            setError("Error fetching company details. Please try again.")
+            toast.error("Error fetching company details. Please try again.")
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
 
     const fetchCompanyDetails = useCallback(
         async (ticker: string) => {
@@ -97,7 +168,7 @@ export default function SignUp() {
 
                     const ceoInfo = serpCompanyDetails.data.companyKnowledgeGraph.about[0]?.info.find((item: { label: string }) => item.label === "CEO");
                     console.log("ceoInfo ", ceoInfo)
-                    
+
                     if (ceoInfo) {
                         const nameParts = ceoInfo.value.trim().split(" "); // Split by space
                         // If the first and second part are the same, remove the duplicate
@@ -105,21 +176,21 @@ export default function SignUp() {
                     } else {
                         companyCEOName = "CEO not found"
                     }
-                    
-                    console.log("CEO Name: ", companyCEOName); 
+
+                    console.log("CEO Name: ", companyCEOName);
 
                     setCompanyCEOName(companyCEOName)
 
                     const foundedInfo = serpCompanyDetails.data.companyKnowledgeGraph.about[0]?.info.find((item: { label: string }) => item.label === "Founded");
                     console.log("foundedInfo ", foundedInfo)
-                    
+
                     if (foundedInfo) {
                         companyFounded = foundedInfo.value.trim();
                     } else {
                         companyFounded = "Data not found"
                     }
                     setCompanyFounded(companyFounded)
-                    console.log("companyFounded: ", companyFounded); 
+                    console.log("companyFounded: ", companyFounded);
 
                     setCompanyDetails({
                         ...serpCompanyDetails.data.companySummary,
@@ -131,7 +202,8 @@ export default function SignUp() {
                         ceoName: companyCEOName,
                         exchange: exchangeFound,
                         foundedYear: companyFounded
-                    })                    
+                    })
+
                 } else {
                     setCompanyDetails(null)
                     setError("No company found for the provided ticker")
@@ -163,6 +235,17 @@ export default function SignUp() {
         return () => clearTimeout(timer)
     }, [debouncedCompanyTicker, fetchCompanyDetails, companyDetails])
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (debouncedCompanyTicker.length >= 2 && debouncedCompanyTicker !== companyDetails?.companyTicker) {
+                fetchCompanyPastDocuments(debouncedCompanyTicker)
+            }
+        }, 750)
+
+        return () => clearTimeout(timer)
+    }, [debouncedCompanyTicker, fetchCompanyDetails, companyDetails])
+
+
     const handleEmailSignUp = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
@@ -173,6 +256,20 @@ export default function SignUp() {
         try {
             await signUp(email, password, companyName, companyTicker, companyDetails)
             toast.success("Account created successfully!")
+/*
+            const companyFilings = await fetchCompanyPastDocuments(companyTicker)
+
+            // Send 10K docs
+            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past10KDocuments)
+
+            // Send 10Q docs
+            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past10QDocuments)
+            // Send 8K docs
+            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past8KDocuments)
+            // Send S1 docs
+            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.pastS1Documents)
+*/            
+            
             router.push("/hub")
         } catch (error) {
             if (error instanceof Error) {
@@ -185,6 +282,26 @@ export default function SignUp() {
         }
     }
 
+    function getLastTwoYearsRange() {
+        // Get the current year
+        const currentYear = new Date().getFullYear();
+
+        // Get the current date
+        const currentDate = new Date();
+
+        // Start date: January 1st, two years ago
+        const startDate = new Date(currentDate.getFullYear() - 2, 0, 1); // January 1st of two years ago
+
+        // End date: Today
+        const endDate = currentDate;
+
+        // Format the dates to "YYYY-MM-DD"
+        const formatDate = (date) => date.toISOString().split('T')[0];
+
+        // Return the formatted string
+        return `[${formatDate(startDate)} TO ${formatDate(endDate)}]`;
+    }
+    
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <ToastContainer position="top-right" autoClose={5000} />
@@ -217,15 +334,6 @@ export default function SignUp() {
                             </div>
                         ) : companyDetails ? (
                             <div className="text-sm bg-gray-50 p-3 rounded-md">
-                                <p>
-                                    <strong>Name:</strong> {companyDetails.name}
-                                </p>
-                                <p>
-                                    <strong>CEO:</strong> {companyDetails.ceoName}
-                                </p>
-                                <p>
-                                    <strong>Founded:</strong> {companyDetails.foundedYear}
-                                </p>
                                 <p>
                                     <strong>Exchange:</strong> {companyDetails.exchange}
                                 </p>

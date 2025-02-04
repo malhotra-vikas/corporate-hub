@@ -5,6 +5,7 @@ import { createContext, useContext, useState, useEffect } from "react"
 import { auth } from "@/lib/firebase"
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
 import UserApi from "@/lib/api/user.api"
+import VaultApi from "@/lib/api/vault.api"
 
 type UserRole = "admin" | "companyUser"
 
@@ -17,8 +18,9 @@ interface CompanyDetails {
 }
 
 interface User {
-    uid: string
+    //uid: string
     fireBaseUid: string
+    _id?: string
     email: string | null
     displayName: string | null
     displayTicker: string | null
@@ -29,7 +31,6 @@ interface User {
     photoURL: string | null
     is_verified: boolean,
     role: UserRole
-    _id?: string
     token?: string
 }
 
@@ -67,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                 const localUser = {
                     fireBaseUid: firebaseUser.uid,
-                    uid: userData._id,
+                    //uid: userData._id,
                     email: firebaseUser.email,
                     displayName: userData.displayName,
                     displayTicker: userData.displayTicker,
@@ -101,15 +102,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const firebaseUser = userCredential.user
 
             const userApi = new UserApi()
+            const vaultApi = new VaultApi()
+
             const loginResponse = await userApi.login({ username: email, password })
             console.log("Logged is user ", loginResponse)
             console.log("Logged is user ticker ", loginResponse.data.user_info.companyTicker)
             console.log("Logged is user exchange ", loginResponse.data.user_info.companyExchange)
 
             const localUser = {
-                fireBaseUid: firebaseUser.uid,
-                uid: loginResponse.data.user_info._id,
-                email: firebaseUser.email,
+                fireBaseUid: loginResponse.data.user_info.fireBaseUid,
+                //uid: loginResponse.data.user_info._id,
+                email: loginResponse.data.user_info.email,
                 displayName: loginResponse.data.user_info.companyName,
                 displayTicker: loginResponse.data.user_info.displayTicker,
                 companyName: loginResponse.data.user_info.companyName,
@@ -125,6 +128,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(localUser)
             const token = await auth.currentUser?.getIdToken()
             setUser((prevUser) => (prevUser ? { ...prevUser, token } : null))
+
+            const companyFilings = await fetchCompanyPastDocuments(loginResponse.data.user_info.companyTicker)
+
+            // Send 10K docs
+            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past10KDocuments, loginResponse.data.user_info._id)
+
+            // Send 10Q docs
+            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past10QDocuments, loginResponse.data.user_info._id)
+            // Send 8K docs
+            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past8KDocuments, loginResponse.data.user_info._id)
+            // Send S1 docs
+            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.pastS1Documents, loginResponse.data.user_info._id)
+
         } catch (error) {
             console.error("Error signing in:", error)
             if (error instanceof Error) {
@@ -145,6 +161,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const signUp = async (email: string, password: string, companyName: string, companyTicker: string, companyDetails: CompanyDetails) => {
         try {
+
+            email = email.toLowerCase()
+
             const userCredential = await createUserWithEmailAndPassword(auth, email, password)
             const firebaseUser = userCredential.user
 
@@ -153,17 +172,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 email,
                 companyName,
                 companyTicker,
-                firebase_uid: firebaseUser.uid,
+                fireBaseUid: firebaseUser.uid,
                 companyCEOName: companyDetails.ceoName,
                 foundedYear: companyDetails.foundedYear,
                 companyExchange: companyDetails.exchange,
                 role: "companyUser", // Default role for new users
             })
 
+            console.log("createUserResponse os ", createUserResponse)
             const localUser = {
-                fireBaseUid: firebaseUser.uid,
-                uid: createUserResponse.data.user_info._id,
-                email: firebaseUser.email,
+                fireBaseUid: createUserResponse.data.fireBaseUid,
+                //uid: createUserResponse.data._id,
+                email: createUserResponse.data.email,
                 displayName: companyName,
                 displayTicker: companyTicker,
                 companyName: companyName,
@@ -171,7 +191,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 companyExchange: companyDetails.exchange,
                 companyCEOName: companyDetails.ceoName,
                 is_verified: false,
-                photoURL: firebaseUser.photoURL,
+                photoURL: createUserResponse.data.photoURL,
                 role: createUserResponse.data.role || "companyUser",
                 _id: createUserResponse.data._id,
             }
@@ -196,6 +216,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const signOut = async () => {
         await auth.signOut()
         setUser(null)
+        localStorage.removeItem('userData');  // Optionally clear any persistent session data
+        console.log("User signed out successfully");
     }
 
     const getToken = async () => {
@@ -214,12 +236,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     )
 }
 
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-    return context;
-};
+export const useAuth = () => useContext(AuthContext)
 
+
+
+
+function getLastTwoYearsRange() {
+    // Get the current year
+    const currentYear = new Date().getFullYear();
+
+    // Get the current date
+    const currentDate = new Date();
+
+    // Start date: January 1st, two years ago
+    const startDate = new Date(currentDate.getFullYear() - 2, 0, 1); // January 1st of two years ago
+
+    // End date: Today
+    const endDate = currentDate;
+
+    // Format the dates to "YYYY-MM-DD"
+    const formatDate = (date) => date.toISOString().split('T')[0];
+
+    // Return the formatted string
+    return `[${formatDate(startDate)} TO ${formatDate(endDate)}]`;
+}
+
+
+async function fetchCompanyPastDocuments(ticker: string) {
+    try {
+
+        const DOCUMENT_8_K = "8-K"
+        const DOCUMENT_10_Q = "10-Q"
+        const DOCUMENT_10_K = "10-K"
+        const DOCUMENT_S1 = "S1"
+
+        const vaultApi = new VaultApi()
+        const duration = getLastTwoYearsRange()
+        const past10KDocs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_10_K, duration })
+        const past10QDocs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_10_Q, duration })
+        const past8KDocs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_8_K, duration })
+        const pastS1Docs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_S1, duration })
+
+
+        const past10KDocuments = past10KDocs?.data.filings || null
+        const past8KDocuments = past8KDocs?.data.filings || null
+        const pastS1Documents = pastS1Docs?.data.filings || null
+        const past10QDocuments = past10QDocs?.data.filings || null
+
+        console.log(" duration is ", duration)
+        console.log(" past10KDocs is ", past10KDocuments)
+        console.log(" past10QDocs is ", past10QDocuments)
+        console.log(" past8KDocs is ", past8KDocuments)
+        console.log(" pastS1Docs is ", pastS1Documents)
+
+        return {
+            past10KDocuments: past10KDocuments,
+            past8KDocuments: past8KDocuments,
+            pastS1Documents: pastS1Documents,
+            past10QDocuments: past10QDocuments
+        }
+
+    } catch (error) {
+        console.error("Error fetching company details:", error)
+    }
+}
 

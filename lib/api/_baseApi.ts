@@ -1,9 +1,7 @@
-
 import { RemoveDuplicateToast } from "@/utils/helper";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { getAuth, signInWithCustomToken } from "firebase/auth";
-import { auth } from "@/utils/firebaseConfig"; 
-import { useAuth } from "@/lib/auth-context"
+import { auth } from "@/utils/firebaseConfig";
 
 interface User {
   firebase_token: string;
@@ -22,14 +20,19 @@ export default class BaseApi {
           if (
             error.response?.status === 401 &&
             (error.response?.data?.message === "Session Expired!" ||
-              error.response?.data?.message ===
-                "Invalid token - decoding error" ||
+              error.response?.data?.message === "Invalid token - decoding error" ||
               error.response?.data?.message === "Authorization token missing" ||
               error.response?.data?.message === "User not in our system" ||
               error.response?.data?.message === "Unauthorized User Access!")
           ) {
             if (!BaseApi.isHandlingError) {
               BaseApi.isHandlingError = true;
+
+              const newToken = await BaseApi.refreshTokenIfNeeded();
+              if (newToken) {
+                error.config.headers['Authorization'] = `Bearer ${newToken}`;
+                return axios.request(error.config); // Retry the request with the new token
+              }
 
               BaseApi.isHandlingError = false;
               RemoveDuplicateToast(
@@ -46,42 +49,33 @@ export default class BaseApi {
     }
   }
 
-  static async exchangeCustomToken(
-    customToken: string,
-  ): Promise<string | null> {
+  private static async refreshTokenIfNeeded(): Promise<string | null> {
     try {
-      const userCredential = await signInWithCustomToken(auth, customToken);
-      const idToken = await userCredential.user.getIdToken();
-      console.log("✅ Successfully exchanged for ID Token:");
-      return idToken;
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (user) {
+        const refreshedToken = await user.getIdToken(true); // Force refresh
+        console.log("Refreshed Token:", refreshedToken);
+        return refreshedToken;
+      }
     } catch (error) {
-      console.error("❌ Error exchanging custom token:", error);
-      return null;
+      console.error("Error refreshing token:", error);
     }
+    return null;
   }
 
-  private static async mergeRequestConfig(
+  static async mergeRequestConfig(
     config?: AxiosRequestConfig,
   ): Promise<AxiosRequestConfig<any>> {
     const baseConfig: AxiosRequestConfig = {
-      baseURL: process.env.NEXT_PUBLIC_BACKEND_URL+"/api/",
+      baseURL: process.env.NEXT_PUBLIC_BACKEND_URL + "/api/",
       headers: {},
     };
-    console.log("11 ");
-
-      // Get Firebase auth object
-    const auth = getAuth(); 
-
-      // Access the current user
+    const auth = getAuth();
     const user = auth.currentUser;
-    console.log("Pre TOken user is :", user);
-
 
     if (user) {
-      const token = await user.getIdToken(); // Get ID token from Firebase user
-      console.log("Pre Exchange TOken is :", token);
-
-      //const idToken = await BaseApi.exchangeCustomToken(token);
+      const token = await user.getIdToken();
       if (token) {
         baseConfig.headers!["Authorization"] = `Bearer ${token}`;
       }

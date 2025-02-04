@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import UserApi from "@/lib/api/user.api"
+import VaultApi from "@/lib/api/vault.api"
 
 export default function SignIn() {
     const [email, setEmail] = useState("")
@@ -16,10 +18,22 @@ export default function SignIn() {
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()
 
+    const userApi = new UserApi();
+    const vaultApi = new VaultApi();
+
     const handleEmailSignIn = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
+            console.log("!1111111111")
             await signInWithEmailAndPassword(auth, email, password)
+
+            const user = await userApi.getClientByEmail(email.toLowerCase())
+            console.log("user is ", user)
+            console.log("!2222222222")
+
+            //const companyFilings = await fetchCompanyPastDocuments(companyTicker)
+
+
             router.push("/hub")
         } catch (error) {
             setError("Failed to sign in. Please check your credentials.")

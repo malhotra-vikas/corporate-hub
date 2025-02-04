@@ -62,11 +62,8 @@ export default class HubApi extends BaseApi {
                     };
 
                     if (item.snippet) {
-                        // Separate into CompanyNews and TrendingNews based on content
-                        console.log("normalizedCompanyName is ", normalizedCompanyName)
 
                         const normalizedSnippet = item.snippet.toLowerCase()
-                        console.log("normalizedSnippet is ", normalizedSnippet)
 
                         // Use regex to test for the company name as a whole word
                         if (companyRegex.test(normalizedSnippet)) {

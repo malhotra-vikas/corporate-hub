@@ -1,16 +1,38 @@
 import { UpdateFileDto } from "@/dto/updateFile.dto";
 import BaseApi from "./_baseApi";
+import UserApi from "./user.api";
+
 import { FileCreationDto } from "@/dto/docFileCreation.dto";
 import { CreateFileDto } from "@/dto/createFile.dto";
 
 export default class VaultApi extends BaseApi {
+  
   baseUrl: string = "vault/";
   getUniqueFieldValues: any;
   constructor() {
     super();
   }
 
+  async uploadComppanyHistoricDocuments(companyFilings: any, user_id: string) {
+
+
+    console.log("IN UI companyFilings is ", JSON.stringify(companyFilings, null, 2)); // log the body
+
+    const data = await VaultApi.post(
+      `${this.baseUrl}upload-company-historic-files-to-vault?user_id=${user_id}`,
+      companyFilings
+    );
+    return data;
+  }
+
   async uploadDocuments(dto: FormData) {
+
+    console.log("HI")
+    // Log form data manually to inspect it (FormData cannot be logged directly)
+    for (let [key, value] of dto.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
     const data = await VaultApi.post(
       `${this.baseUrl}upload-files-to-vault`,
       dto,
@@ -21,6 +43,12 @@ export default class VaultApi extends BaseApi {
     const data = await VaultApi.post(`${this.baseUrl}getSpecificFiles`, dto);
     return data;
   }
+
+  async fetchCompanyPastDocuments(dto: { ticker: string, fileType: string, duration: string }) {
+    const data = await VaultApi.post(`${this.baseUrl}getSECFiles`, dto);
+    return data;
+  }
+
   async deleteFile(dto: { fileId: string }) {
     const data = await VaultApi.post(`${this.baseUrl}deleteFile`, dto);
     return data;
@@ -62,3 +90,8 @@ export default class VaultApi extends BaseApi {
     return paginatedData;
   }
 }
+
+// Utility function to add delay
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+

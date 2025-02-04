@@ -1,34 +1,26 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { SearchIcon } from "lucide-react"
 
-// Define prop types for SearchBar component
 interface SearchBarProps {
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder: string;
+    onSearch: (query: string) => void
+    placeholder: string
 }
 
-export function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
-    const router = useRouter()
+export function SearchBar({ onSearch, placeholder }: SearchBarProps) {
+    const [search, setSearch] = useState("")
 
-    const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
-        router.push(`/dashboard/vault?search=${encodeURIComponent(value)}`)
+        onSearch(search)
     }
 
     return (
         <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center space-x-2">
-            <Input
-                type="search"
-                placeholder={placeholder}
-                value={value}
-                onChange={onChange}  // Using the passed in onChange prop
-            />
+            <Input type="search" placeholder={placeholder} value={search} onChange={(e) => setSearch(e.target.value)} />
             <Button type="submit">
                 <SearchIcon className="h-4 w-4 mr-2" />
                 Search
@@ -36,3 +28,4 @@ export function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
         </form>
     )
 }
+

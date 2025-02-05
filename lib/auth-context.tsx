@@ -131,17 +131,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const token = await auth.currentUser?.getIdToken()
             setUser((prevUser) => (prevUser ? { ...prevUser, token } : null))
 
-            const companyFilings = await fetchCompanyPastDocuments(loginResponse.data.user_info.companyTicker)
+            //const companyFilings = await fetchCompanyPastDocuments(loginResponse.data.user_info.companyTicker)
 
             // Send 10K docs
-            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past10KDocuments, loginResponse.data.user_info._id)
+            //await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past10KDocuments, loginResponse.data.user_info._id)
 
             // Send 10Q docs
-            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past10QDocuments, loginResponse.data.user_info._id)
+            //await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past10QDocuments, loginResponse.data.user_info._id)
             // Send 8K docs
-            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past8KDocuments, loginResponse.data.user_info._id)
+            //await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past8KDocuments, loginResponse.data.user_info._id)
             // Send S1 docs
-            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.pastS1Documents, loginResponse.data.user_info._id)
+            //await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.pastS1Documents, loginResponse.data.user_info._id)
 
         } catch (error) {
             console.error("Error signing in:", error)
@@ -244,7 +244,7 @@ export const useAuth = () => useContext(AuthContext)
 
 
 
-
+/*
 function getLastTwoYearsRange() {
     // Get the current year
     const currentYear = new Date().getFullYear();
@@ -304,4 +304,4 @@ async function fetchCompanyPastDocuments(ticker: string) {
         console.error("Error fetching company details:", error)
     }
 }
-
+*/

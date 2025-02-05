@@ -14,6 +14,8 @@ import "react-toastify/dist/ReactToastify.css"
 import { Loader2 } from "lucide-react"
 import type React from "react"
 import VaultApi from "@/lib/api/vault.api"
+import axios from 'axios';
+
 
 const EXCHANGE_OTC = "OTCMKTS"
 const EXCHANGE_NASDAQ = "NASDAQ"
@@ -57,6 +59,7 @@ export default function SignUp() {
     const serpApi = new SerpApi()
     const vaultApi = new VaultApi()
 
+/*    
     const fetchCompanyPastDocuments = async (ticker: string) => {
         if (ticker.length < 2) {
             setPast10KDocuments("")
@@ -113,7 +116,7 @@ export default function SignUp() {
             setIsLoading(false)
         }
     }
-
+*/
 
     const fetchCompanyDetails = useCallback(
         async (ticker: string) => {
@@ -235,6 +238,7 @@ export default function SignUp() {
         return () => clearTimeout(timer)
     }, [debouncedCompanyTicker, fetchCompanyDetails, companyDetails])
 
+    /*
     useEffect(() => {
         const timer = setTimeout(() => {
             if (debouncedCompanyTicker.length >= 2 && debouncedCompanyTicker !== companyDetails?.companyTicker) {
@@ -244,6 +248,7 @@ export default function SignUp() {
 
         return () => clearTimeout(timer)
     }, [debouncedCompanyTicker, fetchCompanyDetails, companyDetails])
+    */
 
 
     const handleEmailSignUp = async (e: React.FormEvent) => {
@@ -255,7 +260,25 @@ export default function SignUp() {
         }
         try {
             await signUp(email.toLowerCase(), password, companyName, companyTicker, companyDetails)
-            toast.success("Account created successfully!")          
+            toast.success("Account created successfully!")
+
+            // New Account Created. Send a message to the queue for processing the fetch data
+            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/queueprocessor/post-message`;
+            const data = {
+                message: email.toLowerCase()
+            };
+
+            // Send POST request
+            const response = await axios.post(url, data, {
+                headers: {
+                    'Accept': '*/*',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Log the response from the server
+            console.log('Response:', response.data);
+
             
             router.push("/hub")
         } catch (error) {

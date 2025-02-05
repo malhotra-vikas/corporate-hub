@@ -1,186 +1,94 @@
 "use client"
 
-import { useEffect, useState } from "react";
-import { Button } from "react-day-picker";
-import { toast } from "react-toastify";
-import { useFormik } from "formik";
-import { useRouter } from "next/router"; // Use Next.js Router for navigation
-import { IoEyeOutline } from "react-icons/io5";
-import { FaRegEyeSlash } from "react-icons/fa";
-import { useMutation } from "react-query"; // Import useMutation
-import UserApi from "@/lib/api/user.api";
-import { VerifyUserDto } from "@/dto/verifyUser.dto";
-import { Input } from "@/components/ui/input";
-
-
-import { useParams } from "next/navigation";
-
+import { useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { toast } from "react-toastify"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useMutation } from "react-query"
+import UserApi from "@/lib/api/user.api"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import Image from "next/image"
 
 interface VerifyUser {
-  userId: string;
-  password: string;
+  verifyToken: string
 }
 
 const VerifyPage = () => {
-  const [isShowPassword, setIsShowPassword] = useState<boolean>(false);
-  const [isShowConfirmPass, setIsShowConfirmPass] = useState<boolean>(false);
-  const [id, setId] = useState<string | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
-  // Delay usage of useRouter until the component is mounted on the client side
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-  
-  const router = useRouter();
+  const verifyToken = searchParams.get("verify")
 
-  // Check if user_id is available in query params after component is mounted
-  useEffect(() => {
-    if (isMounted && router.query.verify) {
-      setId(router.query.verify as string);
-      console.log("In verify ID is - 1  ", router.query.verify);
-    }
-  }, [router.query.user_id, isMounted]);
-
-  console.log("In verify ID is - 2 ", id);
-
-  const userApi = new UserApi();
-
-  const form = useFormik({
-    initialValues: new VerifyUserDto(),
-    validationSchema: VerifyUserDto.yupSchema(),
-    onSubmit: async (values: { password: any }) => {
-      const { password } = values;
-
-      if (!password) {
-        toast.error("Password is required");
-        return;
-      }
-
-      if (!id) {
-        toast.error("User ID is missing");
-        return;
-      }
-
-      console.log("IN Verify user ID is ", id);  // Check if id is correctly extracted
-
-      const payload: VerifyUser = {
-        userId: id as string,  // Ensure the id is treated as a string
-        password: password,
-      };
-
-      await mutateAsync(payload); // Trigger the mutation when the form is submitted
-    },
-  });
+  const userApi = new UserApi()
 
   const verifyUser = async (values: VerifyUser) => {
-    return await userApi.verifyUser(values);
-  };
+    return await userApi.verifyUser({userId: values.verifyToken})
+  }
 
-  // React Query's useMutation hook
-  const { mutateAsync } = useMutation({
+  const { mutate, isLoading, isError, error, isSuccess } = useMutation({
     mutationFn: verifyUser,
     onSuccess: () => {
-      toast.success("Password Created Successfully!");
-      router.push("/login");
+      toast.success("Email verified successfully! You can now log in.")
+      router.push("/hub")
     },
     onError: (error: any) => {
-      if (error?.response?.data?.message.includes("Cast to ObjectId failed")) {
-        toast.error("User ID is invalid!");
-        router.push("/login");
-      } else if (error?.response?.data?.message === "User not found") {
-        toast.error("User ID is invalid!");
-        router.push("/login");
-      } else {
-        toast.error(error?.response?.data?.message);
+      toast.error(error?.response?.data?.message || "An error occurred during verification")
+      if (error?.response?.status === 400) {
+        router.push("/hub")
       }
     },
-  });
+  })
 
-  const handlePassword = () => {
-    setIsShowPassword(!isShowPassword);
-  };
+  useEffect(() => {
+    if (verifyToken) {
+      mutate({ verifyToken })
+    } else {
+      toast.error("Invalid verification link")
+      throw Error("No User")
+    }
+  }, [verifyToken, mutate, router])
 
-  const handleConfirmPass = () => {
-    setIsShowConfirmPass(!isShowConfirmPass);
-  };
+  if (!verifyToken) {
+    return null
+  }
 
   return (
-    <div
-      className="h-screen w-screen flex justify-center items-center bg-contain bg-no-repeat"
-      style={{
-        //backgroundImage: `url(${bgImg})`,
-        backgroundSize: "100% 100%",
-      }}
-    >
-      <div className="w-[35%] p-4 backdrop-blur-lg flex flex-col px-3 rounded-3xl border-2 border-solid border-white ">
-        <div className="flex justify-center items-center ">
-          <img src={"../../../public/airhub-logo.png"} alt="hippo icon" className="h-32 w-32 " />
-        </div>
-        <h2 className="text-[#1B2559] font-bold text-3xl pb-4 text-center font-PlusJakartaSans">
-          Set Your Password
-        </h2>
-        <form onSubmit={form.handleSubmit}>
-          <div className="w-full p-2">
-            <div className="flex w-full flex-col">
-              <Input
-                labelText="Password"
-                name="password"
-                type={isShowPassword ? "" : "password"}
-                formik={form}
-                placeholder="Atleast 8 Characters"
-                labelClass="text-[#1D275B] text-base font-PlusJakartaSans select-none"
-                icon={
-                  isShowPassword ? (
-                    <IoEyeOutline
-                      color=""
-                      className="w-8 h-8 font-Arimo cursor-pointer"
-                      onClick={handlePassword}
-                    />
-                  ) : (
-                    <FaRegEyeSlash
-                      color=""
-                      className="w-8 h-8 font-Arimo cursor-pointer"
-                      onClick={handlePassword}
-                    />
-                  )
-                }
-              />
-              <Input
-                labelText="Confirm Password"
-                name="confirm_password"
-                type={isShowConfirmPass ? "" : "password"}
-                formik={form}
-                icon={
-                  isShowConfirmPass ? (
-                    <IoEyeOutline
-                      color=""
-                      className="w-8 h-8 font-Arimo cursor-pointer"
-                      onClick={handleConfirmPass}
-                    />
-                  ) : (
-                    <FaRegEyeSlash
-                      color=""
-                      className="w-8 h-8 font-Arimo cursor-pointer"
-                      onClick={handleConfirmPass}
-                    />
-                  )
-                }
-                placeholder="Confirm Password"
-                labelClass="text-[#1D275B] text-base font-PlusJakartaSans select-none"
-              />
-            </div>
-            <Button
-              className="bg-[#1B2559] w-full hover:bg-[#1B2559] rounded-xl mt-2 cursor-pointer font-PlusJakartaSans text-lg select-none "
-              type="submit"
-            >
-              Verify
-            </Button>
+    <div className="min-h-screen flex justify-center items-center bg-gray-100">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <div className="flex justify-center items-center mb-6">
+            <Image src="/airhub-logo.png" alt="AirHub logo" width={128} height={128} />
           </div>
-        </form>
-      </div>
+          <CardTitle className="text-2xl font-bold text-center">Email Verification</CardTitle>
+          <CardDescription className="text-center">We're verifying your email address...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading && (
+            <div className="text-center">
+              <p>Please wait while we verify your email...</p>
+            </div>
+          )}
+          {isError && (
+            <div className="text-center text-red-500">
+              <p>An error occurred during verification. Please try again.</p>
+              <Button onClick={() => mutate({ verifyToken: verifyToken! })} className="mt-4">
+                Retry Verification
+              </Button>
+            </div>
+          )}
+          {isSuccess && (
+            <div className="text-center text-green-500">
+              <p>Your email has been successfully verified!</p>
+              <Button onClick={() => router.push("/login")} className="mt-4">
+                Proceed to Login
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
-  );
-};
+  )
+}
 
-export default VerifyPage;
+export default VerifyPage
+

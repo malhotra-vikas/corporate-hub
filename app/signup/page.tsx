@@ -254,21 +254,8 @@ export default function SignUp() {
             return
         }
         try {
-            await signUp(email, password, companyName, companyTicker, companyDetails)
-            toast.success("Account created successfully!")
-/*
-            const companyFilings = await fetchCompanyPastDocuments(companyTicker)
-
-            // Send 10K docs
-            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past10KDocuments)
-
-            // Send 10Q docs
-            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past10QDocuments)
-            // Send 8K docs
-            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past8KDocuments)
-            // Send S1 docs
-            await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.pastS1Documents)
-*/            
+            await signUp(email.toLowerCase(), password, companyName, companyTicker, companyDetails)
+            toast.success("Account created successfully!")          
             
             router.push("/hub")
         } catch (error) {

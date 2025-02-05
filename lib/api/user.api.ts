@@ -51,8 +51,8 @@ export default class UserApi extends BaseApi {
     return data;
   }
 
-  async verifyUser(payload: { userId: string; password: string }) {
-    const data = await UserApi.post(`${this.baseUrl}update-user`, payload);
+  async verifyUser(payload: { userId: string }) {
+    const data = await UserApi.post(`${this.baseUrl}verify`, payload);
     return data;
   }
   async getAllClient() {

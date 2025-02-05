@@ -20,6 +20,7 @@ import { toast } from "react-toastify"
 import { getFiles } from "@/lib/api/vault"
 import { VaultFile } from "@/lib/types"
 import { File } from "buffer"
+import router from "next/router"
 
 export default function VaultPage() {
   const [files, setFiles] = useState<VaultFile[]>([]);
@@ -31,13 +32,13 @@ export default function VaultPage() {
   const { user, loading, signIn } = useAuth()
   
   console.log("in VaultPage user os ", user)
-
+  
   const userApi = new UserApi()
 
   useEffect(() => {
     if (user) {
       loadFiles()
-    }
+    } 
   }, [])
 
   const vaultApi = new VaultApi();

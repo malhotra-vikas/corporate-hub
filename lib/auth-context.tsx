@@ -61,8 +61,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (firebaseUser) {
                 const token = await firebaseUser.getIdToken()
                 const userApi = new UserApi()
-                const userData = await userApi.getClientByEmail(firebaseUser.email || "")
                 console.log("User Email  is ", firebaseUser.email)
+                console.log("User ID  is ", firebaseUser.uid)
+
+                const userData = await userApi.getClientByEmail(firebaseUser.email || "")
 
                 console.log("My User Data is ", userData)
 
@@ -98,13 +100,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const signIn = async (email: string, password: string) => {
         try {
             console.log("In Auth ", email)
-            const userCredential = await signInWithEmailAndPassword(auth, email, password)
+            const userCredential = await signInWithEmailAndPassword(auth, email.toLowerCase(), password)
             const firebaseUser = userCredential.user
 
             const userApi = new UserApi()
             const vaultApi = new VaultApi()
 
-            const loginResponse = await userApi.login({ username: email, password })
+            const loginResponse = await userApi.login({ username: email.toLowerCase(), password })
             console.log("Logged is user ", loginResponse)
             console.log("Logged is user ticker ", loginResponse.data.user_info.companyTicker)
             console.log("Logged is user exchange ", loginResponse.data.user_info.companyExchange)
@@ -164,9 +166,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             email = email.toLowerCase()
 
+            // Create a FireBase User
             const userCredential = await createUserWithEmailAndPassword(auth, email, password)
             const firebaseUser = userCredential.user
 
+            // Now create a User in the DB too
             const userApi = new UserApi()
             const createUserResponse = await userApi.createUser({
                 email,

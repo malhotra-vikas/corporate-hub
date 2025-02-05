@@ -25,7 +25,7 @@ export default function SignIn() {
         e.preventDefault()
         try {
             console.log("!1111111111")
-            await signInWithEmailAndPassword(auth, email, password)
+            await signInWithEmailAndPassword(auth, email.toLowerCase(), password)
 
             const user = await userApi.getClientByEmail(email.toLowerCase())
             console.log("user is ", user)

@@ -7,6 +7,8 @@ import { AuthProvider } from "@/lib/auth-context"
 import { UIProvider } from "@/lib/ui-context"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import Providers from "./providers"
+import type React from "react" // Added import for React
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,17 +32,19 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
-        <AuthProvider>
-          <UIProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-              <div className="relative flex min-h-screen flex-col">
-                <MainNav />
-                <div className="flex-1">{children}</div>
-              </div>
-            </ThemeProvider>
-          </UIProvider>
-        </AuthProvider>
-        <ToastContainer position="top-right" autoClose={5000} />
+        <Providers>
+          <AuthProvider>
+            <UIProvider>
+              <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                  <div className="relative flex min-h-screen flex-col">
+                    <MainNav />
+                    <div className="flex-1">{children}</div>
+                  </div>                  
+              </ThemeProvider>
+            </UIProvider>
+          </AuthProvider>
+          <ToastContainer position="top-right" autoClose={5000} />
+        </Providers>
       </body>
     </html>
   )

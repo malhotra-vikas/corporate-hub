@@ -20,12 +20,7 @@ import axios from 'axios';
 const EXCHANGE_OTC = "OTCMKTS"
 const EXCHANGE_NASDAQ = "NASDAQ"
 const EXCHANGE_NYSE = "NYSE"
-
-const DOCUMENT_8_K = "8-K"
-const DOCUMENT_10_Q = "10-Q"
-const DOCUMENT_10_K = "10-K"
-const DOCUMENT_S1 = "S1"
-
+const EXCHANGE_NYSE_AMERICAN = "NYSEAMERICAN"
 
 interface CompanyDetails {
     name: string
@@ -35,7 +30,6 @@ interface CompanyDetails {
     exchange: string
 }
 
-
 export default function SignUp() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -44,11 +38,8 @@ export default function SignUp() {
     const [companyName, setCompanyName] = useState("")
     let [companyCEOName, setCompanyCEOName] = useState("")
     let [companyFounded, setCompanyFounded] = useState("")
-
-    let [past8KDocuments, setPast8KDocuments] = useState("")
-    let [past10KDocuments, setPast10KDocuments] = useState("")
-    let [past10QDocuments, setPast10QDocuments] = useState("")
-    let [pastS1Documents, setPastS1Documents] = useState("")
+    const [retryCount, setRetryCount] = useState(0); // Track the number of retries
+    const maxRetries = 3; // Max number of retries
 
     const [companyDetails, setCompanyDetails] = useState<CompanyDetails | null>(null)
 
@@ -210,11 +201,15 @@ export default function SignUp() {
                 } else {
                     setCompanyDetails(null)
                     setError("No company found for the provided ticker")
+                    setRetryCount(prev => prev + 1); // Increment retry count on failure
+
                     toast.error(`Company with ticker ${ticker} not found in any of the exchanges ${EXCHANGE_NASDAQ}, ${EXCHANGE_NYSE} or ${EXCHANGE_OTC}.`);
                 }
             } catch (error) {
                 console.error("Error fetching company details:", error)
                 setCompanyDetails(null)
+                setRetryCount(prev => prev + 1); // Increment retry count on failure
+
                 setError("Error fetching company details. Please try again.")
                 toast.error("Error fetching company details. Please try again.")
             } finally {
@@ -231,12 +226,14 @@ export default function SignUp() {
     useEffect(() => {
         const timer = setTimeout(() => {
             if (debouncedCompanyTicker.length >= 2 && debouncedCompanyTicker !== companyDetails?.companyTicker) {
-                fetchCompanyDetails(debouncedCompanyTicker)
+                if (retryCount < maxRetries) {
+                    fetchCompanyDetails(debouncedCompanyTicker)
+                }
             }
         }, 750)
 
         return () => clearTimeout(timer)
-    }, [debouncedCompanyTicker, fetchCompanyDetails, companyDetails])
+    }, [debouncedCompanyTicker, fetchCompanyDetails, companyDetails, retryCount])
 
     /*
     useEffect(() => {

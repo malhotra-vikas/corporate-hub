@@ -83,6 +83,14 @@ export default class HubApi extends BaseApi {
             const currentTime = new Date();
             let timeValue: number;
 
+            if (relativeTime.includes("month")) {
+                timeValue = parseInt(relativeTime.split(" ")[0]);
+                return new Date(currentTime.setDate(currentTime.getDate() - timeValue * 30)); // 30 days in a month
+            }
+            if (relativeTime.includes("week")) {
+                timeValue = parseInt(relativeTime.split(" ")[0]);
+                return new Date(currentTime.setDate(currentTime.getDate() - timeValue * 7)); // 7 days in a week
+            }
             if (relativeTime.includes("day")) {
                 timeValue = parseInt(relativeTime.split(" ")[0]);
                 return new Date(currentTime.setDate(currentTime.getDate() - timeValue));

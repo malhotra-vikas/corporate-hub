@@ -46,10 +46,6 @@ export function UserNav() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => router.push("/dashboard")}>
-                        Dashboard
-                        <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => router.push("/dashboard/profile")}>
                         Profile
                         <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>

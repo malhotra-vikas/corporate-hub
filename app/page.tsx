@@ -24,7 +24,7 @@ export default function HomePage() {
             tools.
           </p>
           <div className="space-x-4">
-            <Link href="/dashboard">
+            <Link href="/hub">
               <Button size="lg" className="bg-[#cdf683] text-black hover:bg-[#b8e15e]">
                 Get Started
               </Button>
@@ -120,7 +120,7 @@ export default function HomePage() {
           <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
             Join thousands of companies already using AiirHub
           </p>
-          <Link href="/dashboard">
+          <Link href="/hub">
             <Button size="lg" className="mt-4 bg-[#cdf683] text-black hover:bg-[#b8e15e]">
               Start Free Trial
             </Button>

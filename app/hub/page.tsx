@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { HubData } from "@/lib/types"
+import { EarningsEvent, HubData } from "@/lib/types"
 import { CreateUserDto } from "@/dto/createUser.dto"
 import {
     Tabs,
@@ -20,6 +20,7 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion"
 
 async function fetchHubData(companyTicker: string, companyExchange: string, companyUser: any): Promise<HubData> {
     const hubApi = new HubApi()
@@ -177,14 +178,63 @@ export default function HubPage() {
 
     const isVerified = user?.is_verified || false
 
+
+    interface EarningsHubProps {
+        earningsCalendar: EarningsEvent[]
+    }
+
+    const groupedEarnings = hubData.earningsCalendar.reduce(
+        (acc, event) => {
+            if (!acc[event.symbol]) {
+                acc[event.symbol] = []
+            }
+            acc[event.symbol].push(event)
+            console.log("Reduced ", acc)
+            return acc
+        },
+        {} as Record<string, EarningsEvent[]>,
+    )
+
+    function formatDate(dateStr: string) {
+        const date = new Date(dateStr)
+        const month = date.toLocaleString("default", { month: "short" }).toUpperCase()
+        const day = date.getDate()
+        // Get the year as a 2-digit string (e.g., 21 for 2021)
+        const year = date.getFullYear().toString().slice(-2); // Gets last 2 digits of the year
+
+        return {
+            month,
+            day: day.toString(),
+            year
+        }
+    }
+
+    function formatEps(eps: string) {
+        if (!eps) return "-";
+        const epsNumber = parseFloat(eps)
+        if (isNaN(epsNumber)) return "-";  // Return "-" if it's not a valid number
+
+        return epsNumber
+    }
+
+    function formatRevenue(revenue: string) {
+        if (!revenue) return "-";
+        const revenueNumber = parseFloat(revenue)
+        if (isNaN(revenueNumber)) return "-";  // Return "-" if it's not a valid number
+
+        const revenueInMillions = revenueNumber / 1000000;  // Convert revenue to millions
+        return revenueInMillions.toFixed(2) + "M";  // Round to 2 decimal places and append "M"
+    }
+    
+
     return (
         <div className={`container mx-auto p-6 space-y-6`}>
             {!isVerified && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 pointer-events-auto">
-                <div className="bg-white p-6 rounded-lg shadow-lg">
-                    <h2 className="text-xl font-bold mb-4">Account Not Verified</h2>
-                    <p>Your account is not verified. Please check your email for instructions or Aiirhub contact support to gain full access.</p>
-                </div>
+                    <div className="bg-white p-6 rounded-lg shadow-lg">
+                        <h2 className="text-xl font-bold mb-4">Account Not Verified</h2>
+                        <p>Your account is not verified. Please check your email for instructions or Aiirhub contact support to gain full access.</p>
+                    </div>
                 </div>
             )}
 
@@ -275,6 +325,75 @@ export default function HubPage() {
                         <CardTitle>Earnings Hub</CardTitle>
                     </CardHeader>
                     <CardContent>
+                        <div className="text-sm text-muted-foreground mb-4">Based on your Peer stocks</div>
+                        <Accordion type="single" collapsible className="w-full">
+                            {Object.entries(groupedEarnings).map(([symbol, events], index) => (
+                                <AccordionItem key={index} value={`item-${index}`}>
+                                    <AccordionTrigger className="hover:no-underline">
+                                        <div className="flex justify-between w-full">
+                                            <span className="font-medium">{symbol}</span>
+                                            <span className="text-sm text-muted-foreground">{events.length} date(s)</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        <div className="space-y-4 pt-2">
+                                            {events.map((event, eventIndex) => {
+                                                const { month, day, year } = formatDate(event.fiscalDateEnding);
+                                                return (
+                                                    <div key={eventIndex} className="flex items-center justify-between space-x-6 p-2 border-b">
+                                                        {/* Left Column: Date */}
+                                                        <div className="flex flex-col items-center text-blue-600 w-16 text-sm">
+                                                            <div>{month}-{day}-{year}</div>
+                                                        </div>
+
+                                                        {/* Right Column: Event Data */}
+                                                        <div className="flex flex-wrap gap-4 text-sm">
+                                                            {/* EPS Estimated */}
+                                                            <div className="flex flex-col items-start text-muted-foreground">
+                                                                <span className="font-semibold">EPS Est.</span>
+                                                                <span>{formatEps(event.epsEstimated)}</span>
+                                                            </div>
+
+                                                            {/* EPS */}
+                                                            <div className="flex flex-col items-start text-muted-foreground">
+                                                                <span className="font-semibold">EPS</span>
+                                                                <span>{formatEps(event.eps)}</span>
+                                                            </div>
+
+                                                            {/* Revenue Estimated */}
+                                                            <div className="flex flex-col items-start text-muted-foreground">
+                                                                <span className="font-semibold">Rev Est.</span>
+                                                                <span>{formatRevenue(event.revenueEstimated)}</span>
+                                                            </div>
+
+                                                            {/* Revenue */}
+                                                            <div className="flex flex-col items-start text-muted-foreground">
+                                                                <span className="font-semibold">Revenue</span>
+                                                                <span>{formatRevenue(event.revenue)}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Calendar Icon */}
+                                                        <div>
+                                                            <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
+                    </CardContent>
+                </Card>
+
+                {/*
+                <Card className="border-primary border">
+                    <CardHeader>
+                        <CardTitle>Earnings Hub</CardTitle>
+                    </CardHeader>
+                    <CardContent>
                         <div className="text-sm text-gray-500 mb-4">Based on popular stocks</div>
                         <div className="space-y-4">
                             {hubData.earningsCalendar.map((event, index) => (
@@ -296,6 +415,7 @@ export default function HubPage() {
                         </div>
                     </CardContent>
                 </Card>
+                */}
 
                 {/* News Hub Section */}
                 <Card className="md:col-span-2 border-primary border">

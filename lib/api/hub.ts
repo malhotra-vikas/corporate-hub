@@ -5,6 +5,7 @@ import SerpApi from "./serp.api";
 import { Company, Competitor, HubData } from "../types";
 import moment from 'moment';
 import { compareAsc } from "date-fns";
+import EarningsApi from "./earnings.api";
 
 
 export default class HubApi extends BaseApi {
@@ -159,6 +160,8 @@ export default class HubApi extends BaseApi {
     async getCompanyHubDetails(companyTicker: string, exchange: string, companyUser: any) : Promise<HubData> {
 
         const serpApi = new SerpApi()
+        const earningsApi = new EarningsApi()
+
         const companyDetails = await serpApi.getCompanyDataViaFinancialModeling(companyTicker)
 
         console.log("companyDetails ", companyDetails.data)
@@ -177,19 +180,14 @@ export default class HubApi extends BaseApi {
 
         // Build competitors from the given data
         const newss = await this.buildNews(news.data);
-        console.log('Transformed News:', news);
+        //console.log('Transformed News:', news);
+
+        const earnings = await earningsApi.getEarningsForInterestsTickers(interestTickers)
 
         const hubData = {
             company: companyDetails.data,
             competitors: competitors.data,
-            earningsCalendar: [
-                { date: "JAN 21", company: "Netflix", time: "Jan 21, 2025, 4:00 PM" },
-                { date: "JAN 22", company: "Johnson & Johnson", time: "Jan 22, 2025, 6:45 AM" },
-                { date: "JAN 22", company: "Procter & Gamble", time: "Jan 22, 2025" },
-                { date: "JAN 22", company: "GE Vernova", time: "Jan 22, 2025, 9:30 AM" },
-                { date: "JAN 23", company: "Intuitive", time: "Jan 23, 2025" },
-                { date: "JAN 23", company: "Texas Instruments", time: "Jan 23, 2025" },
-            ],
+            earningsCalendar: earnings.data,
             companyNews: newss.companyNews,
             trendingNews: newss.trendingNews,
         }

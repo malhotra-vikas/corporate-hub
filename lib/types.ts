@@ -54,9 +54,15 @@ export interface Competitor {
 }
 
 export interface EarningsEvent {
+  symbol: any
   date: string
-  company: string
   time: string
+
+  eps: string
+  epsEstimated: string
+  revenue: string
+  revenueEstimated: string
+  fiscalDateEnding: string
 }
 
 export interface NewsItem {

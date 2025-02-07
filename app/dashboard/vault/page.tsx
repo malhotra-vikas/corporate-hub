@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import { useAuth } from "@/lib/auth-context"
 import VaultApi from "@/lib/api/vault.api"
 import UserApi from "@/lib/api/user.api"
@@ -11,81 +11,96 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { FileTextIcon, ImageIcon, PresentationIcon, Trash2Icon, ArrowUpDown } from "lucide-react"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { SearchBar } from "@/components/search-bar"
 import { Pagination } from "@/components/ui/pagination"
 import Link from "next/link"
 import { toast } from "react-toastify"
-import { getFiles } from "@/lib/api/vault"
-import { VaultFile } from "@/lib/types"
-import { File } from "buffer"
-import router from "next/router"
+import type { VaultFile } from "@/lib/types"
+import type { File } from "buffer"
 
 export default function VaultPage() {
-  const [files, setFiles] = useState<VaultFile[]>([]);
+  const [files, setFiles] = useState<VaultFile[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [sort, setSort] = useState("uploadDate")
   const [order, setOrder] = useState("desc")
-  const { user, loading, signIn } = useAuth()
+  const { user, loading } = useAuth()
   const [companyName, setCompanyName] = useState("")
 
-  console.log("in VaultPage user os ", user)
-
   const userApi = new UserApi()
+  const vaultApi = new VaultApi()
 
   useEffect(() => {
     if (user) {
       loadFiles()
     }
+  }, [user])
+
+  const filteredFiles = useMemo(() => {
+    console.log("Filtering files with search:", search)
+    const filtered = files.filter(
+      (file) =>
+        (file.originalName && file.originalName.toLowerCase().includes(search.toLowerCase())) ||
+        (file.docType && file.docType.toLowerCase().includes(search.toLowerCase())) ||
+        (file.mimetype && file.mimetype.toLowerCase().includes(search.toLowerCase())) ||
+        (file.uploadedDate && file.uploadedDate.toLowerCase().includes(search.toLowerCase()))
+      )
+    console.log("Filtered files count:", filtered.length)
+    return filtered
+  }, [files, search])
+
+  const paginatedFiles = useMemo(() => {
+    return filteredFiles.slice((page - 1) * 10, page * 10)
+  }, [filteredFiles, page])
+
+  const totalPages = Math.ceil(filteredFiles.length / 10)
+
+  useEffect(() => {
+    console.log("Search state changed:", search)
+    setPage(1) // Reset to first page when search changes
+  }, [search])
+
+  const handleSearchChange = useCallback((value: string) => {
+    console.log("Search input changed:", value)
+    setSearch(value)
   }, [])
 
-  const vaultApi = new VaultApi();
+  useEffect(() => {
+    console.log("Files loaded:", files.length)
+  }, [files])
 
   const deleteFile = async (fileId: string) => {
-    const response = await vaultApi.deleteFile({ fileId: fileId });
-
-    return response;
+    const response = await vaultApi.deleteFile({ fileId: fileId })
+    return response
   }
 
   const uploadFile = async (userId: string, file: File, category: string) => {
-
-    console.log("In upload")
-    const formData = new FormData();
-    formData.append("originalName", file.name);
+    const formData = new FormData()
+    formData.append("originalName", file.name)
     formData.append("serverFileName", file.name)
-    formData.append("files", file as Blob);
-    formData.append("category", category);
-    formData.append("user_id", userId);
+    formData.append("files", file as Blob)
+    formData.append("category", category)
+    formData.append("user_id", userId)
 
-    let filesTag: any = [];
-    let tempObj = {
+    const filesTag: any = []
+    const tempObj = {
       [file.name]: {
         docType: category,
         useFull: "Both",
       },
-    };
-    filesTag?.push(tempObj);
-
-    formData.append("tags", JSON.stringify(filesTag));
-
-    // Log form data manually to inspect it (FormData cannot be logged directly)
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
     }
+    filesTag?.push(tempObj)
+
+    formData.append("tags", JSON.stringify(filesTag))
 
     try {
       const response = await vaultApi.uploadDocuments(formData)
-      return response;
+      return response
     } catch (error) {
-      console.error("Error Response:", error.response.data);
-
-      throw error;  // rethrow the error after logging for further handling if necessary
-
+      console.error("Error Response:", error.response.data)
+      throw error
     }
-
   }
 
   const loadFiles = async () => {
@@ -94,29 +109,15 @@ export default function VaultPage() {
     setIsLoading(true)
     try {
       const companyUser = await userApi.getClientByEmail(user?.email || "")
-      console.log("companyUser is ", companyUser)
-
       const vaultFilesResponse = await vaultApi.getSpecificFiles({ user_id: companyUser._id })
 
-
-      let files
-
-      if (vaultFilesResponse && vaultFilesResponse.data && vaultFilesResponse.data.length > 0) {
-        files = vaultFilesResponse.data
-      } else {
-        files = []
-      }
-
-      console.log("vaultFiles are  ", files)
-
-      //const { totalPages, currentPage, totalCount } = await getFiles(page, 10, search, sort, order)
+      const files = vaultFilesResponse?.data || []
+      console.log("Loaded files count:", files.length)
 
       setFiles(files)
 
       const companyName = companyUser?.companyName || ""
       setCompanyName(companyName)
-
-      // Update pagination state here if needed
     } catch (error) {
       toast.error("Failed to load files")
     } finally {
@@ -131,16 +132,12 @@ export default function VaultPage() {
     const file = formData.get("file") as unknown as File
     const category = formData.get("category") as string
 
-    console.log("File is ", file)
-    console.log("File Category is ", category)
-
     try {
-
-      await uploadFile(user._id || '', file, category)
+      await uploadFile(user._id || "", file, category)
       toast.success("File uploaded successfully")
       loadFiles()
     } catch (error) {
-      console.log("Err ror is ", error)
+      console.log("Error is ", error)
       toast.error("Failed to upload file")
     }
   }
@@ -151,8 +148,7 @@ export default function VaultPage() {
     const formData = new FormData(event.currentTarget)
     const fileIds = formData.getAll("fileIds") as string[]
     try {
-      await Promise.all(fileIds.map((id) => deleteFile(id))); // `deleteFile` expects a string (fileId)
-
+      await Promise.all(fileIds.map((id) => deleteFile(id)))
       toast.success("Files deleted successfully")
       loadFiles()
     } catch (error) {
@@ -168,8 +164,6 @@ export default function VaultPage() {
       setOrder("asc")
     }
   }
-
-  const totalPages = Math.ceil(files.length / 10)
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -203,7 +197,7 @@ export default function VaultPage() {
                 </Select>
                 <Button type="submit">Upload</Button>
               </div>
-              <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search files..." />
+              <SearchBar value={search} onChange={handleSearchChange} placeholder="Search files..." />
             </div>
           </form>
           <Table>
@@ -237,7 +231,7 @@ export default function VaultPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {files.map((file) => (
+              {paginatedFiles.map((file) => (
                 <TableRow key={file._id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center">
@@ -246,31 +240,35 @@ export default function VaultPage() {
                       {file.type === "presentation" && <PresentationIcon className="mr-2 h-4 w-4" />}
                       <a
                         href={file.filePath}
-                        target={file.filePath.match(/^https?:\/\/(v1\.aiirbrain\.com|aiirbrain\.com|aiirhub\.com|v1\.aiirhub\.com|localhost)/) ? "_self" : "_blank"}
+                        target={
+                          file.filePath.match(
+                            /^https?:\/\/(v1\.aiirbrain\.com|aiirbrain\.com|aiirhub\.com|v1\.aiirhub\.com|localhost)/,
+                          )
+                            ? "_self"
+                            : "_blank"
+                        }
                         rel="noopener noreferrer"
                         className="text-blue-500 hover:underline"
                         onClick={(e) => {
-                          // Check if the file path starts with any of the specified domains
-                          if (file.filePath.match(/^https?:\/\/(v1\.aiirbrain\.com|aiirbrain\.com|aiirhub\.com|v1\.aiirhub\.com|localhost)/)) {
-                            // Prevent default action (opening the link) and trigger download
-                            e.preventDefault();
-                            window.location.href = file.filePath;  // This will trigger the download
+                          if (
+                            file.filePath.match(
+                              /^https?:\/\/(v1\.aiirbrain\.com|aiirbrain\.com|aiirhub\.com|v1\.aiirhub\.com|localhost)/,
+                            )
+                          ) {
+                            e.preventDefault()
+                            window.location.href = file.filePath
                           } else {
-                            // For external files, allow them to open in a new tab
-                            window.open(file.filePath, '_blank');
+                            window.open(file.filePath, "_blank")
                           }
                         }}
                       >
                         {file.originalName}
                       </a>
-
                     </div>
                   </TableCell>
                   <TableCell>{file.mimetype}</TableCell>
                   <TableCell>{file.docType}</TableCell>
-                  <TableCell>
-                    {file.uploadedDate ? new Date(file.uploadedDate).toLocaleDateString() : "N/A"}
-                  </TableCell>
+                  <TableCell>{file.uploadedDate ? new Date(file.uploadedDate).toLocaleDateString() : "N/A"}</TableCell>
                   <TableCell>
                     <form onSubmit={handleDeleteFiles}>
                       <input type="hidden" name="fileIds" value={file._id} />
@@ -283,7 +281,14 @@ export default function VaultPage() {
               ))}
             </TableBody>
           </Table>
-          <Pagination currentPage={page} totalPages={totalPages} onPageChange={(page) => setPage(page)} totalCount={files.length} />
+          <div className="mt-4">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={(page) => setPage(page)}
+              totalCount={filteredFiles.length}
+            />
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -297,7 +302,4 @@ function formatFileSize(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
 }
-
-
-
 

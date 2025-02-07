@@ -173,7 +173,6 @@ export default function VaultPage() {
     <div className="space-y-6">
       <header className="text-center mb-8">
         <h1 className="text-3xl font-bold text-blue-900">Welcome {companyName}</h1>
-        <p className="text-sm text-gray-500">Powered by AiirHub</p>
       </header>
       <Card>
         <CardHeader>

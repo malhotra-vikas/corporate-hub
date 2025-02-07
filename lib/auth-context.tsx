@@ -15,6 +15,10 @@ interface CompanyDetails {
     ceoName: string
     companyTicker: string
     exchange: string
+    industry: string
+    description: string
+    cik: string
+    logo: string
 }
 
 interface User {
@@ -180,6 +184,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 companyCEOName: companyDetails.ceoName,
                 foundedYear: companyDetails.foundedYear,
                 companyExchange: companyDetails.exchange,
+                companyIndustry: companyDetails.industry,
+                companyDescription: companyDetails.description,
+                companyCIK: companyDetails.cik,
+                companyLogo: companyDetails.logo,
                 role: "companyUser", // Default role for new users
             })
 

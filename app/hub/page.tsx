@@ -21,11 +21,12 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs"
 
-async function fetchHubData(companyTicker: string, companyExchange: string): Promise<HubData> {
+async function fetchHubData(companyTicker: string, companyExchange: string, companyUser: any): Promise<HubData> {
     const hubApi = new HubApi()
     try {
-        const hubDetails = await hubApi.getCompanyHubDetails(companyTicker, companyExchange)
+        const hubDetails = await hubApi.getCompanyHubDetails(companyTicker, companyExchange, companyUser)
         console.log("hubDetails is here as ", hubDetails)
+
         return hubDetails
     } catch (error) {
         console.error("Error fetching hub data:", error)
@@ -131,7 +132,7 @@ export default function HubPage() {
         }
 
         try {
-            const data = await fetchHubData(companyTicker, companyExchange)
+            const data = await fetchHubData(companyTicker, companyExchange, companyUser)
 
             if (!user?.email) {
                 throw "User not found"

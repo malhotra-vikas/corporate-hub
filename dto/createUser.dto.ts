@@ -25,6 +25,11 @@ export class CreateUserDto {
   companyInvestorRelationsCompanyName?: string;
   companyDescriptor?: string;
 
+  companyCIK?: string
+  companyDescription?: string
+  companyIndustry?: string
+  companyLogo?: string
+
   static yupSchema() {
     return yup.object({
       companyName: yup

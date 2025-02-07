@@ -2,12 +2,13 @@ import BaseApi from "./_baseApi";
 import { LoginDto } from "@/dto/login.dto";
 import { VerifyUserDto } from "@/dto/verifyUser.dto";
 import SerpApi from "./serp.api";
-import { Company, Competitor } from "../types";
+import { Company, Competitor, HubData } from "../types";
 import moment from 'moment';
 import { compareAsc } from "date-fns";
 
 
 export default class HubApi extends BaseApi {
+
     baseUrl: string = "serp/";
     getUniqueFieldValues: any;
     constructor() {
@@ -39,43 +40,23 @@ export default class HubApi extends BaseApi {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }  
   
-    async buildNews(newsData: any, companyName: string) {
+    async buildNews(newsData: any) {
         console.log("newsData is ", newsData);
 
         let companyNews: { source: any; time: any; link: any; title: any; image: any; }[] = [];
         let trendingNews: { source: any; time: any; link: any; title: any; image: any; }[] = [];
     
-        const normalizedCompanyName = companyName.toLowerCase();
-        // Create a regex that matches the company name as a whole word (case-insensitive)
-        const companyRegex = new RegExp(`\\b${this.escapeRegExp(normalizedCompanyName)}\\b`, 'i');
-
         // Example logic for separating into categories (can be customized as needed)
         newsData.forEach(news => {
-            if (news.items && Array.isArray(news.items)) {  // Ensure items exists and is an array
-                news.items.forEach(item => {
-                    const newsItem = {
-                        source: item.source,
-                        time: item.date,
-                        title: item.snippet,
-                        link: item.link,
-                        image: item.thumbnail || 'default-image-url.png', // Fallback for images
-                    };
-
-                    if (item.snippet) {
-
-                        const normalizedSnippet = item.snippet.toLowerCase()
-
-                        // Use regex to test for the company name as a whole word
-                        if (companyRegex.test(normalizedSnippet)) {
-                            companyNews.push(newsItem);
-                        } else {
-                            trendingNews.push(newsItem);
-                        }
-                      }
-                });
-            } else {
-                console.warn('No items found in news data', news); // Log warning if no items
-            }
+            const newsItem = {
+                source: news.site,
+                time: news.publishedDate,
+                title: news.title,
+                text: news.text,
+                link: news.url,
+                image: news.image || 'default-image-url.png', // Fallback for images
+            };
+            companyNews.push(newsItem);
         });
 
         // Function to parse relative time like "1 day ago", "4 hours ago"
@@ -121,10 +102,13 @@ export default class HubApi extends BaseApi {
         companyNews.sort(sortByDate);
         trendingNews.sort(sortByDate);
 
+        const sortedCompanyNews = companyNews.sort((a, b) => new Date(b.time) - new Date(a.time));
+        const sortedTrendingNews = trendingNews.sort((a, b) => new Date(b.time) - new Date(a.time));
+
         // Combine them into an object to return both categories
         return {
-            companyNews: companyNews,
-            trendingNews: trendingNews
+            companyNews: sortedCompanyNews,
+            trendingNews: sortedTrendingNews
         };
 
     }
@@ -170,29 +154,34 @@ export default class HubApi extends BaseApi {
         return competitors;
     }
 
-    async getCompanyHubDetails(companyTicker: string, exchange: string) {
 
-        const queryString = `ticker=${companyTicker}&exchange=${exchange}`;
 
-        const companyDetails = await SerpApi.get(
-            `${this.baseUrl}getAllCompanyDataForTicker?${queryString}`,
-        );
+    async getCompanyHubDetails(companyTicker: string, exchange: string, companyUser: any) : Promise<HubData> {
 
-        console.log("In Hub companyDetails ", companyDetails)
+        const serpApi = new SerpApi()
+        const companyDetails = await serpApi.getCompanyDataViaFinancialModeling(companyTicker)
 
+        console.log("companyDetails ", companyDetails.data)
+
+        const interestTickers = companyUser.interestTickers
+
+        const competitors = await serpApi.getCompanyCompetitorDataViaFinancialModeling(interestTickers)
+
+        console.log("competitors are ", competitors.data);
+
+        const news = await serpApi.getCompanyCompetitorNewsViaFinancialModeling(interestTickers)
+
+        console.log("news are ", news.data);
+
+        const trendingNews = null
 
         // Build competitors from the given data
-        const competitors = await this.buildCompetitorsFromSearchedList([companyDetails.data.companyDiscoverMore[0].items]);
-
-        console.log("competitors are ", competitors);
-
-        // Build competitors from the given data
-        const news = await this.buildNews(companyDetails.data.newsResults, companyDetails.data.companySummary.title);
+        const newss = await this.buildNews(news.data);
         console.log('Transformed News:', news);
 
         const hubData = {
-            company: companyDetails.data.companySummary,
-            competitors: competitors,
+            company: companyDetails.data,
+            competitors: competitors.data,
             earningsCalendar: [
                 { date: "JAN 21", company: "Netflix", time: "Jan 21, 2025, 4:00 PM" },
                 { date: "JAN 22", company: "Johnson & Johnson", time: "Jan 22, 2025, 6:45 AM" },
@@ -201,8 +190,8 @@ export default class HubApi extends BaseApi {
                 { date: "JAN 23", company: "Intuitive", time: "Jan 23, 2025" },
                 { date: "JAN 23", company: "Texas Instruments", time: "Jan 23, 2025" },
             ],
-            companyNews: news.companyNews,
-            trendingNews: news.trendingNews,
+            companyNews: newss.companyNews,
+            trendingNews: newss.trendingNews,
         }
 
         return hubData;

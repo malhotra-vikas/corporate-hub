@@ -28,6 +28,10 @@ interface CompanyDetails {
     ceoName: string
     companyTicker: string
     exchange: string
+    industry: string
+    description: string
+    cik: string
+    logo: string
 }
 
 export default function SignUp() {
@@ -36,6 +40,8 @@ export default function SignUp() {
     const [companyTicker, setCompanyTicker] = useState("")
     const [companyExchange, setCompanyExchange] = useState("")
     const [companyName, setCompanyName] = useState("")
+    const [companyLogo, setCompanyLogo] = useState("")
+
     let [companyCEOName, setCompanyCEOName] = useState("")
     let [companyFounded, setCompanyFounded] = useState("")
     const [retryCount, setRetryCount] = useState(0); // Track the number of retries
@@ -122,6 +128,12 @@ export default function SignUp() {
             try {
                 let serpCompanyDetails = null
 
+                const companyFMP = await serpApi.getCompanyDataViaFinancialModeling(ticker)
+
+                console.log("companyFMP is ", companyFMP)
+                console.log("companyFMP DATA is ", companyFMP.data)
+
+                /*
                 // Try fetching company details from EXCHANGE_OTC
                 serpCompanyDetails = await serpApi.getCompanyDetails({
                     companyTicker: ticker,
@@ -143,59 +155,30 @@ export default function SignUp() {
                         exchange: EXCHANGE_NYSE,
                     })
                 }
+                */
 
-                if (serpCompanyDetails && serpCompanyDetails.data && serpCompanyDetails.data.companySummary) {
+                if (companyFMP && companyFMP.data && companyFMP.data && companyFMP.data.length > 0) {
                     const exchangeFound =
-                        serpCompanyDetails.data.companySummary.exchange
+                    companyFMP.data[0].exchangeShortName
                     setCompanyExchange(exchangeFound)
 
+                    console.log("companyFMP.data[0].exchangeShortName ", companyFMP.data[0].exchangeShortName)
 
                     console.log(exchangeFound)
-                    console.log("companySummary : ", serpCompanyDetails.data.companySummary)
-                    console.log("companyKnowledgeGraph :", serpCompanyDetails.data.companyKnowledgeGraph)
-                    console.log("newsResults :", serpCompanyDetails.data.newsResults)
-                    console.log("companyFinancials :", serpCompanyDetails.data.companyFinancials)
-                    console.log("companyDiscoverMore :", serpCompanyDetails.data.companyDiscoverMore)
-                    console.log(serpCompanyDetails.data.companySummary.title)
 
-                    setCompanyName(serpCompanyDetails.data.companySummary.title)
+                    setCompanyName(companyFMP.data[0].companyName)
+                    setCompanyCEOName(companyFMP.data[0].ceo)
 
-                    const ceoInfo = serpCompanyDetails.data.companyKnowledgeGraph.about[0]?.info.find((item: { label: string }) => item.label === "CEO");
-                    console.log("ceoInfo ", ceoInfo)
-
-                    if (ceoInfo) {
-                        const nameParts = ceoInfo.value.trim().split(" "); // Split by space
-                        // If the first and second part are the same, remove the duplicate
-                        companyCEOName = nameParts[0] === nameParts[1] ? nameParts[0] : ceoInfo.value.trim();
-                    } else {
-                        companyCEOName = "CEO not found"
-                    }
-
-                    console.log("CEO Name: ", companyCEOName);
-
-                    setCompanyCEOName(companyCEOName)
-
-                    const foundedInfo = serpCompanyDetails.data.companyKnowledgeGraph.about[0]?.info.find((item: { label: string }) => item.label === "Founded");
-                    console.log("foundedInfo ", foundedInfo)
-
-                    if (foundedInfo) {
-                        companyFounded = foundedInfo.value.trim();
-                    } else {
-                        companyFounded = "Data not found"
-                    }
-                    setCompanyFounded(companyFounded)
-                    console.log("companyFounded: ", companyFounded);
 
                     setCompanyDetails({
-                        ...serpCompanyDetails.data.companySummary,
-                        ...serpCompanyDetails.data.companyKnowledgeGraph,
-                        ...serpCompanyDetails.data.newsResults,
-                        ...serpCompanyDetails.data.companyFinancials,
-                        ...serpCompanyDetails.data.companyDiscoverMore,
+                        ...companyFMP.data[0],
                         companyTicker: ticker,
                         ceoName: companyCEOName,
                         exchange: exchangeFound,
-                        foundedYear: companyFounded
+                        industry: companyFMP.data[0].industry,
+                        cik: companyFMP.data[0].cik,
+                        description: companyFMP.data[0].description,
+                        logo: companyFMP.data[0].image
                     })
 
                 } else {

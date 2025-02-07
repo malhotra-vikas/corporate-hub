@@ -19,4 +19,15 @@ export default class EarningsApi extends BaseApi {
     console.log("IN getEarningsForInterestsTickers interestTickers is ", interestTickers)
     return earnings;
   }
+
+  async addNewEarningsTicker(interestTicker: string) {
+    const queryString = `ticker=${interestTicker}`;
+
+    const earnings = await EarningsApi.get(
+      `${this.baseUrl}addNewEarningsTicker?${queryString}`,
+    );
+
+    console.log("IN addNewEarningsTicker new interestTicker is ", interestTicker)
+    return earnings;
+  }  
 }

@@ -49,7 +49,7 @@ export interface Competitor {
     name: string;
     price: number;
     change: number;
-    percentChange: number;
+    changesPercentage: number;
     link: string;
 }
 

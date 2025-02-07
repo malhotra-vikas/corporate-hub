@@ -21,6 +21,7 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion"
+import EarningsApi from "@/lib/api/earnings.api"
 
 async function fetchHubData(companyTicker: string, companyExchange: string, companyUser: any): Promise<HubData> {
     const hubApi = new HubApi()
@@ -58,6 +59,8 @@ export default function HubPage() {
     const [currentTickers, setCurrentTickers] = useState<string[]>([])
 
     const userApi = new UserApi()
+    const earningsApi = new EarningsApi()
+
     const hubApi = new HubApi()
 
     const handleAddTicker = async () => {
@@ -80,6 +83,9 @@ export default function HubPage() {
                 interestTickers: updatedTickers
             }
             await userApi.updateUserByEmail(updateUser)
+
+            earningsApi.addNewEarningsTicker(newTickerSymbol)
+
             setNewTickerSymbol("")
             setIsAddingTicker(false)
             toast.success(`Added ${newTickerSymbol} to competitors`)
@@ -189,7 +195,6 @@ export default function HubPage() {
                 acc[event.symbol] = []
             }
             acc[event.symbol].push(event)
-            console.log("Reduced ", acc)
             return acc
         },
         {} as Record<string, EarningsEvent[]>,
@@ -266,13 +271,13 @@ export default function HubPage() {
                                         <span className={`text-sm font-medium ${comp.change >= 0 ? "text-green-600" : "text-red-600"}`}>
                                             {comp.change >= 0 ? "+" : ""}${Math.abs(comp.change).toFixed(2)}
                                         </span>
-                                        <div className={`flex items-center ${comp.percentChange >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                            {comp.percentChange >= 0 ? (
+                                        <div className={`flex items-center ${comp.changesPercentage >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                            {comp.changesPercentage >= 0 ? (
                                                 <ArrowUpIcon className="h-4 w-4 mr-1" />
                                             ) : (
                                                 <ArrowDownIcon className="h-4 w-4 mr-1" />
                                             )}
-                                            <span className="text-sm font-medium">{Math.abs(comp.percentChange).toFixed(2)}%</span>
+                                            <span className="text-sm font-medium">{Math.abs(comp.changesPercentage).toFixed(2)}%</span>
                                         </div>
                                     </div>
                                     <Button
@@ -426,7 +431,7 @@ export default function HubPage() {
                         <Tabs defaultValue="company-news">
                             <TabsList>
                                 {/* Tabs for switching between Company News and Trending News */}
-                                <TabsTrigger value="company-news">Company News</TabsTrigger>
+                                <TabsTrigger value="company-news">Industry News</TabsTrigger>
                                 <TabsTrigger value="trending-news">Trending News</TabsTrigger>
                             </TabsList>
 

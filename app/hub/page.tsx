@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/auth-context"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CalendarIcon, ArrowUpIcon, ArrowDownIcon, Plus, X } from "lucide-react"
+import { CalendarIcon, ArrowUpIcon, ArrowDownIcon, Plus, X, TrendingUpIcon, TrendingDownIcon, ChevronRight } from "lucide-react"
 import { useEffect, useState } from "react"
 import HubApi from "@/lib/api/hub"
 import UserApi from "@/lib/api/user.api"
@@ -13,6 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { EarningsEvent, HubData } from "@/lib/types"
+import { ScrollArea } from "@/components/ui/scroll-area"
+
 import { CreateUserDto } from "@/dto/createUser.dto"
 import {
     Tabs,
@@ -22,6 +24,9 @@ import {
 } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion"
 import EarningsApi from "@/lib/api/earnings.api"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 
 async function fetchHubData(companyTicker: string, companyExchange: string, companyUser: any): Promise<HubData> {
     const hubApi = new HubApi()
@@ -230,7 +235,79 @@ export default function HubPage() {
         const revenueInMillions = revenueNumber / 1000000;  // Convert revenue to millions
         return revenueInMillions.toFixed(2) + "M";  // Round to 2 decimal places and append "M"
     }
-    
+
+    function EarningsEventCard({ event }: { event: EarningsEvent }) {
+        const { month, day, year } = formatDate(event.fiscalDateEnding)
+        const actualEps = formatEps(event.eps)
+        const estimatedEps = formatEps(event.epsEstimated)
+        const epsDifference = actualEps !== "-" && estimatedEps !== "-" ? Number(actualEps) - Number(estimatedEps) : null
+
+        return (
+            <div className="bg-card rounded-lg p-4 shadow-sm transition-all hover:shadow-md">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                        <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                        <span className="font-medium text-primary">
+                            {month} {day}, {year}
+                        </span>
+                    </div>
+                    {epsDifference !== null && (
+                        <Badge variant={epsDifference >= 0 ? "beat" : "missed"} className="flex items-center gap-1">
+                        {epsDifference >= 0 ? (
+                            <>
+                            <TrendingUpIcon className="w-3 h-3" />
+                            Beat
+                            </>
+                        ) : (
+                            <>
+                            <TrendingDownIcon className="w-3 h-3" />
+                            Missed
+                            </>
+                        )}
+                        </Badge>
+                    )}
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                    <EarningsMetric label="EPS" actual={actualEps} estimated={estimatedEps} />
+                    <EarningsMetric
+                        label="Revenue"
+                        actual={formatRevenue(event.revenue)}
+                        estimated={formatRevenue(event.revenueEstimated)}
+                    />
+                </div>
+            </div>
+        )
+    }
+
+    function EarningsMetric({ label, actual, estimated }: { label: string; actual: string; estimated: string }) {
+        return (
+            <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">{label}</p>
+                <div className="flex justify-between items-baseline">
+                    <span className="text-lg font-semibold">{actual}</span>
+                    <span className="text-sm text-muted-foreground">Est: {estimated}</span>
+                </div>
+            </div>
+        )
+    }
+
+    function EarningsHubSkeleton() {
+        return (
+            <div className="space-y-2">
+                {[...Array(5)].map((_, i) => (
+                    <div key={i} className="border rounded-lg p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <Skeleton className="h-5 w-20" />
+                                <Skeleton className="h-4 w-32" />
+                            </div>
+                            <Skeleton className="h-6 w-16" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )
+    }
 
     return (
         <div className={`container mx-auto p-6 space-y-6`}>
@@ -327,100 +404,57 @@ export default function HubPage() {
                 {/* Earnings Hub Section */}
                 <Card className="border-primary border">
                     <CardHeader>
-                        <CardTitle>Earnings Hub</CardTitle>
+                        <CardTitle className="flex items-center gap-2">
+                        <CalendarIcon className="h-5 w-5 text-primary" />
+                        Earnings Hub
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">Based on your Peer stocks</p>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-sm text-muted-foreground mb-4">Based on your Peer stocks</div>
-                        <Accordion type="single" collapsible className="w-full">
+                        <ScrollArea className="h-[600px] pr-4">
+                            <Accordion type="single" collapsible className="w-full space-y-2">
                             {Object.entries(groupedEarnings).map(([symbol, events], index) => (
-                                <AccordionItem key={index} value={`item-${index}`}>
-                                    <AccordionTrigger className="hover:no-underline">
-                                        <div className="flex justify-between w-full">
-                                            <span className="font-medium">{symbol}</span>
-                                            <span className="text-sm text-muted-foreground">{events.length} date(s)</span>
+                                <AccordionItem
+                                key={index}
+                                value={`item-${index}`}
+                                className="border rounded-lg overflow-hidden bg-card hover:bg-accent/50 transition-colors"
+                                >
+                                <AccordionTrigger className="hover:no-underline px-4 py-3 [&[data-state=open]>div>div>.chevron]:rotate-90">
+                                    <div className="flex items-center justify-between w-full">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex flex-col items-start">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold text-primary">{symbol}</span>
+                                            <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 chevron" />
                                         </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <div className="space-y-4 pt-2">
-                                            {events.map((event, eventIndex) => {
-                                                const { month, day, year } = formatDate(event.fiscalDateEnding);
-                                                return (
-                                                    <div key={eventIndex} className="flex items-center justify-between space-x-6 p-2 border-b">
-                                                        {/* Left Column: Date */}
-                                                        <div className="flex flex-col items-center text-blue-600 w-16 text-sm">
-                                                            <div>{month}-{day}-{year}</div>
-                                                        </div>
 
-                                                        {/* Right Column: Event Data */}
-                                                        <div className="flex flex-wrap gap-4 text-sm">
-                                                            {/* EPS Estimated */}
-                                                            <div className="flex flex-col items-start text-muted-foreground">
-                                                                <span className="font-semibold">EPS Est.</span>
-                                                                <span>{formatEps(event.epsEstimated)}</span>
-                                                            </div>
-
-                                                            {/* EPS */}
-                                                            <div className="flex flex-col items-start text-muted-foreground">
-                                                                <span className="font-semibold">EPS</span>
-                                                                <span>{formatEps(event.eps)}</span>
-                                                            </div>
-
-                                                            {/* Revenue Estimated */}
-                                                            <div className="flex flex-col items-start text-muted-foreground">
-                                                                <span className="font-semibold">Rev Est.</span>
-                                                                <span>{formatRevenue(event.revenueEstimated)}</span>
-                                                            </div>
-
-                                                            {/* Revenue */}
-                                                            <div className="flex flex-col items-start text-muted-foreground">
-                                                                <span className="font-semibold">Revenue</span>
-                                                                <span>{formatRevenue(event.revenue)}</span>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Calendar Icon */}
-                                                        <div>
-                                                            <CalendarIcon className="w-4 h-4 text-muted-foreground" />
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
-                    </CardContent>
-                </Card>
-
-                {/*
-                <Card className="border-primary border">
-                    <CardHeader>
-                        <CardTitle>Earnings Hub</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-sm text-gray-500 mb-4">Based on popular stocks</div>
-                        <div className="space-y-4">
-                            {hubData.earningsCalendar.map((event, index) => (
-                                <div key={index} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="text-blue-600 w-12">
-                                            {event.date.split(" ")[0]}
-                                            <br />
-                                            {event.date.split(" ")[1]}
-                                        </div>
-                                        <div>
-                                            <div className="font-medium">{event.company}</div>
-                                            <div className="text-sm text-gray-500">{event.time}</div>
                                         </div>
                                     </div>
-                                    <CalendarIcon className="w-5 h-5 text-gray-400" />
-                                </div>
+                                    <Badge
+                                        variant="secondary"
+                                        className={cn(
+                                        "ml-auto font-medium",
+                                        events.length > 5 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+                                        )}
+                                    >
+                                        {events.length} {events.length === 1 ? "date" : "dates"}
+                                    </Badge>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="px-4 pb-4 pt-1">
+                                    {events.map((event, eventIndex) => (
+                                        <EarningsEventCard key={eventIndex} event={event} />
+                                    ))}
+                                    </div>
+                                </AccordionContent>
+                                </AccordionItem>
                             ))}
-                        </div>
+                            </Accordion>
+                        </ScrollArea>
                     </CardContent>
-                </Card>
-                */}
+                    </Card>
+                {/*
 
                 {/* News Hub Section */}
                 <Card className="md:col-span-2 border-primary border">

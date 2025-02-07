@@ -95,17 +95,18 @@ export default function VaultPage() {
 
       const vaultFilesResponse = await vaultApi.getSpecificFiles({ user_id: companyUser._id})
 
-      console.log("vaultFilesResponse is ", vaultFilesResponse)
 
       let files
 
       if (vaultFilesResponse && vaultFilesResponse.data && vaultFilesResponse.data.length > 0) {
-        files = vaultFilesResponse.data
+        files = vaultFilesResponse.data        
       } else {
         files = []
       }
 
-      const { totalPages, currentPage, totalCount } = await getFiles(page, 10, search, sort, order)
+      console.log("vaultFiles are  ", files)
+
+      //const { totalPages, currentPage, totalCount } = await getFiles(page, 10, search, sort, order)
 
       setFiles(files)
       // Update pagination state here if needed
@@ -211,7 +212,7 @@ export default function VaultPage() {
                 </TableHead>
                 <TableHead>
                   <Link href="#" onClick={() => toggleSort("size")} className="flex items-center">
-                    Size
+                    Document Type
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Link>
                 </TableHead>
@@ -238,9 +239,9 @@ export default function VaultPage() {
                     </div>
                   </TableCell>
                   <TableCell>{file.mimetype}</TableCell>
-                  <TableCell>{formatFileSize(file.size)}</TableCell>
+                  <TableCell>{file.docType}</TableCell>
                   <TableCell>
-                    {file.uploadDate ? file.uploadDate.toLocaleDateString() : "N/A"}
+                    {file.uploadedDate ? new Date(file.uploadedDate).toLocaleDateString() : "N/A"}
                   </TableCell>
                   <TableCell>
                     <form onSubmit={handleDeleteFiles}>

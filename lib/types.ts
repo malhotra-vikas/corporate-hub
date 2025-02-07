@@ -30,6 +30,9 @@ export interface User {
 export interface VaultFile {
   _id: string
   originalName: string
+  docType: string
+  extractedTextLink: string
+  uploadedDate: string
   serverFileName: string
   type: string
   mimetype: string

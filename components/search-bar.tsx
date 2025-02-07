@@ -32,10 +32,6 @@ export function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
   return (
     <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center space-x-2">
       <Input type="search" placeholder={placeholder} value={search} onChange={handleInputChange} />
-      <Button type="submit">
-        <SearchIcon className="h-4 w-4 mr-2" />
-        Search
-      </Button>
     </form>
   )
 }

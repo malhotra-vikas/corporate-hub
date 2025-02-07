@@ -30,6 +30,7 @@ export default function VaultPage() {
   const [sort, setSort] = useState("uploadDate")
   const [order, setOrder] = useState("desc")
   const { user, loading, signIn } = useAuth()
+  const [companyName, setCompanyName] = useState("")
   
   console.log("in VaultPage user os ", user)
   
@@ -109,6 +110,10 @@ export default function VaultPage() {
       //const { totalPages, currentPage, totalCount } = await getFiles(page, 10, search, sort, order)
 
       setFiles(files)
+
+      const companyName = companyUser?.companyName || ""
+      setCompanyName(companyName)
+
       // Update pagination state here if needed
     } catch (error) {
       toast.error("Failed to load files")
@@ -170,6 +175,10 @@ export default function VaultPage() {
 
   return (
     <div className="space-y-6">
+      <header className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-blue-900">Welcome {companyName}</h1>
+        <p className="text-sm text-gray-500">Powered by AiirHub</p>
+      </header>
       <Card>
         <CardHeader>
           <CardTitle>Document Vault</CardTitle>

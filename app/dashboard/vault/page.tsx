@@ -31,26 +31,28 @@ export default function VaultPage() {
   const [order, setOrder] = useState("desc")
   const { user, loading, signIn } = useAuth()
   const [companyName, setCompanyName] = useState("")
-  
+
   console.log("in VaultPage user os ", user)
-  
+
   const userApi = new UserApi()
 
   useEffect(() => {
     if (user) {
       loadFiles()
-    } 
+    }
   }, [])
 
   const vaultApi = new VaultApi();
 
   const deleteFile = async (fileId: string) => {
-    const response = await vaultApi.deleteFile({fileId: fileId});
+    const response = await vaultApi.deleteFile({ fileId: fileId });
 
     return response;
   }
 
   const uploadFile = async (userId: string, file: File, category: string) => {
+
+    console.log("In upload")
     const formData = new FormData();
     formData.append("originalName", file.name);
     formData.append("serverFileName", file.name)
@@ -83,7 +85,7 @@ export default function VaultPage() {
       throw error;  // rethrow the error after logging for further handling if necessary
 
     }
-  
+
   }
 
   const loadFiles = async () => {
@@ -94,13 +96,13 @@ export default function VaultPage() {
       const companyUser = await userApi.getClientByEmail(user?.email || "")
       console.log("companyUser is ", companyUser)
 
-      const vaultFilesResponse = await vaultApi.getSpecificFiles({ user_id: companyUser._id})
+      const vaultFilesResponse = await vaultApi.getSpecificFiles({ user_id: companyUser._id })
 
 
       let files
 
       if (vaultFilesResponse && vaultFilesResponse.data && vaultFilesResponse.data.length > 0) {
-        files = vaultFilesResponse.data        
+        files = vaultFilesResponse.data
       } else {
         files = []
       }
@@ -133,7 +135,7 @@ export default function VaultPage() {
     console.log("File Category is ", category)
 
     try {
-      
+
       await uploadFile(user._id || '', file, category)
       toast.success("File uploaded successfully")
       loadFiles()
@@ -166,7 +168,7 @@ export default function VaultPage() {
       setOrder("asc")
     }
   }
-  
+
   const totalPages = Math.ceil(files.length / 10)
 
   if (isLoading) {
@@ -242,9 +244,26 @@ export default function VaultPage() {
                       {file.type === "document" && <FileTextIcon className="mr-2 h-4 w-4" />}
                       {file.type === "image" && <ImageIcon className="mr-2 h-4 w-4" />}
                       {file.type === "presentation" && <PresentationIcon className="mr-2 h-4 w-4" />}
-                      <a href={file.filePath} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                      <a
+                        href={file.filePath}
+                        target={file.filePath.match(/^https?:\/\/(v1\.aiirbrain\.com|aiirbrain\.com|aiirhub\.com|v1\.aiirhub\.com|localhost)/) ? "_self" : "_blank"}
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline"
+                        onClick={(e) => {
+                          // Check if the file path starts with any of the specified domains
+                          if (file.filePath.match(/^https?:\/\/(v1\.aiirbrain\.com|aiirbrain\.com|aiirhub\.com|v1\.aiirhub\.com|localhost)/)) {
+                            // Prevent default action (opening the link) and trigger download
+                            e.preventDefault();
+                            window.location.href = file.filePath;  // This will trigger the download
+                          } else {
+                            // For external files, allow them to open in a new tab
+                            window.open(file.filePath, '_blank');
+                          }
+                        }}
+                      >
                         {file.originalName}
                       </a>
+
                     </div>
                   </TableCell>
                   <TableCell>{file.mimetype}</TableCell>

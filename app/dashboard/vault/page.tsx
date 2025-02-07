@@ -283,7 +283,7 @@ export default function VaultPage() {
               ))}
             </TableBody>
           </Table>
-          <Pagination currentPage={page} totalPages={totalPages} onPageChange={(page) => setPage(page)} totalCount={0} />
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={(page) => setPage(page)} totalCount={files.length} />
         </CardContent>
       </Card>
     </div>

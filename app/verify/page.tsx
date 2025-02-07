@@ -29,12 +29,12 @@ const VerifyPage = () => {
     mutationFn: verifyUser,
     onSuccess: () => {
       toast.success("Email verified successfully! You can now log in.")
-      router.push("/hub")
+      router.push("/")
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || "An error occurred during verification")
       if (error?.response?.status === 400) {
-        router.push("/hub")
+        router.push("/")
       }
     },
   })

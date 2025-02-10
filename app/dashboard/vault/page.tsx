@@ -192,6 +192,7 @@ export default function VaultPage() {
                     <SelectItem value="document">Documents</SelectItem>
                     <SelectItem value="image">Images</SelectItem>
                     <SelectItem value="presentation">Presentations</SelectItem>
+                    <SelectItem value="press_releases">Press Releases</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button type="submit">Upload</Button>

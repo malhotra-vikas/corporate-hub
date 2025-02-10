@@ -18,6 +18,7 @@ import { useAuth } from "@/lib/auth-context"
 
 import { toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import { Link } from "lucide-react"
 
 export function LoginButton() {
     const [email, setEmail] = useState("")
@@ -82,6 +83,7 @@ export function LoginButton() {
                     <DialogFooter>
                         <Button type="submit">Log In</Button>
                     </DialogFooter>
+
                 </form>
             </DialogContent>
         </Dialog>

@@ -84,11 +84,6 @@ export default function SignIn() {
                             Sign In
                         </Button>
                     </form>
-                    <div className="mt-4">
-                        <Button variant="outline" className="w-full border-[#cdf683]" onClick={handleGoogleSignIn}>
-                            Sign In with Google
-                        </Button>
-                    </div>
                     {error && <p className="text-red-500 mt-4">{error}</p>}
                 </CardContent>
                 <CardFooter>
@@ -99,6 +94,15 @@ export default function SignIn() {
                         </Link>
                     </p>
                 </CardFooter>
+                <CardFooter>
+
+                    <p className="text-sm text-center w-full">
+                        Forgot password?{" "}
+                        <Link href="/reset-password" className="text-blue-500 hover:underline">
+                            Reset Here
+                        </Link>
+                    </p>
+                </CardFooter>                
             </Card>
         </div>
     )

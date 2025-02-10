@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/auth-context"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CalendarIcon, ArrowUpIcon, ArrowDownIcon, Plus, X, TrendingUpIcon, TrendingDownIcon, ChevronRight } from "lucide-react"
+import { CalendarIcon, ArrowUpIcon, ArrowDownIcon, Plus, X, TrendingUpIcon, TrendingDownIcon, ChevronRight, DollarSign, TrendingUp, Calendar } from "lucide-react"
 import { useEffect, useState } from "react"
 import HubApi from "@/lib/api/hub"
 import UserApi from "@/lib/api/user.api"
@@ -253,17 +253,17 @@ export default function HubPage() {
                     </div>
                     {epsDifference !== null && (
                         <Badge variant={epsDifference >= 0 ? "beat" : "missed"} className="flex items-center gap-1">
-                        {epsDifference >= 0 ? (
-                            <>
-                            <TrendingUpIcon className="w-3 h-3" />
-                            Beat
-                            </>
-                        ) : (
-                            <>
-                            <TrendingDownIcon className="w-3 h-3" />
-                            Missed
-                            </>
-                        )}
+                            {epsDifference >= 0 ? (
+                                <>
+                                    <TrendingUpIcon className="w-3 h-3" />
+                                    Beat
+                                </>
+                            ) : (
+                                <>
+                                    <TrendingDownIcon className="w-3 h-3" />
+                                    Missed
+                                </>
+                            )}
                         </Badge>
                     )}
                 </div>
@@ -343,7 +343,9 @@ export default function HubPage() {
                                             </div>
                                             <span className="text-sm font-medium">{comp.name}</span>
                                         </div>
-                                        <span className="text-sm font-medium">${comp.price.toFixed(2)}</span>
+                                        <span className="text-sm font-medium">
+                                            {comp.price ? `$${comp.price.toFixed(2)}` : "Price not available"}
+                                        </span>
                                         <span className={`text-sm font-medium ${comp.change >= 0 ? "text-green-600" : "text-red-600"}`}>
                                             {comp.change >= 0 ? "+" : ""}${Math.abs(comp.change).toFixed(2)}
                                         </span>
@@ -404,55 +406,57 @@ export default function HubPage() {
                 <Card className="border-primary border">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                        <CalendarIcon className="h-5 w-5 text-primary" />
-                        Earnings Hub
+                            <CalendarIcon className="h-5 w-5 text-primary" />
+                            Earnings Hub
                         </CardTitle>
                         <p className="text-sm text-muted-foreground">Based on your Peer stocks</p>
                     </CardHeader>
                     <CardContent>
                         <ScrollArea className="h-[600px] pr-4">
                             <Accordion type="single" collapsible className="w-full space-y-2">
-                            {Object.entries(groupedEarnings).map(([symbol, events], index) => (
-                                <AccordionItem
-                                key={index}
-                                value={`item-${index}`}
-                                className="border rounded-lg overflow-hidden bg-card hover:bg-accent/50 transition-colors"
-                                >
-                                <AccordionTrigger className="hover:no-underline px-4 py-3 [&[data-state=open]>div>div>.chevron]:rotate-90">
-                                    <div className="flex items-center justify-between w-full">
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex flex-col items-start">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-bold text-primary">{symbol}</span>
-                                            <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 chevron" />
-                                        </div>
-
-                                        </div>
-                                    </div>
-                                    <Badge
-                                        variant="secondary"
-                                        className={cn(
-                                        "ml-auto font-medium",
-                                        events.length > 5 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
-                                        )}
+                                {Object.entries(groupedEarnings).map(([symbol, events], index) => (
+                                    <AccordionItem
+                                        key={index}
+                                        value={`item-${index}`}
+                                        className="border rounded-lg overflow-hidden bg-card hover:bg-accent/50 transition-colors"
                                     >
-                                        {events.length} {events.length === 1 ? "date" : "dates"}
-                                    </Badge>
-                                    </div>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="px-4 pb-4 pt-1">
-                                    {events.map((event, eventIndex) => (
-                                        <EarningsEventCard key={eventIndex} event={event} />
-                                    ))}
-                                    </div>
-                                </AccordionContent>
-                                </AccordionItem>
-                            ))}
+                                        <AccordionTrigger className="hover:no-underline px-4 py-3 [&[data-state=open]>div>div>.chevron]:rotate-90">
+                                            <div className="flex items-center justify-between w-full">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex flex-col items-start">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-bold text-primary">{symbol}</span>
+                                            <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 chevron" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className={cn(
+                                                            "font-medium",
+                                                            events.length > 5 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+                                                        )}
+                                                    >
+                                                        {events.length} {events.length === 1 ? "event" : "events"}
+                                                    </Badge>
+                                                    <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 chevron" />
+                                                </div>
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <div className="px-4 pb-4 pt-1">
+                                                {events.map((event, eventIndex) => (
+                                                    <EarningsEventCard key={eventIndex} event={event} />
+                                                ))}
+                                            </div>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
                             </Accordion>
                         </ScrollArea>
                     </CardContent>
-                    </Card>
+                </Card>
                 {/*
 
                 {/* News Hub Section */}

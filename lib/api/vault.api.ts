@@ -44,6 +44,11 @@ export default class VaultApi extends BaseApi {
     return data;
   }
 
+  async getFileByFileId(dto: { file_id: string }) {
+    const data = await VaultApi.post(`${this.baseUrl}getFileByFileId`, dto);
+    return data;
+  }
+
   async fetchCompanyPastDocuments(dto: { ticker: string, fileType: string, duration: string }) {
     const data = await VaultApi.post(`${this.baseUrl}getSECFiles`, dto);
     return data;
@@ -77,6 +82,12 @@ export default class VaultApi extends BaseApi {
     const data = await VaultApi.post(`${this.baseUrl}createFile`, dto);
     return data;
   }
+
+  async createFileFromText(dto: CreateFileDto) {
+    const data = await VaultApi.post(`${this.baseUrl}createFileFromText`, dto);
+    return data;
+  }
+  
   async getPaginatedData(
     user_id: string,
     paginationNumber: number,

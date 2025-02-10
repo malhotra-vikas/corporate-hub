@@ -12,13 +12,21 @@ import { Loader2, Upload, FileText, ChevronLeft, ChevronRight } from "lucide-rea
 import { AIExtractedDetails } from "./ai-extracted-details"
 import { ChatInterface } from "./chat-interface"
 import { PastChatSessions } from "./past-chat-sessions"
-import { getFiles, type File } from "@/app/actions/upload-file"
+
+import { type File } from "@/app/actions/upload-file"
+import { useAuth } from "@/lib/auth-context"
+import UserApi from "@/lib/api/user.api"
+import VaultApi from "@/lib/api/vault.api"
+import { toast } from "react-toastify"
+import { VaultFile } from "@/lib/types"
+import { useRouter } from "next/router"
 
 type DocumentType = "press_release" | "earnings_statement" | "shareholder_letter" | "other"
 
 interface UploadedDocument {
   file: File
   type: DocumentType
+  file_id?: string
 }
 
 interface AIDocBuilderProps {
@@ -27,6 +35,9 @@ interface AIDocBuilderProps {
 
 const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [selectedDocuments, setSelectedDocuments] = useState<UploadedDocument[]>([])
+  const [activeTab, setActiveTab] = useState<'upload' | 'vault' | 'paste'>('upload') // Track active tab
+  const [documentContent, setDocumentContent] = useState<string>('') // Store pasted content
+
   const [extractedData, setExtractedData] = useState<{
     [key: string]: {
       name: string
@@ -38,26 +49,145 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     }
   }>({})
   const [isDocumentSelected, setIsDocumentSelected] = useState(false)
-  const [vaultFiles, setVaultFiles] = useState<File[]>([])
+  let [vaultFiles, setVaultFiles] = useState<VaultFile[]>([])
+
   const [isLoading, setIsLoading] = useState(false)
   const [isPastSessionsCollapsed, setIsPastSessionsCollapsed] = useState(false)
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const newDocuments = Array.from(event.target.files).map((file) => ({
-        file: {
-          id: Math.random().toString(),
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          uploadDate: new Date(),
-          category: "other",
-        },
-        type: "other" as DocumentType,
-      }))
-      setSelectedDocuments([...selectedDocuments, ...newDocuments])
+  const { user, loading } = useAuth()
+
+  if (!user) return;
+
+  let companyUser
+
+  const userApi = new UserApi()
+  const vaultApi = new VaultApi()
+
+  function getQuarter(date: Date): string {
+    const month = date.getMonth()
+    const year = date.getFullYear()
+    const quarter = Math.floor(month / 3) + 1
+    return `${year}-Q${quarter}`
+  }
+
+  // Define the function to fetch files
+  async function getFiles(): Promise<{ files: VaultFile[] }> {
+    // Check if the user is defined
+    if (!user) {
+      throw new Error("User is not authenticated");
+    }
+
+    try {
+      // Fetch the company user using the user's email
+      const companyUser = await userApi.getClientByEmail(user?.email || "");
+
+      console.log("User is ", user)
+
+
+      // If companyUser is not found or doesn't have an ID, throw an error
+      if (!companyUser?._id) {
+        throw new Error("Company user not found");
+      }
+
+      // Fetch the files for the specific company user based on their _id
+      const userFiles = await vaultApi.getSpecificFiles({ user_id: companyUser._id });
+
+      console.log("userFiles  is ", userFiles.data)
+
+      // Optionally filter the files if you need, right now we return them as is
+      const filteredFiles = userFiles.data; // Modify filtering logic if necessary
+
+      // Return the files
+      return {
+        files: filteredFiles,
+      };
+    } catch (error) {
+      console.error("Error fetching files:", error);
+      throw new Error("Failed to fetch files");
     }
   }
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (user) {
+      companyUser = await userApi.getClientByEmail(user?.email || "")
+    }
+
+    if (event.target.files) {
+      const files = Array.from(event.target.files)
+      for (const file of files) {
+        try {
+          const formData = new FormData()
+          formData.append("originalName", file.name)
+          formData.append("serverFileName", file.name)
+          formData.append("files", file)
+
+          // Assuming you have a way to select or determine the category
+          const category: string = "news" // This should be dynamically set based on user input or file type
+          formData.append("category", category)
+
+          if (companyUser && companyUser._id) {
+            formData.append("user_id", companyUser._id)
+          } else {
+            throw new Error("User not authenticated")
+          }
+
+          const tagsData = [
+            {
+              [file.name]: {
+                docType: category,
+                useFull: "Both",
+              },
+            },
+          ]
+          formData.append("tags", JSON.stringify(tagsData))
+
+          console.log("Starting file upload process...")
+          console.log("tagsData is ", tagsData)
+
+          // Log the FormData entries
+          for (const [key, value] of formData.entries()) {
+            console.log(key, value)
+          }
+
+          const response = await vaultApi.uploadDocuments(formData)
+          console.log("File uploaded successfully:", response)
+
+          const newDocument: UploadedDocument = {
+            file: file,
+            type: category,
+          }
+          //setSelectedDocuments((prev) => [...prev, newDocument])
+          setActiveTab('vault') // Switch to "Select from Vault" tab after document upload
+          toast.success(`File ${file.name} uploaded successfully`)
+        } catch (error) {
+          console.error("Error uploading file:", error)
+          toast.error(`Failed to upload file ${file.name}`)
+        }
+      }
+    }
+  }
+
+  // Triggered when user submits (done typing)
+  const handlePasteSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    handleFileUploadFromPaste(documentContent) // Submit the document content
+    // You can add additional logic after submitting, like clearing the text area or moving to the next step
+  }
+
+  const handleFileUploadFromPaste = async (content: string) => {
+    setDocumentContent(content)
+
+    if (user) {
+      companyUser = await userApi.getClientByEmail(user?.email || "")
+    }
+
+    const response = await vaultApi.createFileFromText({ fileName: "UserText Input for PR", fileContent: content, user_id: companyUser._id })
+
+    //setSelectedDocuments((prev) => [...prev, newDocument])
+    setActiveTab('vault') // Switch to "Select from Vault" tab after document upload
+    toast.success(`File uploaded successfully`)
+  }
+
 
   const handleDocumentTypeChange = (index: number, type: DocumentType) => {
     const updatedDocuments = [...selectedDocuments]
@@ -69,7 +199,10 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     setIsLoading(true)
     try {
       const files = await getFiles()
-      setVaultFiles(files)
+      console.log("files  are befoere setVaultFiles ", files)
+      vaultFiles = files.files
+
+      setVaultFiles(files.files)
     } catch (error) {
       console.error("Error fetching vault files:", error)
     } finally {
@@ -85,16 +218,80 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     }
   }
 
-  const handleContinue = () => {
+  const uploadFile = async (userId: string, file: File, category: string) => {
+    const formData = new FormData()
+    formData.append("originalName", file.name)
+    formData.append("serverFileName", file.name)
+    formData.append("files", file as Blob)
+    formData.append("category", category)
+    formData.append("user_id", userId)
+
+    const filesTag: any = []
+    const tempObj = {
+      [file.name]: {
+        docType: category,
+        useFull: "Both",
+      },
+    }
+    filesTag?.push(tempObj)
+
+    formData.append("tags", JSON.stringify(filesTag))
+
+    try {
+      const response = await vaultApi.uploadDocuments(formData)
+      return response
+    } catch (error) {
+      console.error("Error Response:", error.response.data)
+      throw error
+    }
+  }
+
+  const handleContinue = async () => {
+    console.log("in handle continue")
+
     if (selectedDocuments.length > 0) {
+
+      console.log("selectedDocuments is ", selectedDocuments)
       setIsDocumentSelected(true)
+
+      if (!user) {
+        console.error("User not authenticated")
+        toast.error("Please log in to upload documents")
+        return
+      }
+
+      let extractedTextForSelectedDocuments = ''
+
+      for (const doc of selectedDocuments) {
+        try {
+          const file = doc.file as File
+
+          if (file && file._id) { // File is fetched from the Vault
+            const extractedText = file.extractedText
+            extractedTextForSelectedDocuments = extractedText + extractedTextForSelectedDocuments
+          }
+
+          if (file && !file._id) { // File is new. Read the doc from the Vault
+            console.log("New file is ", file)
+
+            const extractedText = file.extractedText
+            extractedTextForSelectedDocuments = extractedText + extractedTextForSelectedDocuments
+          }
+
+          console.log("extractedTextForSelectedDocuments = ", extractedTextForSelectedDocuments)
+
+        } catch (error) {
+          console.error("Error with file:", error)
+        }
+      }
+
       // Generate default extracted data
       const newExtractedData = selectedDocuments.reduce(
         (acc, doc) => {
           acc[doc.file.name] = {
             name: doc.file.name,
             headline:
-              "LuxUrban Hotels Announces Strategic Joint Venture with Lockwood Development and Bright Hospitality, Projecting $130 Million Revenue Potential and Enhanced Market Presence in NYC",
+              "Tetete  Joint Venture with Lockwood Development and Bright Hospitality, Projecting $130 Million Revenue Potential and Enhanced Market Presence in NYC",
             subHeadline:
               "LuxUrban Hotels, in partnership with Lockwood and Bright, aims to launch a joint venture expected to generate $36.7 million in annual revenue from two pilot hotels. Projected total revenue could reach $130 million across nine Lux properties, enhancing shareholder value and bolstering financial stability through strategic partnerships and advanced technology.",
             summary:
@@ -134,10 +331,11 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
             <CardDescription>Select documents to analyze and build with AI assistance</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="upload" className="space-y-4">
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'upload' | 'vault' | 'paste')} className="space-y-4">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="upload">Upload Documents</TabsTrigger>
                 <TabsTrigger value="vault">Select from Vault</TabsTrigger>
+                <TabsTrigger value="paste">Paste Document</TabsTrigger>
               </TabsList>
               <TabsContent value="upload" className="space-y-4">
                 <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -153,26 +351,36 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                             <FileText className="h-6 w-6 text-primary" />
                             <span>{doc.file.name}</span>
                           </div>
-                          <Select
-                            value={doc.type}
-                            onValueChange={(value: DocumentType) => handleDocumentTypeChange(index, value)}
-                          >
-                            <SelectTrigger className="w-[200px]">
-                              <SelectValue placeholder="Select document type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="press_release">Press Release</SelectItem>
-                              <SelectItem value="earnings_statement">Earnings Statement</SelectItem>
-                              <SelectItem value="shareholder_letter">Shareholder Letter</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
                 )}
               </TabsContent>
+
+              <TabsContent value="paste" className="space-y-4">
+                <div className="container mx-auto p-4 space-y-6">
+                  <Card className="bg-white shadow-lg">
+                    <CardContent>
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="paste-doc">Paste source documents</Label>
+                        <textarea
+                          id="paste-doc"
+                          rows={8} // You can adjust the rows to control the height of the textarea
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                          placeholder="Paste your document content here..."
+                          value={documentContent} // Keep the textarea controlled
+                          onChange={(e) => setDocumentContent(e.target.value)} // Update content in state
+                        />
+                      </div>
+                      <Button onClick={handlePasteSubmit} className="mt-4 bg-primary">
+                        Submit Document
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
               <TabsContent value="vault" className="space-y-4">
                 <Button onClick={handleVaultSelection} disabled={isLoading} className="bg-primary text-white">
                   {isLoading ? (
@@ -190,21 +398,21 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                 {vaultFiles.length > 0 && (
                   <div className="space-y-2">
                     {vaultFiles.map((file) => (
-                      <Card key={file.id} className="bg-gray-50">
+                      <Card key={file._id} className="bg-gray-50">
                         <CardContent className="flex items-center justify-between p-4">
                           <div className="flex items-center space-x-4">
                             <Checkbox
-                              id={file.id}
+                              id={file._id}
                               onCheckedChange={(checked) => handleVaultFileSelection(file, checked as boolean)}
                             />
                             <Label
-                              htmlFor={file.id}
+                              htmlFor={file._id}
                               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                             >
-                              {file.name}
+                              {file.originalName}
                             </Label>
                           </div>
-                          <span className="text-sm text-muted-foreground">{file.category}</span>
+                          <span className="text-sm text-muted-foreground">{file.uploadedDate}</span>
                         </CardContent>
                       </Card>
                     ))}
@@ -279,4 +487,6 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 }
 
 export default AIDocBuilder
+
+
 

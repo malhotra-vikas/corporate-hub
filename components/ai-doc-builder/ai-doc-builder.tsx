@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Loader2, Upload, FileText, ChevronLeft, ChevronRight } from "lucide-react"
+import { Loader2, Upload, FileText, ChevronLeft, ChevronRight, Trash2 } from "lucide-react"
 import { AIExtractedDetails } from "./ai-extracted-details"
 import { ChatInterface } from "./chat-interface"
 import { PastChatSessions } from "./past-chat-sessions"
@@ -322,112 +322,105 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     }))
   }
 
-  if (!isDocumentSelected) {
-    return (
-      <div className="container mx-auto p-4 space-y-6">
-        <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl text-primary">AI Document Builder</CardTitle>
-            <CardDescription>Select documents to analyze and build with AI assistance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'upload' | 'vault' | 'paste')} className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="upload">Upload Documents</TabsTrigger>
-                <TabsTrigger value="vault">Select from Vault</TabsTrigger>
-                <TabsTrigger value="paste">Paste Document</TabsTrigger>
-              </TabsList>
-              <TabsContent value="upload" className="space-y-4">
-                <div className="grid w-full max-w-sm items-center gap-1.5">
-                  <Label htmlFor="file-upload">Upload source documents</Label>
-                  <Input id="file-upload" type="file" multiple onChange={handleFileUpload} />
-                </div>
-                {selectedDocuments.length > 0 && (
-                  <div className="space-y-4">
-                    {selectedDocuments.map((doc, index) => (
-                      <Card key={index} className="bg-gray-50">
-                        <CardContent className="flex items-center justify-between p-4">
-                          <div className="flex items-center space-x-4">
-                            <FileText className="h-6 w-6 text-primary" />
-                            <span>{doc.file.name}</span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
+  const handleRemoveDocument = (index: number) => {
+    const updatedDocuments = selectedDocuments.filter((_, i) => i !== index)
+    setSelectedDocuments(updatedDocuments)
+  }
 
-              <TabsContent value="paste" className="space-y-4">
-                <div className="container mx-auto p-4 space-y-6">
-                  <Card className="bg-white shadow-lg">
-                    <CardContent>
-                      <div className="grid w-full max-w-sm items-center gap-1.5">
-                        <Label htmlFor="paste-doc">Paste source documents</Label>
-                        <textarea
-                          id="paste-doc"
-                          rows={8} // You can adjust the rows to control the height of the textarea
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                          placeholder="Paste your document content here..."
-                          value={documentContent} // Keep the textarea controlled
-                          onChange={(e) => setDocumentContent(e.target.value)} // Update content in state
+  if (!isDocumentSelected) {
+
+    return (
+      <Card className="w-full max-w-4xl mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold">AI Document Builder</CardTitle>
+        <CardDescription>Upload, select, or paste your documents for analysis</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as "upload" | "vault" | "paste")}
+          className="space-y-4"
+        >
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="upload">Upload Documents</TabsTrigger>
+            <TabsTrigger value="vault">Select from Vault</TabsTrigger>
+            <TabsTrigger value="paste">Paste Document</TabsTrigger>
+          </TabsList>
+          <TabsContent value="upload" className="space-y-4">
+            <div className="grid w-full items-center gap-1.5">
+              <Label htmlFor="file-upload" className="text-lg font-semibold">
+                Upload source documents
+              </Label>
+              <Input id="file-upload" type="file" multiple onChange={handleFileUpload} className="cursor-pointer" />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="paste" className="space-y-4">
+            <div className="grid w-full items-center gap-1.5">
+              <Label htmlFor="paste-doc" className="text-lg font-semibold">
+                Paste source documents
+              </Label>
+              <textarea
+                id="paste-doc"
+                rows={8}
+                className="w-full p-2 border border-gray-300 rounded-md resize-vertical"
+                placeholder="Paste your document content here..."
+                value={documentContent}
+                onChange={(e) => setDocumentContent(e.target.value)}
+              />
+              <Button onClick={handlePasteSubmit} className="mt-2 bg-primary">
+                Submit Document
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="vault" className="space-y-4">
+            <Button onClick={handleVaultSelection} disabled={isLoading} className="w-full bg-primary text-white">
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading Vault Documents
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Reload Vault Documents
+                </>
+              )}
+            </Button>
+            {vaultFiles.length > 0 && (
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {vaultFiles.map((file) => (
+                  <Card key={file._id} className="bg-gray-50">
+                    <CardContent className="flex items-center justify-between p-4">
+                      <div className="flex items-center space-x-4">
+                        <Checkbox
+                          id={file._id}
+                          onCheckedChange={(checked) => handleVaultFileSelection(file, checked as boolean)}
                         />
+                        <Label
+                          htmlFor={file._id}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {file.originalName}
+                        </Label>
                       </div>
-                      <Button onClick={handlePasteSubmit} className="mt-4 bg-primary">
-                        Submit Document
-                      </Button>
+                      <span className="text-sm text-muted-foreground">{file.uploadedDate}</span>
                     </CardContent>
                   </Card>
-                </div>
-              </TabsContent>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
 
-              <TabsContent value="vault" className="space-y-4">
-                <Button onClick={handleVaultSelection} disabled={isLoading} className="bg-primary text-white">
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading Vault Documents
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Load Vault Documents
-                    </>
-                  )}
-                </Button>
-                {vaultFiles.length > 0 && (
-                  <div className="space-y-2">
-                    {vaultFiles.map((file) => (
-                      <Card key={file._id} className="bg-gray-50">
-                        <CardContent className="flex items-center justify-between p-4">
-                          <div className="flex items-center space-x-4">
-                            <Checkbox
-                              id={file._id}
-                              onCheckedChange={(checked) => handleVaultFileSelection(file, checked as boolean)}
-                            />
-                            <Label
-                              htmlFor={file._id}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {file.originalName}
-                            </Label>
-                          </div>
-                          <span className="text-sm text-muted-foreground">{file.uploadedDate}</span>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
         {selectedDocuments.length > 0 && (
-          <Button onClick={handleContinue} className="w-full bg-primary text-white">
+          <Button onClick={handleContinue} className="mt-4 w-full bg-primary text-white">
             Continue with {selectedDocuments.length} selected document{selectedDocuments.length > 1 ? "s" : ""}
           </Button>
         )}
-      </div>
+      </CardContent>
+    </Card>
     )
   }
 

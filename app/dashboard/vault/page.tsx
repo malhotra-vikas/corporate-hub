@@ -132,8 +132,12 @@ export default function VaultPage() {
     const file = formData.get("file") as unknown as File
     const category = formData.get("category") as string
 
+    const companyUser = await userApi.getClientByEmail(user?.email || "")
+
+    console.log("Use for uploda - user = ", companyUser._id)
+
     try {
-      await uploadFile(user._id || "", file, category)
+      await uploadFile(companyUser._id || "", file, category)
       toast.success("File uploaded successfully")
       loadFiles()
     } catch (error) {
@@ -189,10 +193,10 @@ export default function VaultPage() {
                     <SelectValue placeholder="Select Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="document">Documents</SelectItem>
-                    <SelectItem value="image">Images</SelectItem>
-                    <SelectItem value="presentation">Presentations</SelectItem>
-                    <SelectItem value="press_releases">Press Releases</SelectItem>
+                    <SelectItem value="Document">Documents</SelectItem>
+                    <SelectItem value="Image">Images</SelectItem>
+                    <SelectItem value="Presentation">Presentations</SelectItem>
+                    <SelectItem value="Press Releases">Press Releases</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button type="submit">Upload</Button>
@@ -206,12 +210,6 @@ export default function VaultPage() {
                 <TableHead>
                   <Link href="#" onClick={() => toggleSort("name")} className="flex items-center">
                     File Name
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </Link>
-                </TableHead>
-                <TableHead>
-                  <Link href="#" onClick={() => toggleSort("type")} className="flex items-center">
-                    Type
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Link>
                 </TableHead>
@@ -266,7 +264,6 @@ export default function VaultPage() {
                       </a>
                     </div>
                   </TableCell>
-                  <TableCell>{file.mimetype}</TableCell>
                   <TableCell>{file.docType}</TableCell>
                   <TableCell>{file.uploadedDate ? new Date(file.uploadedDate).toLocaleDateString() : "N/A"}</TableCell>
                   <TableCell>

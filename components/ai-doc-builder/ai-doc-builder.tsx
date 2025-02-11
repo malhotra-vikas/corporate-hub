@@ -21,6 +21,8 @@ import { toast } from "react-toastify"
 import { VaultFile } from "@/lib/types"
 import { useRouter } from "next/router"
 
+
+
 type DocumentType = "press_release" | "earnings_statement" | "shareholder_letter" | "other"
 
 interface UploadedDocument {
@@ -37,7 +39,6 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [selectedDocuments, setSelectedDocuments] = useState<UploadedDocument[]>([])
   const [activeTab, setActiveTab] = useState<'upload' | 'vault' | 'paste'>('upload') // Track active tab
   const [documentContent, setDocumentContent] = useState<string>('') // Store pasted content
-
   const [extractedData, setExtractedData] = useState<{
     [key: string]: {
       name: string
@@ -48,17 +49,19 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       ceoQuote: string
     }
   }>({})
+
   const [isDocumentSelected, setIsDocumentSelected] = useState(false)
   let [vaultFiles, setVaultFiles] = useState<VaultFile[]>([])
 
   const [isLoading, setIsLoading] = useState(false)
-  const [isPastSessionsCollapsed, setIsPastSessionsCollapsed] = useState(false)
+  const [isPastSessionsCollapsed, setIsPastSessionsCollapsed] = useState(true)
+  const [isExtractingData, setIsExtractingData] = useState(false)
+  let [companyUser, setCompanyUser] = useState()
 
   const { user, loading } = useAuth()
 
   if (!user) return;
 
-  let companyUser
 
   const userApi = new UserApi()
   const vaultApi = new VaultApi()
@@ -249,12 +252,19 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const handleContinue = async () => {
     console.log("in handle continue")
 
+    // Fetch the company user using the user's email
+    const companyUser = await userApi.getClientByEmail(user?.email || "");
+
+    console.log("companyUser is ", companyUser)
+
+    setCompanyUser(companyUser)
+    
     if (selectedDocuments.length > 0) {
 
       console.log("selectedDocuments is ", selectedDocuments)
       setIsDocumentSelected(true)
 
-      if (!user) {
+      if (!companyUser) {
         console.error("User not authenticated")
         toast.error("Please log in to upload documents")
         return
@@ -285,6 +295,10 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         }
       }
 
+      setIsExtractingData(true)
+
+      
+/*
       // Generate default extracted data
       const newExtractedData = selectedDocuments.reduce(
         (acc, doc) => {
@@ -305,6 +319,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         {} as typeof extractedData,
       )
       setExtractedData(newExtractedData)
+      */
     }
   }
 
@@ -463,8 +478,10 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                 <h3 className="text-lg font-semibold mb-2 text-primary">AI Extracted Details</h3>
                 <AIExtractedDetails
                   documents={selectedDocuments}
-                  extractedData={extractedData}
+                  //extractedData={extractedData}
                   onUpdateExtractedData={handleUpdateExtractedData}
+                  isLoading={true}
+                  company={companyUser}
                 />
               </div>
               <div className="w-1/2 p-4 overflow-hidden bg-gray-50">

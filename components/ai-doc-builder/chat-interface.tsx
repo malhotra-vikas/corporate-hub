@@ -6,13 +6,18 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card } from "@/components/ui/card"
 import { Loader2, Send } from "lucide-react"
+import type React from "react" // Added import for React
 
 type Message = {
     role: "user" | "assistant"
     content: string
 }
 
-export const ChatInterface = () => {
+interface ChatInterfaceProps {
+    onSendMessage: (message: string) => Promise<string>
+}
+
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage }) => {
     const [messages, setMessages] = useState<Message[]>([
         { role: "assistant", content: "Hello! How can I help you refine the document?" },
     ])
@@ -22,20 +27,20 @@ export const ChatInterface = () => {
     const handleSend = async () => {
         if (input.trim()) {
             setIsLoading(true)
-            setMessages([...messages, { role: "user", content: input }])
+            const userMessage: Message = { role: "user", content: input }
+            setMessages((prevMessages) => [...prevMessages, userMessage])
             setInput("")
 
-            // Simulating AI response
-            setTimeout(() => {
-                setMessages((prevMessages) => [
-                    ...prevMessages,
-                    {
-                        role: "assistant",
-                        content: "I've noted your input. How else can I assist you with the document?",
-                    },
-                ])
+            try {
+                const response = await onSendMessage(input)
+                const assistantMessage: Message = { role: "assistant", content: response }
+                setMessages((prevMessages) => [...prevMessages, assistantMessage])
+            } catch (error) {
+                console.error("Error sending message:", error)
+                // Handle error (e.g., show an error message to the user)
+            } finally {
                 setIsLoading(false)
-            }, 1000)
+            }
         }
     }
 

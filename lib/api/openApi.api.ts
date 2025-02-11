@@ -1,7 +1,7 @@
 import BaseApi from "./_baseApi";
 
-const OPEN_AI_KEY = import.meta.env.VITE_OPEN_AI_KEY;
-const MODEL_DEFAULT = import.meta.env.VITE_OPEN_AI_DEFAULT_MODEL;
+const OPEN_AI_KEY = process.env.NEXT_PUBLIC_OPEN_AI_KEY;
+const MODEL_DEFAULT = process.env.NEXT_PUBLIC_OPEN_AI_DEFAULT_MODEL;
 
 export default class OpenAiApi extends BaseApi {
   constructor() {

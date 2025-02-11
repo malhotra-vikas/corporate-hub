@@ -11,7 +11,11 @@ interface ChatSession {
     preview: string
 }
 
-export const PastChatSessions = () => {
+interface PastChatSessionsProps {
+    onSelectSession: (sessionId: string) => void
+}
+
+export const PastChatSessions: React.FC<PastChatSessionsProps> = ({ onSelectSession }) => {
     // This would typically come from a database or API
     const [sessions, setSessions] = useState<ChatSession[]>([
         {
@@ -36,6 +40,11 @@ export const PastChatSessions = () => {
 
     const [selectedSession, setSelectedSession] = useState<string | null>(null)
 
+    const handleSelectSession = (sessionId: string) => {
+        setSelectedSession(sessionId)
+        onSelectSession(sessionId)
+    }
+
     return (
         <ScrollArea className="h-[calc(100vh-16rem)]">
             {sessions.map((session) => (
@@ -43,7 +52,7 @@ export const PastChatSessions = () => {
                     key={session.id}
                     className={`mb-4 cursor-pointer transition-colors ${selectedSession === session.id ? "bg-secondary" : "bg-white"
                         }`}
-                    onClick={() => setSelectedSession(session.id)}
+                    onClick={() => handleSelectSession(session.id)}
                 >
                     <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-2">

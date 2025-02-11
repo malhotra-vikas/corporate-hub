@@ -415,6 +415,8 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
 
   const handleSave = (fileId: string, field: string, value: string) => {
     onUpdateExtractedData(fileId, field, value)
+
+    console.log("In save - value", value)
     setEditingFields((prev) => ({
       ...prev,
       [fileId]: prev[fileId].filter((f) => f !== field),

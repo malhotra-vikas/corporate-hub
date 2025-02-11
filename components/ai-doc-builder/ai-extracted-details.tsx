@@ -1,3 +1,5 @@
+"use client"
+
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -6,12 +8,13 @@ import { RichTextEditor } from "@/components/rich-text-editor"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2 } from 'lucide-react'
+import { Loader2 } from "lucide-react"
 import ChatApi from "@/lib/api/chat.api"
 import VaultApi from "@/lib/api/vault.api"
 import OpenAiApi from "@/lib/api/openApi.api"
 import UserApi from "@/lib/api/user.api"
 import { toast } from "react-toastify"
+import { ChatInterface } from "./chat-interface"
 
 interface ExtractedData {
   name: string
@@ -38,93 +41,78 @@ interface AIExtractedDetailsProps {
 }
 
 const fieldLabels = {
-  name: "Press Release Name",
-  headline: "Headline",
-  subHeadline: "Sub-Headline",
-  summary: "Summary",
-  keyHighlights: "Key Highlights",
-  ceoQuote: "CEO's Quote",
-};
+  headline: "extractedTextHeadline",
+  subHeadline: "extractedSubHeadline",
+  summary: "extractedTextSummary",
+  keyHighlights: "extractedKeyHighlights",
+  ceoQuote: "extractedCeoQuote",
+}
 
 export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   documents,
-  //extractedData,
   onUpdateExtractedData,
   isLoading: initialIsLoading,
-  company
+  company,
 }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(initialIsLoading);
+  const [isLoading, setIsLoading] = useState<boolean>(initialIsLoading)
   const [editingFields, setEditingFields] = useState<{ [key: string]: string[] }>({})
-  const [toneMessages, setToneMessages] = useState<string | null>(null);
-  let [currentChatId, setCurrentChatId] = useState<string | null>(null); // Added
-  const [showPdfConfirmation, setShowPdfConfirmation] = useState(false);
-  const [welcomeMessageSent, setWelcomeMessageSent] = useState(false); // Added state variable
-  let [chatName, setChatName] = useState(); // Added state variable
-  let [loggedInUser, setLoggedinUser] = useState(); // Added state variable
-  const [messages, setMessages] = useState<any[]>([]);
-  let [summary, setSummary] = useState<string>("");
-  let [headline, setHeadline] = useState<string>("");
-  let [subHeadline, setSubHeadline] = useState<string>("");
-  let [keyHighlights, setKeyHighlights] = useState<string>("");
+  const [toneMessages, setToneMessages] = useState<string | null>(null)
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null)
+  const [showPdfConfirmation, setShowPdfConfirmation] = useState(false)
+  const [welcomeMessageSent, setWelcomeMessageSent] = useState(false)
+  const [loggedInUser, setLoggedinUser] = useState<string>("")
+  const [messages, setMessages] = useState<any[]>([])
 
   let [ceoQuote, setCeoQuote] = useState<string>("");
   let [documentText, setExtractedDocumentText] = useState<string>("");
 
-  let [extractedData, setExtractedData] = useState<{
-    [key: string]: {
-      name: string
-      headline: string
-      subHeadline: string
-      summary: string
-      keyHighlights: string
-      ceoQuote: string
-    }
+  const [extractedData, setExtractedData] = useState<{
+    [key: string]: ExtractedData
   }>({})
 
-  
-  const chatApi = new ChatApi();
-  const vaultApi = new VaultApi();
-  const openAiApi = new OpenAiApi();
-  const userApi = new UserApi();
-  
+  const chatApi = new ChatApi()
+  const vaultApi = new VaultApi()
+  const openAiApi = new OpenAiApi()
+  const userApi = new UserApi()
+
   console.log("In AIExtractedDetails - documents ", documents)
   console.log("In AIExtractedDetails - company ", company)
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoggedinUser(company._id);
-  
+      setLoggedinUser(company._id)
+
       if (initialIsLoading) {
-        let cumulativeExtractedText = "";
+        let cumulativeExtractedText = ""
         let file_id = ""
-  
+
         documents.forEach((fileData) => {
-          cumulativeExtractedText += fileData.file.extractedData;
+          cumulativeExtractedText += fileData.file.extractedData
           file_id = fileData.file._id
-        });
-  
-        console.log("In AIExtractedDetails - cumulativeExtractedText ", cumulativeExtractedText);
-  
-        await runAi(cumulativeExtractedText, file_id);
+        })
+
+        console.log("In AIExtractedDetails - cumulativeExtractedText ", cumulativeExtractedText)
+
+        await runAi(cumulativeExtractedText, file_id)
       }
-    };
-  
-    fetchData();
-  }, [initialIsLoading, company._id, documents]);
+    }
+
+    fetchData()
+  }, [initialIsLoading, company._id, documents])
 
   const runAi = async (cumulativeExtractedText: string, file_id: string) => {
     setIsLoading(true)
 
     const namePrompt =
-      "Generate a short, memorable name of no more than 5 words for this press-release using the headline that the user provided. ";
+      "Generate a short, memorable name of no more than 5 words for this press-release using the headline that the user provided. "
 
-    let headlinePrompt = `
+    const headlinePrompt = `
         Generate a short, impactful headline of no more than 25 words that captures the core news. Follow the guidelines. Set the Tone with a Strong Headline.
         The headline should succinctly convey the key news and its significance. You would never add any assumptions, just convey facts.
         Highlight the value to shareholders, whether it's a new acquisition, a major "milestone, or a growth driver. 
         
         Leverage High-Performing professional Keywords to enhance engagement and convey confidence. Do not add any formating
-      `;
+      `
 
     let ceoQuotePrompt = `
         Generate a CEO quote in first-person for the following news. Follow the guidelines. 
@@ -134,13 +122,12 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         You would never add any assumptions, just convey facts.
         Leverage High-Performing professional Keywords to enhance engagement and convey confidence
 
-      `;
+      `
 
     if (toneMessages) {
-      ceoQuotePrompt = ceoQuotePrompt + " The tone should be " + toneMessages;
+      ceoQuotePrompt = ceoQuotePrompt + " The tone should be " + toneMessages
     } else {
-      ceoQuotePrompt =
-        ceoQuotePrompt + " The tone should be cautiously optimistic. ";
+      ceoQuotePrompt = ceoQuotePrompt + " The tone should be cautiously optimistic. "
     }
 
     let summaryPrompt = `
@@ -157,13 +144,12 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         Balance promotional tone with a realistic outlook, highlighting challenges and next steps. Do not add any formating.
 
         The sumary paragraph will always start with the company descriptor of ${company.companyDescriptor}
-      `;
+      `
 
     if (toneMessages) {
-      summaryPrompt = summaryPrompt + " The tone should be " + toneMessages;
+      summaryPrompt = summaryPrompt + " The tone should be " + toneMessages
     } else {
-      summaryPrompt =
-        summaryPrompt + " The tone should be cautiously optimistic. ";
+      summaryPrompt = summaryPrompt + " The tone should be cautiously optimistic. "
     }
 
     let subHeadlinePrompt = `
@@ -178,14 +164,12 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         {
           Bullet Point hook: Bullet Point Details
         }
-      `;
+      `
 
     if (toneMessages) {
-      subHeadlinePrompt =
-        subHeadlinePrompt + " The tone should be " + toneMessages;
+      subHeadlinePrompt = subHeadlinePrompt + " The tone should be " + toneMessages
     } else {
-      subHeadlinePrompt =
-        subHeadlinePrompt + " The tone should be cautiously optimistic. ";
+      subHeadlinePrompt = subHeadlinePrompt + " The tone should be cautiously optimistic. "
     }
 
     let keyHighlightsPrompt = `
@@ -205,17 +189,15 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
           Bullet Point hook: Bullet Point Details
         }
 
-        `;
+        `
 
     if (toneMessages) {
-      keyHighlightsPrompt =
-        keyHighlightsPrompt + " The tone should be " + toneMessages;
+      keyHighlightsPrompt = keyHighlightsPrompt + " The tone should be " + toneMessages
     } else {
-      keyHighlightsPrompt =
-        keyHighlightsPrompt + " The tone should be cautiously optimistic. ";
+      keyHighlightsPrompt = keyHighlightsPrompt + " The tone should be cautiously optimistic. "
     }
     const system_prompt =
-      "You are a high-quality IR/PR professional specializing in crafting impactful press releases for companies across various industries.";
+      "You are a high-quality IR/PR professional specializing in crafting impactful press releases for companies across various industries."
 
     // Step 3: Run OpenAI APIs in parallel
     console.log("Sending requests to OpenAI APIs", {
@@ -224,7 +206,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       ceoQuote: ceoQuotePrompt,
       subHeadline: subHeadlinePrompt,
       keyHighlights: keyHighlightsPrompt,
-    });
+    })
 
     const summaryResponse = await openAiApi.completion(
       [
@@ -265,33 +247,43 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       keyHighlightsPrompt,
     )
 
-    let generatedSummary = summaryResponse?.data.choices[0].message.content;
-    let generatedHeadline =
-      headlineResponse?.data.choices[0].message.content;
-      let generatedCeoQuote =
-      ceoQuoteResponse?.data.choices[0].message.content;
+    const generatedSummary = summaryResponse?.data.choices[0].message.content
+    const generatedHeadline = headlineResponse?.data.choices[0].message.content
+    const generatedCeoQuote = ceoQuoteResponse?.data.choices[0].message.content
 
-    let generatedSubHeadlines =
-      subHeadlineResponse?.data.choices[0].message.content;
+    let generatedSubHeadlinesJson = subHeadlineResponse?.data.choices[0].message.content
+    let formattedSubHeadlines = "";
+    let formattedkeyhighlights = "";
+
 
     // Ensure the response is in the correct JSON format and handle parsing
     try {
-      generatedSubHeadlines = JSON.parse(generatedSubHeadlines);
+      generatedSubHeadlinesJson = JSON.parse(generatedSubHeadlinesJson)
+
+      // Iterate through the object and concatenate each key-value pair
+      formattedSubHeadlines = Object.entries(generatedSubHeadlinesJson)
+        .map(([key, value]) => `${key}:${value}`)
+        .join("\n");  // Join each pair with a newline character
+
     } catch (error) {
-      console.error("Error parsing SubHeadlines JSON:", error);
-      generatedSubHeadlines = {}; // Assign an empty object if parsing fails
+      console.error("Error parsing SubHeadlines JSON:", error)
+      formattedSubHeadlines = "" // Assign an empty object if parsing fails
     }
 
     // Parse the JSON response for key highlights
-    let generatedKeyHighlights =
-      keyHighlightsResponse?.data.choices[0].message.content;
+    let generatedKeyHighlightsJson = keyHighlightsResponse?.data.choices[0].message.content
 
     // Ensure the response is in the correct JSON format and handle parsing
     try {
-      generatedKeyHighlights = JSON.parse(generatedKeyHighlights);
+      generatedKeyHighlightsJson = JSON.parse(generatedKeyHighlightsJson)
+      // Iterate through the object and concatenate each key-value pair
+      formattedkeyhighlights = Object.entries(generatedKeyHighlightsJson)
+        .map(([key, value]) => `${key}:${value}`)
+        .join("\n");  // Join each pair with a newline character
+
     } catch (error) {
-      console.error("Error parsing key highlights JSON:", error);
-      generatedKeyHighlights = {}; // Assign an empty object if parsing fails
+      console.error("Error parsing key highlights JSON:", error)
+      formattedkeyhighlights = "" // Assign an empty object if parsing fails
     }
 
     const chatNameResponse = await openAiApi.completion(
@@ -300,110 +292,122 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         { role: "user", content: generatedHeadline },
       ],
       namePrompt,
-    );
+    )
 
-    let generatedName = chatNameResponse?.data.choices[0].message.content;
-    chatName = generatedName
-    setChatName(generatedName);
+    const generatedChatName = chatNameResponse?.data.choices[0].message.content
 
     console.log("Received responses from OpenAI APIs", {
-      chatName: generatedName,
+      chatName: generatedChatName,
       summary: generatedSummary,
       headline: generatedHeadline,
       ceoQuote: generatedCeoQuote,
-      subHeadline: generatedSubHeadlines,
-      keyHighlights: generatedKeyHighlights,
-    });
-
-    // After generating summary, headline, and CEO quote
-    console.log("Creating new chat with generated content");
-    try {
-      const newChatContent = [
-        {
-          message: "Generated Headline: " + generatedHeadline,
-          direction: "incoming",
-          sender: "bot",
-        },
-        {
-          message:
-            `Generated Sub Headline:: \n` +
-            Object.entries(generatedSubHeadlines)
-              .map(([key, value]) => `- ${key}: ${value}`)
-              .join("\n"),
-          direction: "incoming",
-          sender: "bot",
-        },
-        {
-          message: "Generated Summary: " + generatedSummary,
-          direction: "incoming",
-          sender: "bot",
-        },
-        {
-          message:
-            `Generated Key Highlights: \n` +
-            Object.entries(generatedKeyHighlights)
-              .map(([key, value]) => `- ${key}: ${value}`)
-              .join("\n"),
-          direction: "incoming",
-          sender: "bot",
-        },
-        {
-          message: "Generated CEO Quote: " + generatedCeoQuote,
-          direction: "incoming",
-          sender: "bot",
-        },
-      ];
-
-      if (currentChatId) {
-        console.log("Saving chat name as ", chatName);
-        await chatApi.updateChat({
-          _id: currentChatId,
-          userid: loggedInUser,
-          messages: newChatContent,
-          chat_type: "Press Release",
-          chatName: chatName,
-        });
-
-        //navigate(`/chat/pressRelease/${currentChatId}`);
-      }
-
-      // Update messages state with new chat content
-      setMessages((prevMessages) => [...prevMessages, ...newChatContent]);
-    } catch (error) {
-      console.error("Failed to create new chat:", error);
-      toast.error("Failed to create new chat. Please try again.");
-    }
-
-    // Headline
-    setHeadline(generatedHeadline);
-
-    // Sub Headline
-    setSubHeadline(generatedSubHeadlines);
-
-    // Summary
-    setSummary(generatedSummary);
-
-    // Key Highlights
-    setKeyHighlights(generatedKeyHighlights);
-
-    // CEO Quote
-    setCeoQuote(generatedCeoQuote);
+      subHeadline: formattedSubHeadlines,
+      keyHighlights: formattedkeyhighlights,
+    })
 
     const newExtractedData = {
-      [file_id]: {  // Use the file name (or any unique identifier) as the key
-        name: generatedName,
+      [file_id]: {
+        name: generatedChatName,
         headline: generatedHeadline,
-        subHeadline: generatedSubHeadlines,
+        subHeadline: formattedSubHeadlines,
         summary: generatedSummary,
-        keyHighlights:generatedKeyHighlights,
+        keyHighlights: formattedkeyhighlights,
         ceoQuote: generatedCeoQuote,
-      }
-    };
-    
-    setExtractedData(newExtractedData);
-    
-    setIsLoading(false)
+      },
+    }
 
+    setExtractedData(newExtractedData)
+
+    // Persist the extracted data in Vault
+    await updateVaultWithInitialExtractedData(file_id, newExtractedData[file_id])
+
+    // Persist the extracted data in Chat DB and Chat Window
+    await updateNewChatWithNewMessages(loggedInUser, newExtractedData[file_id])
+
+    setIsLoading(false)
+  }
+
+  const updateNewChatWithNewMessages = async (loggedInUser: string, data: ExtractedData) => {
+        // After generating summary, headline, and CEO quote
+        console.log("Creating new chat with generated content")
+        try {
+          const newChatContent = [
+            {
+              message: "Generated Headline: " + data.headline,
+              direction: "incoming",
+              sender: "bot",
+            },
+            {
+              message:
+                `Generated Sub Headline:: \n` + data.subHeadline,
+              direction: "incoming",
+              sender: "bot",
+            },
+            {
+              message: "Generated Summary: " + data.summary,
+              direction: "incoming",
+              sender: "bot",
+            },
+            {
+              message:
+                `Generated Key Highlights: \n` + data.keyHighlights,
+              direction: "incoming",
+              sender: "bot",
+            },
+            {
+              message: "Generated CEO Quote: " + data.ceoQuote,
+              direction: "incoming",
+              sender: "bot",
+            },
+          ]
+
+          console.log("Creating new chat name as ", data.name)
+
+          const newChatResponse = await chatApi.newChat({
+            userid: loggedInUser,
+            messages: newChatContent,
+            chat_type: "Press Release",
+            chatName: data.name,
+          })
+
+          if (newChatResponse) {
+            const chatId = newChatResponse.data._id
+
+            console.log("Newe chat id is ", chatId)
+            setCurrentChatId(chatId)
+          }
+        
+          // Update messages state with new chat content
+          setMessages((prevMessages) => [...prevMessages, ...newChatContent])
+        } catch (error) {
+          console.error("Failed to create new chat:", error)
+          toast.error("Failed to create new chat. Please try again.")
+        }
+    
+
+  }
+
+
+  const updateVaultWithInitialExtractedData = async (fileId: string, data: ExtractedData) => {
+    try {
+      console.log("Updating vault entry");
+      const updateData = [
+        {
+          _id: fileId,
+          extractedTextSummary: data.summary,
+          extractedTextHeadline: data.headline,
+          extractedCeoQuote: data.ceoQuote,
+          extractedSubHeadline: data.subHeadline,
+          extractedKeyHighlights: data.keyHighlights,
+          chatName: data.name,
+        },
+      ];
+      await vaultApi.updateFiles(updateData);
+
+    } catch (error) {
+      console.error("Error persisting data:", error)
+      toast.error("Failed to save data. Please try again.")
+    }
   }
 
   const handleEdit = (fileId: string, field: string) => {
@@ -413,10 +417,48 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
     }))
   }
 
-  const handleSave = (fileId: string, field: string, value: string) => {
+  const updateExtractedData = async (fileId: string, field: string, value: string) => {
+    try {
+
+      const mappedField = fieldLabels[field]
+
+      if (!mappedField) {
+        throw new Error("Field mapping not found");
+      }
+  
+      const updateData = [
+        {
+          _id: fileId,
+          [mappedField]: value
+        },
+      ];
+      console.log(`Updating vault entry ${updateData}` )
+
+      await vaultApi.updateFiles(updateData);
+
+    } catch (error) {
+      console.error("Error persisting data:", error)
+      toast.error("Failed to save data. Please try again.")
+    }
+  }
+
+
+  const handleSave = async (fileId: string, field: string, value: string) => {
+    const updatedData = {
+      ...extractedData[fileId],
+      [field]: value,
+    }
+    setExtractedData((prev) => ({
+      ...prev,
+      [fileId]: updatedData,
+    }))
+
+    console.log(`New value for field ${field} is ${value}` )
+    // Persist the changes
+    await updateExtractedData(fileId, field, value)
+
     onUpdateExtractedData(fileId, field, value)
 
-    console.log("In save - value", value)
     setEditingFields((prev) => ({
       ...prev,
       [fileId]: prev[fileId].filter((f) => f !== field),
@@ -429,12 +471,10 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       [fileId]: prev[fileId].filter((f) => f !== field),
     }))
   }
-  
+
   const renderEditableField = (fileId: string, field: string, isRichText: boolean, fieldName: string) => {
     const isEditing = editingFields[fileId]?.includes(field)
     const value = extractedData[fileId]?.[field as keyof ExtractedData] || ""
-
-    console.log("Field contant is ", value)
 
     if (isEditing) {
       return (
@@ -442,25 +482,40 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
           {isRichText ? (
             <RichTextEditor
               label={fieldName}
-              value={typeof value === "string" ? value : JSON.stringify(value, null, 2)} // Convert object to string
-              onChange={(newValue) => onUpdateExtractedData(fileId, field, newValue)}
-            />
+              value={value}
+              onChange={(newValue) => {
+                setExtractedData((prev) => ({
+                  ...prev,
+                  [fileId]: {
+                    ...prev[fileId],
+                    [field]: newValue,
+                  },
+                }))
+              }} />
           ) : (
             <div className="space-y-2">
               <Label htmlFor={`${fileId}-${field}`}>{fieldName}</Label>
               <Input
                 id={`${fileId}-${field}`}
-                value={typeof value === "string" ? value : JSON.stringify(value, null, 2)} // Convert object to string
-                onChange={(e) => onUpdateExtractedData(fileId, field, e.target.value)}
+                value={value}
+                onChange={(e) => {
+                  setExtractedData((prev) => ({
+                    ...prev,
+                    [fileId]: {
+                      ...prev[fileId],
+                      [field]: e.target.value,
+                    },
+                  }))
+                }}
               />
             </div>
           )}
           <div className="space-x-2">
-            <Button onClick={() => handleSave(fileId, field, value)} className="bg-primary text-white">
-              Save
-            </Button>
-            <Button variant="outline" onClick={() => handleCancel(fileId, field)}>
+            <Button onClick={() => handleCancel(fileId, field)} variant="outline">
               Cancel
+            </Button>
+            <Button onClick={() => handleSave(fileId, field, extractedData[fileId][field])} variant="default">
+              Save
             </Button>
           </div>
         </div>
@@ -486,19 +541,12 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         </div>
         {isRichText ? (
           <div
-            dangerouslySetInnerHTML={{
-              __html: typeof value === "string" ? value : Object.entries(value) // Render object entries
-              .map(([key, val]) => `<strong>${key}:</strong> ${val}`)
-              .join("<br/>"),
-            }}
+            dangerouslySetInnerHTML={{ __html: value }}
             className="prose prose-sm max-w-none"
             style={{ whiteSpace: "pre-wrap" }}
           />
         ) : (
-          <p className="text-gray-700">
-            {typeof value === "string" ? value : JSON.stringify(value, null, 2)}
-          </p>
-
+          <p className="text-gray-700">{value}</p>
         )}
       </div>
     )

@@ -9,6 +9,7 @@ export interface NewChaDto {
   userid: string;
   chat_type: string;
   messages: MessageDto[];
+  chatName?: string;
 }
 
 export interface UpdateChaDto {

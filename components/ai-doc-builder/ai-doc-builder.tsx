@@ -434,6 +434,8 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   }
 
   const generatePDF = async () => {
+    setIsLoading(true)
+
     const date = new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -490,8 +492,8 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       document.body.removeChild(link);
     }
 
+    setIsLoading(false)
 
-    throw new Error("Function not implemented.")
   }
 
 
@@ -532,6 +534,18 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
             >
               <div className="w-1/2 border-r border-gray-200 p-4 overflow-hidden">
                 <h3 className="text-lg font-semibold mb-2 text-primary">AI Extracted Details</h3>
+                {isDataFetched && (
+                  <Button
+                    onClick={generatePDF}
+                    className={`mt-2 ${isLoading ? "bg-gray-400" : "bg-primary"}`}
+                  >
+                    {isLoading ? (
+                      <span>Generating...</span>
+                    ) : (
+                      <span>Generate PDF</span>
+                    )}
+                  </Button>
+                )}                
                 <AIExtractedDetails
                   documents={selectedDocuments}
                   //extractedData={extractedData}
@@ -540,14 +554,9 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                   company={companyUser}
                   updateParentExtractedData={updateParentExtractedData}
                 />
+
+
               </div>
-              {isDataFetched && (
-                <div className="mt-4 flex justify-end">
-                  <Button onClick={generatePDF} className="mt-2 bg-primary">
-                    Generate PDF
-                  </Button>
-                </div>
-              )}
 
               <div className="w-1/2 p-4 overflow-hidden bg-gray-50">
                 <h3 className="text-lg font-semibold mb-2 text-primary">Chat Assistance</h3>

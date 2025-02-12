@@ -181,6 +181,7 @@ const convertHtmlToRichText = (html: string) => {
   });
 };
 
+
 const RichTextWithHTML: React.FC<{ content: string }> = ({ content }) => {
   const [htmlContent, setHtmlContent] = useState<string>("");
 
@@ -242,15 +243,8 @@ const PressReleasePDF: React.FC<PressReleasePDFProps> = ({
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.date}>{date}</Text>
 
-        {Object.keys(subHeadline as unknown as Record<string, string>).map(
-          (key) => (
-            <View key={key}>
-              <Text style={styles.subHeadlineText}>
-                - {(subHeadline as unknown as Record<string, string>)[key]}
-              </Text>
-            </View>
-          ),
-        )}
+        <RichTextWithHTML content={`${subHeadline}`} />
+
 
         <View style={styles.spacer} />
 
@@ -260,16 +254,8 @@ const PressReleasePDF: React.FC<PressReleasePDFProps> = ({
         <Text style={styles.title}>Key Highlights</Text>
         {/* Render key highlights */}
 
-        {Object.keys(keyHighlights as unknown as Record<string, string>).map(
-          (key) => (
-            <View key={key} style={styles.bulletPoint}>
-              <Text style={styles.bullet}>•</Text>
-              <Text style={styles.bulletText}>
-                {(keyHighlights as unknown as Record<string, string>)[key]}
-              </Text>
-            </View>
-          ),
-        )}
+        <RichTextWithHTML content={`${keyHighlights}`} />
+
         <View style={styles.spacer} />
 
         <Text style={styles.content}>

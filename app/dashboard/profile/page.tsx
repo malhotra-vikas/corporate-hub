@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -9,23 +9,58 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RichTextEditor } from "@/components/rich-text-editor"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { FileUpload } from "@/components/file-upload"
+import { useAuth } from "@/lib/auth-context"
+
+// Add this import for the API calls
+import UserApi from "@/lib/api/user.api"
+
+import { toast } from "react-toastify"
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState({
-    companyName: "Acme Corp",
-    aboutCompany:
-      "<p>Acme Corporation is a fictional company that features prominently in the Road Runner/Wile E. Coyote animated shorts as a running gag featuring outlandish products that fail or backfire catastrophically at the worst possible times.</p>",
-    cautionaryNote: "<p>This document contains forward-looking statements. Actual results may differ materially.</p>",
-    companyDescriptor: "<p>Leading provider of innovative solutions for cartoon characters.</p>",
-    ceoName: "John Doe",
-    contactName: "Jane Smith",
-    contactEmail: "jane@acmecorp.com",
-    irContactName: "Bob Johnson",
-    irContactEmail: "bob@acmecorp.com",
-    irContactPhone: "+1 (555) 123-4567",
-    irCompanyName: "Acme Investor Relations",
+    companyName: "",
+    companyAbout: "",
+    companyCautionaryNote: "",
+    companyDescriptor: "",
+    companyCEOName: "",
+    companyContactName: "",
+    companyContactEmail: "",
+    companyInvestorRelationsContactName: "",
+    companyInvestorRelationsContactEmail: "",
+    companyInvestorRelationsContactPhone: "",
+    companyInvestorRelationsCompanyName: "",
     logo: null as File | null,
   })
+
+  const userApi = new UserApi()
+  
+  const [isLoading, setIsLoading] = useState(true)
+  const { user } = useAuth()
+
+  let companyUser
+
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (user) {
+        try {
+          companyUser = await userApi.getClientByEmail(user.email)
+          
+          setProfile((prevProfile) => ({
+            ...prevProfile,
+            ...companyUser
+          }))
+        } catch (error) {
+          console.error("Error fetching profile:", error)
+          toast.error("Failed to load profile data")
+        } finally {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadProfile()
+  }, [user])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -36,14 +71,22 @@ export default function ProfilePage() {
     setProfile((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleLogoUpload = (file: File) => {
-    setProfile((prev) => ({ ...prev, logo: file }))
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (user) {
+      try {
+        await userApi.updateUserByEmail(profile)
+        toast.success("Profile updated successfully!")
+      } catch (error) {
+        console.error("Error updating profile:", error)
+        toast.error("Failed to update profile")
+      }
+    }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Profile data:", profile)
-    alert("Profile updated successfully!")
+  if (isLoading) {
+    return <div>Loading...</div>
   }
 
   return (
@@ -56,11 +99,6 @@ export default function ProfilePage() {
         <CardContent>
           <div className="flex items-center space-x-4">
             <Avatar className="h-20 w-20">
-              {profile.logo ? (
-                <AvatarImage src={URL.createObjectURL(profile.logo)} alt="Company Logo" />
-              ) : (
-                <AvatarImage src="/company-logo.png" alt="Default Company Logo" />
-              )}
               <AvatarFallback>{profile.companyName.slice(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
@@ -87,16 +125,15 @@ export default function ProfilePage() {
                 <Label htmlFor="companyName">Company Name</Label>
                 <Input id="companyName" name="companyName" value={profile.companyName} onChange={handleInputChange} />
               </div>
-              <FileUpload onFileSelect={handleLogoUpload} accept="image/*" label="Company Logo" />
               <RichTextEditor
                 label="About the Company"
-                value={profile.aboutCompany}
-                onChange={handleRichTextChange("aboutCompany")}
+                value={profile.companyAbout}
+                onChange={handleRichTextChange("companyAbout")}
               />
               <RichTextEditor
                 label="Cautionary Note"
-                value={profile.cautionaryNote}
-                onChange={handleRichTextChange("cautionaryNote")}
+                value={profile.companyCautionaryNote}
+                onChange={handleRichTextChange("companyCautionaryNote")}
               />
               <RichTextEditor
                 label="Company Descriptor"
@@ -104,8 +141,8 @@ export default function ProfilePage() {
                 onChange={handleRichTextChange("companyDescriptor")}
               />
               <div className="space-y-2">
-                <Label htmlFor="ceoName">CEO Name</Label>
-                <Input id="ceoName" name="ceoName" value={profile.ceoName} onChange={handleInputChange} />
+                <Label htmlFor="companyCEOName">CEO Name</Label>
+                <Input id="companyCEOName" name="companyCEOName" value={profile.companyCEOName} onChange={handleInputChange} />
               </div>
             </CardContent>
           </Card>
@@ -118,16 +155,16 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="contactName">Contact Name</Label>
-                <Input id="contactName" name="contactName" value={profile.contactName} onChange={handleInputChange} />
+                <Label htmlFor="companyContactName">Contact Name</Label>
+                <Input id="companyContactName" name="companyContactName" value={profile.companyContactName} onChange={handleInputChange} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contactEmail">Contact Email</Label>
+                <Label htmlFor="companyContactEmail">Contact Email</Label>
                 <Input
-                  id="contactEmail"
-                  name="contactEmail"
+                  id="companyContactEmail"
+                  name="companyContactEmail"
                   type="email"
-                  value={profile.contactEmail}
+                  value={profile.companyContactEmail}
                   onChange={handleInputChange}
                 />
               </div>
@@ -142,40 +179,40 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="irContactName">IR Contact Name</Label>
+                <Label htmlFor="companyInvestorRelationsContactName">IR Contact Name</Label>
                 <Input
-                  id="irContactName"
-                  name="irContactName"
-                  value={profile.irContactName}
+                  id="companyInvestorRelationsContactName"
+                  name="companyInvestorRelationsContactName"
+                  value={profile.companyInvestorRelationsContactName}
                   onChange={handleInputChange}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="irContactEmail">IR Contact Email</Label>
+                <Label htmlFor="companyInvestorRelationsContactEmail">IR Contact Email</Label>
                 <Input
-                  id="irContactEmail"
-                  name="irContactEmail"
+                  id="companyInvestorRelationsContactEmail"
+                  name="companyInvestorRelationsContactEmail"
                   type="email"
-                  value={profile.irContactEmail}
+                  value={profile.companyInvestorRelationsContactEmail}
                   onChange={handleInputChange}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="irContactPhone">IR Contact Phone</Label>
                 <Input
-                  id="irContactPhone"
-                  name="irContactPhone"
+                  id="companyInvestorRelationsContactPhone"
+                  name="companyInvestorRelationsContactPhone"
                   type="tel"
-                  value={profile.irContactPhone}
+                  value={profile.companyInvestorRelationsContactPhone}
                   onChange={handleInputChange}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="irCompanyName">IR Company Name</Label>
+                <Label htmlFor="companyInvestorRelationsCompanyName">IR Company Name</Label>
                 <Input
-                  id="irCompanyName"
-                  name="irCompanyName"
-                  value={profile.irCompanyName}
+                  id="companyInvestorRelationsCompanyName"
+                  name="companyInvestorRelationsCompanyName"
+                  value={profile.companyInvestorRelationsCompanyName}
                   onChange={handleInputChange}
                 />
               </div>

@@ -16,7 +16,7 @@ import UserApi from "@/lib/api/user.api"
 import { toast } from "react-toastify"
 import { ChatInterface } from "./chat-interface"
 
-interface ExtractedData {
+export interface ExtractedData {
   name: string
   headline: string
   subHeadline: string
@@ -38,6 +38,7 @@ interface AIExtractedDetailsProps {
   onUpdateExtractedData: (fileId: string, field: string, value: string) => void
   isLoading: boolean
   company: any
+  updateParentExtractedData: (data: { [key: string]: ExtractedData }) => void
 }
 
 const fieldLabels = {
@@ -53,6 +54,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   onUpdateExtractedData,
   isLoading: initialIsLoading,
   company,
+  updateParentExtractedData
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(initialIsLoading)
   const [editingFields, setEditingFields] = useState<{ [key: string]: string[] }>({})
@@ -62,6 +64,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   const [welcomeMessageSent, setWelcomeMessageSent] = useState(false)
   const [loggedInUser, setLoggedinUser] = useState<string>("")
   const [messages, setMessages] = useState<any[]>([])
+  const [isDataFetched, setIsDataFetched] = useState(false)
 
   let [ceoQuote, setCeoQuote] = useState<string>("");
   let [documentText, setExtractedDocumentText] = useState<string>("");
@@ -208,123 +211,135 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       keyHighlights: keyHighlightsPrompt,
     })
 
-    const summaryResponse = await openAiApi.completion(
-      [
-        { role: "system", content: system_prompt },
-        { role: "user", content: cumulativeExtractedText },
-      ],
-      summaryPrompt,
-    )
-    const headlineResponse = await openAiApi.completion(
-      [
-        { role: "system", content: system_prompt },
-        { role: "user", content: cumulativeExtractedText },
-      ],
-      headlinePrompt,
-    )
 
-    const ceoQuoteResponse = await openAiApi.completion(
-      [
-        { role: "system", content: system_prompt },
-        { role: "user", content: cumulativeExtractedText },
-      ],
-      ceoQuotePrompt,
-    )
-
-    const subHeadlineResponse = await openAiApi.completion(
-      [
-        { role: "system", content: system_prompt },
-        { role: "user", content: cumulativeExtractedText },
-      ],
-      subHeadlinePrompt,
-    )
-
-    const keyHighlightsResponse = await openAiApi.completion(
-      [
-        { role: "system", content: system_prompt },
-        { role: "user", content: cumulativeExtractedText },
-      ],
-      keyHighlightsPrompt,
-    )
-
-    const generatedSummary = summaryResponse?.data.choices[0].message.content
-    const generatedHeadline = headlineResponse?.data.choices[0].message.content
-    const generatedCeoQuote = ceoQuoteResponse?.data.choices[0].message.content
-
-    let generatedSubHeadlinesJson = subHeadlineResponse?.data.choices[0].message.content
-    let formattedSubHeadlines = "";
-    let formattedkeyhighlights = "";
-
-
-    // Ensure the response is in the correct JSON format and handle parsing
     try {
-      generatedSubHeadlinesJson = JSON.parse(generatedSubHeadlinesJson)
-
-      // Iterate through the object and concatenate each key-value pair
-      formattedSubHeadlines = Object.entries(generatedSubHeadlinesJson)
-        .map(([key, value]) => `${key}:${value}`)
-        .join("\n");  // Join each pair with a newline character
-
-    } catch (error) {
-      console.error("Error parsing SubHeadlines JSON:", error)
-      formattedSubHeadlines = "" // Assign an empty object if parsing fails
-    }
-
-    // Parse the JSON response for key highlights
-    let generatedKeyHighlightsJson = keyHighlightsResponse?.data.choices[0].message.content
-
-    // Ensure the response is in the correct JSON format and handle parsing
-    try {
-      generatedKeyHighlightsJson = JSON.parse(generatedKeyHighlightsJson)
-      // Iterate through the object and concatenate each key-value pair
-      formattedkeyhighlights = Object.entries(generatedKeyHighlightsJson)
-        .map(([key, value]) => `${key}:${value}`)
-        .join("\n");  // Join each pair with a newline character
-
-    } catch (error) {
-      console.error("Error parsing key highlights JSON:", error)
-      formattedkeyhighlights = "" // Assign an empty object if parsing fails
-    }
-
-    const chatNameResponse = await openAiApi.completion(
-      [
-        { role: "system", content: system_prompt },
-        { role: "user", content: generatedHeadline },
-      ],
-      namePrompt,
-    )
-
-    const generatedChatName = chatNameResponse?.data.choices[0].message.content
-
-    console.log("Received responses from OpenAI APIs", {
-      chatName: generatedChatName,
-      summary: generatedSummary,
-      headline: generatedHeadline,
-      ceoQuote: generatedCeoQuote,
-      subHeadline: formattedSubHeadlines,
-      keyHighlights: formattedkeyhighlights,
-    })
-
-    const newExtractedData = {
-      [file_id]: {
-        name: generatedChatName,
-        headline: generatedHeadline,
-        subHeadline: formattedSubHeadlines,
+      const summaryResponse = await openAiApi.completion(
+        [
+          { role: "system", content: system_prompt },
+          { role: "user", content: cumulativeExtractedText },
+        ],
+        summaryPrompt,
+      )
+      const headlineResponse = await openAiApi.completion(
+        [
+          { role: "system", content: system_prompt },
+          { role: "user", content: cumulativeExtractedText },
+        ],
+        headlinePrompt,
+      )
+  
+      const ceoQuoteResponse = await openAiApi.completion(
+        [
+          { role: "system", content: system_prompt },
+          { role: "user", content: cumulativeExtractedText },
+        ],
+        ceoQuotePrompt,
+      )
+  
+      const subHeadlineResponse = await openAiApi.completion(
+        [
+          { role: "system", content: system_prompt },
+          { role: "user", content: cumulativeExtractedText },
+        ],
+        subHeadlinePrompt,
+      )
+  
+      const keyHighlightsResponse = await openAiApi.completion(
+        [
+          { role: "system", content: system_prompt },
+          { role: "user", content: cumulativeExtractedText },
+        ],
+        keyHighlightsPrompt,
+      )
+  
+      const generatedSummary = summaryResponse?.data.choices[0].message.content
+      const generatedHeadline = headlineResponse?.data.choices[0].message.content
+      const generatedCeoQuote = ceoQuoteResponse?.data.choices[0].message.content
+  
+      let generatedSubHeadlinesJson = subHeadlineResponse?.data.choices[0].message.content
+      let formattedSubHeadlines = "";
+      let formattedkeyhighlights = "";
+  
+  
+      // Ensure the response is in the correct JSON format and handle parsing
+      try {
+        generatedSubHeadlinesJson = JSON.parse(generatedSubHeadlinesJson)
+  
+        // Iterate through the object and concatenate each key-value pair
+        formattedSubHeadlines = Object.entries(generatedSubHeadlinesJson)
+          .map(([key, value]) => `${key}:${value}`)
+          .join("\n");  // Join each pair with a newline character
+  
+      } catch (error) {
+        console.error("Error parsing SubHeadlines JSON:", error)
+        formattedSubHeadlines = "" // Assign an empty object if parsing fails
+      }
+  
+      // Parse the JSON response for key highlights
+      let generatedKeyHighlightsJson = keyHighlightsResponse?.data.choices[0].message.content
+  
+      // Ensure the response is in the correct JSON format and handle parsing
+      try {
+        generatedKeyHighlightsJson = JSON.parse(generatedKeyHighlightsJson)
+        // Iterate through the object and concatenate each key-value pair
+        formattedkeyhighlights = Object.entries(generatedKeyHighlightsJson)
+          .map(([key, value]) => `${key}:${value}`)
+          .join("\n");  // Join each pair with a newline character
+  
+      } catch (error) {
+        console.error("Error parsing key highlights JSON:", error)
+        formattedkeyhighlights = "" // Assign an empty object if parsing fails
+      }
+  
+      const chatNameResponse = await openAiApi.completion(
+        [
+          { role: "system", content: system_prompt },
+          { role: "user", content: generatedHeadline },
+        ],
+        namePrompt,
+      )
+  
+      const generatedChatName = chatNameResponse?.data.choices[0].message.content
+  
+      console.log("Received responses from OpenAI APIs", {
+        chatName: generatedChatName,
         summary: generatedSummary,
-        keyHighlights: formattedkeyhighlights,
+        headline: generatedHeadline,
         ceoQuote: generatedCeoQuote,
-      },
+        subHeadline: formattedSubHeadlines,
+        keyHighlights: formattedkeyhighlights,
+      })
+  
+      const newExtractedData = {
+        [file_id]: {
+          name: generatedChatName,
+          headline: generatedHeadline,
+          subHeadline: formattedSubHeadlines,
+          summary: generatedSummary,
+          keyHighlights: formattedkeyhighlights,
+          ceoQuote: generatedCeoQuote,
+        },
+      }
+  
+      setExtractedData(newExtractedData)
+
+      updateParentExtractedData(newExtractedData)
+
+      // Add a 5-second delay before removing the loader
+      await delay(5000)
+  
+      // Persist the extracted data in Vault
+      await updateVaultWithInitialExtractedData(file_id, newExtractedData[file_id])
+  
+      // Persist the extracted data in Chat DB and Chat Window
+      await updateNewChatWithNewMessages(loggedInUser, newExtractedData[file_id])
+  
+    } catch (error) {
+      console.error("Error runing AI:", error)
+    } finally {
+      setIsLoading(false)
     }
 
-    setExtractedData(newExtractedData)
-
-    // Persist the extracted data in Vault
-    await updateVaultWithInitialExtractedData(file_id, newExtractedData[file_id])
-
-    // Persist the extracted data in Chat DB and Chat Window
-    await updateNewChatWithNewMessages(loggedInUser, newExtractedData[file_id])
-
-    setIsLoading(false)
   }
 
   const updateNewChatWithNewMessages = async (loggedInUser: string, data: ExtractedData) => {
@@ -575,6 +590,11 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         </Card>
       ))}
     </ScrollArea>
+
   )
+}
+
+function delay(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 

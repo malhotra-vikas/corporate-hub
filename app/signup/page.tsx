@@ -56,65 +56,6 @@ export default function SignUp() {
     const serpApi = new SerpApi()
     const vaultApi = new VaultApi()
 
-    /*    
-        const fetchCompanyPastDocuments = async (ticker: string) => {
-            if (ticker.length < 2) {
-                setPast10KDocuments("")
-                setPast10QDocuments("")
-                setPast8KDocuments("")
-                setPastS1Documents("")
-                return
-            }
-    
-            setIsLoading(true)
-            setError(null)
-    
-            try {
-    
-                const duration = getLastTwoYearsRange()
-                const past10KDocs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_10_K, duration })
-                const past10QDocs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_10_Q, duration })
-                const past8KDocs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_8_K, duration })
-                const pastS1Docs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_S1, duration })
-    
-    
-                past10KDocuments = past10KDocs?.data.filings || null,
-                    past8KDocuments = past8KDocs?.data.filings || null,
-                    pastS1Documents = pastS1Docs?.data.filings || null,
-                    past10QDocuments = past10QDocs?.data.filings || null
-    
-                console.log(" duration is ", duration)
-                console.log(" past10KDocs is ", past10KDocuments)
-                console.log(" past10QDocs is ", past10QDocuments)
-                console.log(" past8KDocs is ", past8KDocuments)
-                console.log(" pastS1Docs is ", pastS1Documents)
-    
-                setPast10KDocuments(past10KDocuments)
-                setPast10QDocuments(past10QDocuments)
-                setPast8KDocuments(past8KDocuments)
-                setPastS1Documents(pastS1Documents)
-    
-                return {
-                    past10KDocuments: past10KDocuments,
-                    past8KDocuments: past8KDocuments,
-                    pastS1Documents: pastS1Documents,
-                    past10QDocuments: past10QDocuments
-                }
-    
-            } catch (error) {
-                console.error("Error fetching company details:", error)
-                setPast10KDocuments("")
-                setPast10QDocuments("")
-                setPast8KDocuments("")
-                setPastS1Documents("")
-                setError("Error fetching company details. Please try again.")
-                toast.error("Error fetching company details. Please try again.")
-            } finally {
-                setIsLoading(false)
-            }
-        }
-    */
-
     const fetchCompanyDetails = useCallback(
         async (ticker: string) => {
             if (ticker.length < 2) {
@@ -149,7 +90,7 @@ export default function SignUp() {
                     setCompanyDetails({
                         ...companyFMP.data[0],
                         companyTicker: ticker,
-                        ceoName: companyCEOName,
+                        ceoName: companyFMP.data[0].ceo,
                         exchange: exchangeFound,
                         industry: companyFMP.data[0].industry,
                         cik: companyFMP.data[0].cik,

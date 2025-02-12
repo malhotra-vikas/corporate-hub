@@ -176,7 +176,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             // Now create a User in the DB too
             const userApi = new UserApi()
-            const createUserResponse = await userApi.createUser({
+
+            const createCompanyData = {
                 email,
                 companyName,
                 companyTicker,
@@ -189,7 +190,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 companyCIK: companyDetails.cik,
                 companyLogo: companyDetails.logo,
                 role: "companyUser", // Default role for new users
-            })
+            }
+
+            console.log("createUser Request being sent is  ", createCompanyData)
+
+            const createUserResponse = await userApi.createUser(createCompanyData)
 
             console.log("createUserResponse os ", createUserResponse)
             const localUser = {

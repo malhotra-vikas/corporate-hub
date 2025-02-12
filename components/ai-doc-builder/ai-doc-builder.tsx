@@ -10,6 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Loader2, Upload, FileText, ChevronLeft, ChevronRight, Trash2 } from "lucide-react"
 import { AIExtractedDetails } from "./ai-extracted-details"
+import type { ExtractedData } from "./ai-extracted-details"
+
 import { ChatInterface } from "./chat-interface"
 import { PastChatSessions } from "./past-chat-sessions"
 
@@ -20,7 +22,9 @@ import VaultApi from "@/lib/api/vault.api"
 import { toast } from "react-toastify"
 import { VaultFile } from "@/lib/types"
 import { useRouter } from "next/router"
+import PressReleasePDF from "./PressReleasePDF"
 
+import { pdf } from "@react-pdf/renderer";
 
 
 type DocumentType = "press_release" | "earnings_statement" | "shareholder_letter" | "other"
@@ -57,6 +61,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [isPastSessionsCollapsed, setIsPastSessionsCollapsed] = useState(true)
   const [isExtractingData, setIsExtractingData] = useState(false)
   let [companyUser, setCompanyUser] = useState()
+  const [isDataFetched, setIsDataFetched] = useState(false) // Added state variable
 
   const { user, loading } = useAuth()
 
@@ -108,6 +113,17 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       console.error("Error fetching files:", error);
       throw new Error("Failed to fetch files");
     }
+  }
+
+  const updateParentExtractedData = (data: { [key: string]: ExtractedData }) => {
+    setExtractedData(data)
+    setIsDataFetched(true)
+  }
+
+  const handleSendMessage = async (message: string) => {
+    // Here you would typically send the message to your AI service and get a response
+    // For now, we'll just echo the message back
+    return `You said: ${message}`
   }
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -298,28 +314,6 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       setIsExtractingData(true)
 
       
-/*
-      // Generate default extracted data
-      const newExtractedData = selectedDocuments.reduce(
-        (acc, doc) => {
-          acc[doc.file.name] = {
-            name: doc.file.name,
-            headline:
-              "Tetete  Joint Venture with Lockwood Development and Bright Hospitality, Projecting $130 Million Revenue Potential and Enhanced Market Presence in NYC",
-            subHeadline:
-              "LuxUrban Hotels, in partnership with Lockwood and Bright, aims to launch a joint venture expected to generate $36.7 million in annual revenue from two pilot hotels. Projected total revenue could reach $130 million across nine Lux properties, enhancing shareholder value and bolstering financial stability through strategic partnerships and advanced technology.",
-            summary:
-              "LuxUrban Hotels Inc. (Nasdaq: LUXH), a hospitality company that leases entire hotels on a long-term basis, manages these hotels, and rents out rooms to guests in the properties it leases, has initiated a strategic joint venture (JV) with Lockwood Development Partners LLC and The Bright Hospitality Management, LLC. This collaboration aims to enhance operational efficiencies and profitability through the integration of advanced hotel management technology and the introduction of Lockwood's Vitality brand into the New York City market. The Pilot JV will initially focus on two Lux hotels—Herald Hotel and Tuscany Hotel—laying the groundwork for potentially expanding the partnership to encompass Lux's full portfolio of nine hotels, contingent upon favorable evaluations and necessary approvals. The joint venture represents a critical step in Lux's broader strategy to address existing financial challenges, including substantial arrears with landlords and unions. With an initial investment of $2 million from Lockwood, the parties project a top-line revenue of approximately $36.7 million for the two pilot hotels, and an estimated $130 million for the entire Lux portfolio once fully integrated into the JV framework. The collaboration with Bright is expected to leverage its proprietary technology platform to enhance revenue management and operational efficiencies, potentially increasing overall profits by $42 million for the full portfolio. However, the successful realization of these forecasts will depend on securing requisite consents from stakeholders, including landlords and noteholders. While the proposed JV provides a promising opportunity for LuxUrban Hotels to revitalize its operations and financial standing, it also acknowledges inherent challenges, particularly in obtaining necessary approvals and addressing existing arrears. The cautious optimism surrounding this venture underscores the company's commitment to sustainable growth and stakeholder value enhancement. As Lux moves forward with these initiatives, effective management of stakeholder expectations and clear communication of progress will be vital for fostering confidence among shareholders, investors, and potential partners.",
-            keyHighlights:
-              "1. Joint Venture Launch: LuxUrban Hotels Inc. is poised to establish a strategic joint venture with Lockwood Development Partners and Bright Hospitality Management, targeting the launch of two pilot hotels in New York City, aligning with Lux's growth strategy in a lucrative market.\n2. Revenue Potential: Projected annual revenue for the two pilot hotels is estimated at $36.7 million, with potential growth to $130 million across all nine Lux properties once fully integrated into the joint venture framework.\n3. Financial Backing: Lockwood's initial investment of $2 million will address current arrears for the pilot hotels, with a total investment expectation of $35 to $42 million, indicating strong financial commitment and confidence in the venture's success.\n4. Operational Innovation: Utilization of Bright's proprietary technology platform aims to enhance operational efficiency and guest experience, positioning Lux for improved profitability with anticipated bottom-line gains of $8.7 million for pilot hotels and $42 million for the full portfolio.\n5. Expansion and Compliance: The joint venture includes a clear roadmap for potential expansion to all Lux hotels, contingent upon necessary consents from stakeholders, emphasizing a cautious yet optimistic approach to growth amid existing challenges.",
-            ceoQuote: "AI-Generated CEO Quote for " + doc.file.name,
-          }
-          return acc
-        },
-        {} as typeof extractedData,
-      )
-      setExtractedData(newExtractedData)
-      */
     }
   }
 
@@ -439,6 +433,68 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     )
   }
 
+  const generatePDF = async () => {
+    const date = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    console.log("extractedData os ", extractedData)
+    const dynamicKey = Object.keys(extractedData)[0]; // Get the first key dynamically
+    const data = extractedData[dynamicKey]; // Access data for that key
+
+    console.log("data os ", data)
+
+    // Generate PDF
+    const pdfContent = (
+      <PressReleasePDF
+        title={data.headline}
+        subHeadline={data.subHeadline}
+        date={date}
+        content={data.summary}
+        keyHighlights={data.keyHighlights}
+        ceoQuote={data.ceoQuote}
+        ceoName={companyUser.companyCEOName}
+        aboutCompany={companyUser.companyAbout}
+        cautionaryNote={companyUser.companyCautionaryNote}
+        companyContactEmail={companyUser.companyCEOName}
+        companyContactName={companyUser.companyContactName}
+        companyName={companyUser.companyName}
+        companyDescriptor={companyUser.companyDescriptor}
+        companyInvestorRelationsCompanyName={
+          companyUser.companyInvestorRelationsCompanyName
+        }
+        companyInvestorRelationsContactEmail={
+          companyUser.companyInvestorRelationsContactEmail
+        }
+        companyInvestorRelationsContactName={
+          companyUser.companyInvestorRelationsContactName
+        }
+        companyInvestorRelationsContactPhone={
+          companyUser.companyInvestorRelationsContactPhone
+        }
+      />
+    );
+
+    console.log("pdfContent is ", pdfContent)
+    const blob = await pdf(pdfContent).toBlob();
+
+    if (blob) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "press_release.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+
+    throw new Error("Function not implemented.")
+  }
+
+
   return (
     <div className="container mx-auto p-4">
       <Card className="h-[calc(100vh-2rem)] bg-white shadow-lg">
@@ -482,14 +538,24 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                   onUpdateExtractedData={handleUpdateExtractedData}
                   isLoading={true}
                   company={companyUser}
+                  updateParentExtractedData={updateParentExtractedData}
                 />
               </div>
+              {isDataFetched && (
+                <div className="mt-4 flex justify-end">
+                  <Button onClick={generatePDF} className="mt-2 bg-primary">
+                    Generate PDF
+                  </Button>
+                </div>
+              )}
+
               <div className="w-1/2 p-4 overflow-hidden bg-gray-50">
                 <h3 className="text-lg font-semibold mb-2 text-primary">Chat Assistance</h3>
-                <ChatInterface />
+                <ChatInterface onSendMessage={handleSendMessage} />
               </div>
             </div>
           </div>
+
         </CardContent>
       </Card>
     </div>

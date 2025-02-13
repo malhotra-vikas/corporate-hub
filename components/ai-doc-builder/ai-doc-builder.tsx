@@ -5,27 +5,24 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Loader2, Upload, FileText, ChevronLeft, ChevronRight, Trash2 } from "lucide-react"
+import { Loader2, Upload, ChevronLeft, ChevronRight } from "lucide-react"
 import { AIExtractedDetails } from "./ai-extracted-details"
 import type { ExtractedData } from "./ai-extracted-details"
 
 import { ChatInterface } from "./chat-interface"
 import { PastChatSessions } from "./past-chat-sessions"
 
-import { type File } from "@/app/actions/upload-file"
+import type { File } from "@/app/actions/upload-file"
 import { useAuth } from "@/lib/auth-context"
 import UserApi from "@/lib/api/user.api"
 import VaultApi from "@/lib/api/vault.api"
 import { toast } from "react-toastify"
-import { VaultFile } from "@/lib/types"
-import { useRouter } from "next/router"
+import type { VaultFile } from "@/lib/types"
 import PressReleasePDF from "./PressReleasePDF"
 
-import { pdf } from "@react-pdf/renderer";
-
+import { pdf } from "@react-pdf/renderer"
 
 type DocumentType = "press_release" | "earnings_statement" | "shareholder_letter" | "other"
 
@@ -41,8 +38,8 @@ interface AIDocBuilderProps {
 
 const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [selectedDocuments, setSelectedDocuments] = useState<UploadedDocument[]>([])
-  const [activeTab, setActiveTab] = useState<'upload' | 'vault' | 'paste'>('upload') // Track active tab
-  const [documentContent, setDocumentContent] = useState<string>('') // Store pasted content
+  const [activeTab, setActiveTab] = useState<"upload" | "vault" | "paste">("upload") // Track active tab
+  const [documentContent, setDocumentContent] = useState<string>("") // Store pasted content
   const [extractedData, setExtractedData] = useState<{
     [key: string]: {
       name: string
@@ -60,15 +57,14 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isPastSessionsCollapsed, setIsPastSessionsCollapsed] = useState(true)
   const [isChatInterfaceCollapsed, setIsChatInterfaceCollapsed] = useState(false)
-  
+
   const [isExtractingData, setIsExtractingData] = useState(false)
   let [companyUser, setCompanyUser] = useState()
   const [isDataFetched, setIsDataFetched] = useState(false) // Added state variable
 
   const { user, loading } = useAuth()
 
-  if (!user) return;
-
+  if (!user) return
 
   const userApi = new UserApi()
   const vaultApi = new VaultApi()
@@ -84,36 +80,35 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   async function getFiles(): Promise<{ files: VaultFile[] }> {
     // Check if the user is defined
     if (!user) {
-      throw new Error("User is not authenticated");
+      throw new Error("User is not authenticated")
     }
 
     try {
       // Fetch the company user using the user's email
-      const companyUser = await userApi.getClientByEmail(user?.email || "");
+      const companyUser = await userApi.getClientByEmail(user?.email || "")
 
       console.log("User is ", user)
 
-
       // If companyUser is not found or doesn't have an ID, throw an error
       if (!companyUser?._id) {
-        throw new Error("Company user not found");
+        throw new Error("Company user not found")
       }
 
       // Fetch the files for the specific company user based on their _id
-      const userFiles = await vaultApi.getSpecificFiles({ user_id: companyUser._id });
+      const userFiles = await vaultApi.getSpecificFiles({ user_id: companyUser._id })
 
       console.log("userFiles  is ", userFiles.data)
 
       // Optionally filter the files if you need, right now we return them as is
-      const filteredFiles = userFiles.data; // Modify filtering logic if necessary
+      const filteredFiles = userFiles.data // Modify filtering logic if necessary
 
       // Return the files
       return {
         files: filteredFiles,
-      };
+      }
     } catch (error) {
-      console.error("Error fetching files:", error);
-      throw new Error("Failed to fetch files");
+      console.error("Error fetching files:", error)
+      throw new Error("Failed to fetch files")
     }
   }
 
@@ -178,7 +173,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
             type: category,
           }
           //setSelectedDocuments((prev) => [...prev, newDocument])
-          setActiveTab('vault') // Switch to "Select from Vault" tab after document upload
+          setActiveTab("vault") // Switch to "Select from Vault" tab after document upload
           toast.success(`File ${file.name} uploaded successfully`)
         } catch (error) {
           console.error("Error uploading file:", error)
@@ -202,13 +197,16 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       companyUser = await userApi.getClientByEmail(user?.email || "")
     }
 
-    const response = await vaultApi.createFileFromText({ fileName: "UserText Input for PR", fileContent: content, user_id: companyUser._id })
+    const response = await vaultApi.createFileFromText({
+      fileName: "UserText Input for PR",
+      fileContent: content,
+      user_id: companyUser._id,
+    })
 
     //setSelectedDocuments((prev) => [...prev, newDocument])
-    setActiveTab('vault') // Switch to "Select from Vault" tab after document upload
+    setActiveTab("vault") // Switch to "Select from Vault" tab after document upload
     toast.success(`File uploaded successfully`)
   }
-
 
   const handleDocumentTypeChange = (index: number, type: DocumentType) => {
     const updatedDocuments = [...selectedDocuments]
@@ -224,20 +222,19 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       vaultFiles = files.files
 
       // Filter files that are either .docx or .pdf
-      const filteredFiles = files.files.filter(file =>
-        file.originalName.endsWith(".docx") || file.originalName.endsWith(".pdf")
-      );
+      const filteredFiles = files.files.filter(
+        (file) => file.originalName.endsWith(".docx") || file.originalName.endsWith(".pdf"),
+      )
 
       console.log("filteredFiles are ", filteredFiles)
       // Sort by last modified date (assuming file object has a `lastModified` field)
-      const sortedFiles = filteredFiles.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-  
+      const sortedFiles = filteredFiles.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+
       console.log("sortedFiles are ", sortedFiles)
 
-      setVaultFiles(sortedFiles);
-
+      setVaultFiles(sortedFiles)
     } catch (error) {
       console.error("Error fetching vault files:", error)
     } finally {
@@ -285,14 +282,13 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     console.log("in handle continue")
 
     // Fetch the company user using the user's email
-    const companyUser = await userApi.getClientByEmail(user?.email || "");
+    const companyUser = await userApi.getClientByEmail(user?.email || "")
 
     console.log("companyUser is ", companyUser)
 
     setCompanyUser(companyUser)
-    
-    if (selectedDocuments.length > 0) {
 
+    if (selectedDocuments.length > 0) {
       console.log("selectedDocuments is ", selectedDocuments)
       setIsDocumentSelected(true)
 
@@ -302,18 +298,20 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         return
       }
 
-      let extractedTextForSelectedDocuments = ''
+      let extractedTextForSelectedDocuments = ""
 
       for (const doc of selectedDocuments) {
         try {
           const file = doc.file as File
 
-          if (file && file._id) { // File is fetched from the Vault
+          if (file && file._id) {
+            // File is fetched from the Vault
             const extractedText = file.extractedText
             extractedTextForSelectedDocuments = extractedText + extractedTextForSelectedDocuments
           }
 
-          if (file && !file._id) { // File is new. Read the doc from the Vault
+          if (file && !file._id) {
+            // File is new. Read the doc from the Vault
             console.log("New file is ", file)
 
             const extractedText = file.extractedText
@@ -321,15 +319,12 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
           }
 
           console.log("extractedTextForSelectedDocuments = ", extractedTextForSelectedDocuments)
-
         } catch (error) {
           console.error("Error with file:", error)
         }
       }
 
       setIsExtractingData(true)
-
-      
     }
   }
 
@@ -357,99 +352,98 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   }
 
   if (!isDocumentSelected) {
-
     return (
-      <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">AI Document Builder</CardTitle>
-        <CardDescription>Upload, select, or paste your documents for analysis</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs
-          value={activeTab}
-          onValueChange={(value) => setActiveTab(value as "upload" | "vault" | "paste")}
-          className="space-y-4"
-        >
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="upload">Upload Documents</TabsTrigger>
-            <TabsTrigger value="vault">Select from Vault</TabsTrigger>
-            <TabsTrigger value="paste">Paste Document</TabsTrigger>
-          </TabsList>
-          <TabsContent value="upload" className="space-y-4">
-            <div className="grid w-full items-center gap-1.5">
-              <Label htmlFor="file-upload" className="text-lg font-semibold">
-                Upload source documents
-              </Label>
-              <Input id="file-upload" type="file" multiple onChange={handleFileUpload} className="cursor-pointer" />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="paste" className="space-y-4">
-            <div className="grid w-full items-center gap-1.5">
-              <Label htmlFor="paste-doc" className="text-lg font-semibold">
-                Paste source documents
-              </Label>
-              <textarea
-                id="paste-doc"
-                rows={8}
-                className="w-full p-2 border border-gray-300 rounded-md resize-vertical"
-                placeholder="Paste your document content here..."
-                value={documentContent}
-                onChange={(e) => setDocumentContent(e.target.value)}
-              />
-              <Button onClick={handlePasteSubmit} className="mt-2 bg-primary">
-                Submit Document
-              </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="vault" className="space-y-4">
-            <Button onClick={handleVaultSelection} disabled={isLoading} className="w-full bg-primary text-white">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading Vault Documents
-                </>
-              ) : (
-                <>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Reload Vault Documents
-                </>
-              )}
-            </Button>
-            {vaultFiles.length > 0 && (
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {vaultFiles.map((file) => (
-                  <Card key={file._id} className="bg-gray-50">
-                    <CardContent className="flex items-center justify-between p-4">
-                      <div className="flex items-center space-x-4">
-                        <Checkbox
-                          id={file._id}
-                          onCheckedChange={(checked) => handleVaultFileSelection(file, checked as boolean)}
-                        />
-                        <Label
-                          htmlFor={file._id}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {file.originalName}
-                        </Label>
-                      </div>
-                      <span className="text-sm text-muted-foreground">{file.uploadedDate}</span>
-                    </CardContent>
-                  </Card>
-                ))}
+      <Card className="w-full mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">AI Document Builder</CardTitle>
+          <CardDescription>Upload, select, or paste your documents for analysis</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as "upload" | "vault" | "paste")}
+            className="space-y-4"
+          >
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="upload">Upload Documents</TabsTrigger>
+              <TabsTrigger value="vault">Select from Vault</TabsTrigger>
+              <TabsTrigger value="paste">Paste Document</TabsTrigger>
+            </TabsList>
+            <TabsContent value="upload" className="space-y-4">
+              <div className="grid w-full items-center gap-1.5">
+                <Label htmlFor="file-upload" className="text-lg font-semibold">
+                  Upload source documents
+                </Label>
+                <Input id="file-upload" type="file" multiple onChange={handleFileUpload} className="cursor-pointer" />
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
 
-        {selectedDocuments.length > 0 && (
-          <Button onClick={handleContinue} className="mt-4 w-full bg-primary text-white">
-            Continue with {selectedDocuments.length} selected document{selectedDocuments.length > 1 ? "s" : ""}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+            <TabsContent value="paste" className="space-y-4">
+              <div className="grid w-full items-center gap-1.5">
+                <Label htmlFor="paste-doc" className="text-lg font-semibold">
+                  Paste source documents
+                </Label>
+                <textarea
+                  id="paste-doc"
+                  rows={8}
+                  className="w-full p-2 border border-gray-300 rounded-md resize-vertical"
+                  placeholder="Paste your document content here..."
+                  value={documentContent}
+                  onChange={(e) => setDocumentContent(e.target.value)}
+                />
+                <Button onClick={handlePasteSubmit} className="mt-2 bg-primary">
+                  Submit Document
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="vault" className="space-y-4">
+              <Button onClick={handleVaultSelection} disabled={isLoading} className="w-full bg-primary text-white">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Loading Vault Documents
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Reload Vault Documents
+                  </>
+                )}
+              </Button>
+              {vaultFiles.length > 0 && (
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {vaultFiles.map((file) => (
+                    <Card key={file._id} className="bg-gray-50">
+                      <CardContent className="flex items-center justify-between p-4">
+                        <div className="flex items-center space-x-4">
+                          <Checkbox
+                            id={file._id}
+                            onCheckedChange={(checked) => handleVaultFileSelection(file, checked as boolean)}
+                          />
+                          <Label
+                            htmlFor={file._id}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {file.originalName}
+                          </Label>
+                        </div>
+                        <span className="text-sm text-muted-foreground">{file.uploadedDate}</span>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+
+          {selectedDocuments.length > 0 && (
+            <Button onClick={handleContinue} className="mt-4 w-full bg-primary text-white">
+              Continue with {selectedDocuments.length} selected document{selectedDocuments.length > 1 ? "s" : ""}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
     )
   }
 
@@ -460,11 +454,11 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       year: "numeric",
       month: "long",
       day: "numeric",
-    });
+    })
 
     console.log("extractedData os ", extractedData)
-    const dynamicKey = Object.keys(extractedData)[0]; // Get the first key dynamically
-    const data = extractedData[dynamicKey]; // Access data for that key
+    const dynamicKey = Object.keys(extractedData)[0] // Get the first key dynamically
+    const data = extractedData[dynamicKey] // Access data for that key
 
     console.log("data os ", data)
 
@@ -484,42 +478,32 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         companyContactName={companyUser.companyContactName}
         companyName={companyUser.companyName}
         companyDescriptor={companyUser.companyDescriptor}
-        companyInvestorRelationsCompanyName={
-          companyUser.companyInvestorRelationsCompanyName
-        }
-        companyInvestorRelationsContactEmail={
-          companyUser.companyInvestorRelationsContactEmail
-        }
-        companyInvestorRelationsContactName={
-          companyUser.companyInvestorRelationsContactName
-        }
-        companyInvestorRelationsContactPhone={
-          companyUser.companyInvestorRelationsContactPhone
-        }
+        companyInvestorRelationsCompanyName={companyUser.companyInvestorRelationsCompanyName}
+        companyInvestorRelationsContactEmail={companyUser.companyInvestorRelationsContactEmail}
+        companyInvestorRelationsContactName={companyUser.companyInvestorRelationsContactName}
+        companyInvestorRelationsContactPhone={companyUser.companyInvestorRelationsContactPhone}
       />
-    );
+    )
 
     console.log("pdfContent is ", pdfContent)
-    const blob = await pdf(pdfContent).toBlob();
+    const blob = await pdf(pdfContent).toBlob()
 
     if (blob) {
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "press_release.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = "press_release.pdf"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     }
 
     setIsLoading(false)
-
   }
 
-
   return (
-    <div className="container mx-auto p-4">
-      <Card className="h-[calc(100vh-2rem)] bg-white shadow-lg">
+    <div className="w-full p-4">
+      <Card className="h-screen bg-white shadow-lg">
         <CardHeader className="pb-2">
           <CardTitle className="text-2xl text-primary">AI Document Analysis</CardTitle>
           <CardDescription>Review AI-extracted details and refine with chat assistance</CardDescription>
@@ -601,6 +585,4 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 }
 
 export default AIDocBuilder
-
-
 

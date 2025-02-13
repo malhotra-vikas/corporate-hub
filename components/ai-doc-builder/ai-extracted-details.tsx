@@ -25,6 +25,11 @@ export interface ExtractedData {
   ceoQuote: string
 }
 
+interface Message {
+  role: string
+  content: string
+}
+
 interface AIExtractedDetailsProps {
   documents: Array<{
     file: {
@@ -39,6 +44,7 @@ interface AIExtractedDetailsProps {
   isLoading: boolean
   company: any
   updateParentExtractedData: (data: { [key: string]: ExtractedData }) => void
+  onMessagesGenerated: (messages: Message[]) => void
 }
 
 const fieldLabels = {
@@ -54,7 +60,8 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   onUpdateExtractedData,
   isLoading: initialIsLoading,
   company,
-  updateParentExtractedData
+  updateParentExtractedData,
+  onMessagesGenerated,
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(initialIsLoading)
   const [editingFields, setEditingFields] = useState<{ [key: string]: string[] }>({})
@@ -107,14 +114,14 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
 
         console.log("In AIExtractedDetails - cumulativeExtractedText ", pdfToTextResponse)
 
-        await runAi(pdfToTextResponse.data, relevantDoc.file._id)
+        await runAi(pdfToTextResponse.data, relevantDoc.file._id, company._id)
       }
     }
 
     fetchData()
   }, [initialIsLoading, company._id, documents])
 
-  const runAi = async (cumulativeExtractedText: string, file_id: string) => {
+  const runAi = async (cumulativeExtractedText: string, file_id: string, loggedInUser: string) => {
     setIsLoading(true)
 
     const namePrompt =
@@ -332,13 +339,13 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         },
       }
   
+      // Add a 5-second delay before removing the loader
+      await delay(3000)
+
       setExtractedData(newExtractedData)
 
       updateParentExtractedData(newExtractedData)
 
-      // Add a 5-second delay before removing the loader
-      await delay(5000)
-  
       // Persist the extracted data in Vault
       await updateVaultWithInitialExtractedData(file_id, newExtractedData[file_id])
   
@@ -387,7 +394,14 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
             },
           ]
 
+          const messages: Message[] = newChatContent.map((content) => ({
+            role: "assistant",
+            content: content.message,
+          }))
+    
           console.log("Creating new chat name as ", data.name)
+
+          onMessagesGenerated(messages)
 
           const newChatResponse = await chatApi.newChat({
             userid: loggedInUser,

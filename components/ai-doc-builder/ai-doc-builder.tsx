@@ -36,7 +36,14 @@ interface AIDocBuilderProps {
   defaultType?: "press_release" | "earnings_statement" | "other"
 }
 
+interface Message {
+  role: string
+  content: string
+}
+
 const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
+  const [chatMessages, setChatMessages] = useState<Message[]>([])
+
   const [selectedDocuments, setSelectedDocuments] = useState<UploadedDocument[]>([])
   const [activeTab, setActiveTab] = useState<"upload" | "vault" | "paste">("upload") // Track active tab
   const [documentContent, setDocumentContent] = useState<string>("") // Store pasted content
@@ -116,6 +123,11 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     setExtractedData(data)
     setIsDataFetched(true)
   }
+
+  const handleMessagesGenerated = (messages: Message[]) => {
+    setChatMessages(messages)
+  }
+
 
   const handleSendMessage = async (message: string) => {
     // Here you would typically send the message to your AI service and get a response
@@ -553,6 +565,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                   isLoading={isExtractingData}
                   company={companyUser}
                   updateParentExtractedData={updateParentExtractedData}
+                  onMessagesGenerated={handleMessagesGenerated}
                 />
               </div>
 
@@ -574,7 +587,9 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                     )}
                   </Button>
                 </div>
-                {!isChatInterfaceCollapsed && <ChatInterface onSendMessage={handleSendMessage} />}
+                {!isChatInterfaceCollapsed && 
+                <ChatInterface onSendMessage={handleSendMessage} 
+                initialMessages={chatMessages} />}
               </div>
             </div>
           </div>

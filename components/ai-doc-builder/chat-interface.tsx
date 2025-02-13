@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -15,15 +15,25 @@ type Message = {
 
 interface ChatInterfaceProps {
     onSendMessage: (message: string) => Promise<string>
+    initialMessages: Message[] // Add this new prop
 }
 
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage }) => {
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
+    onSendMessage, initialMessages }) => {
     const [messages, setMessages] = useState<Message[]>([
         { role: "assistant", content: "Hello! How can I help you refine the document?" },
     ])
     const [input, setInput] = useState("")
     const [isLoading, setIsLoading] = useState(false)
 
+    useEffect(() => {
+        // Update messages when initialMessages prop changes
+        if (initialMessages.length > 0) {
+          setMessages((prevMessages) => [...prevMessages, ...initialMessages])
+        }
+      }, [initialMessages])
+
+      
     const handleSend = async () => {
         if (input.trim()) {
             setIsLoading(true)

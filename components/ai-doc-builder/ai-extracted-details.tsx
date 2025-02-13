@@ -89,14 +89,25 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         let cumulativeExtractedText = ""
         let file_id = ""
 
-        documents.forEach((fileData) => {
-          cumulativeExtractedText += fileData.file.extractedData
-          file_id = fileData.file._id
-        })
+        console.log("In AIExtractedDetails - documents ", documents)
 
-        console.log("In AIExtractedDetails - cumulativeExtractedText ", cumulativeExtractedText)
+        const relevantDoc = documents[0]
 
-        await runAi(cumulativeExtractedText, file_id)
+        console.log("In AIExtractedDetails - relevantDoc file id ", relevantDoc.file._id)
+        console.log("In AIExtractedDetails - relevantDoc user id ", relevantDoc.file.user_id)
+
+        console.log("Converting PDF to text");
+        const pdfToTextResponse = await vaultApi.getFileData({
+          user_id: relevantDoc.file.user_id,
+          docType: "pdf",
+          fileId: relevantDoc.file._id,
+        });
+        const extractedText = pdfToTextResponse.data;
+
+
+        console.log("In AIExtractedDetails - cumulativeExtractedText ", pdfToTextResponse)
+
+        await runAi(pdfToTextResponse.data, relevantDoc.file._id)
       }
     }
 
@@ -405,7 +416,6 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
 
   const updateVaultWithInitialExtractedData = async (fileId: string, data: ExtractedData) => {
     try {
-      console.log("Updating vault entry");
       const updateData = [
         {
           _id: fileId,
@@ -417,6 +427,9 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
           chatName: data.name,
         },
       ];
+
+      console.log("Updating vault entry ", updateData);
+
       await vaultApi.updateFiles(updateData);
 
     } catch (error) {
@@ -573,10 +586,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         <Card key={index} className="mb-4 bg-white shadow-sm">
           <CardHeader className="p-4 pb-2">
             <CardTitle className="text-base flex justify-between items-center">
-              <span className="truncate text-primary">{doc.file._id}</span>
-              <Badge variant="secondary" className="ml-2">
-                {doc.type}
-              </Badge>
+
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 space-y-4">
@@ -590,7 +600,6 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         </Card>
       ))}
     </ScrollArea>
-
   )
 }
 

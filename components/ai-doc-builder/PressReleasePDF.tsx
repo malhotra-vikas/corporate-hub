@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const convertHtmlToRichText = (html: string) => {
+const convertHtmlToRichText = (html: string, style?: object) => {
   const elements = htmlToReactParser.parse(html);
 
   const elementsArray = Array.isArray(elements) ? elements : [elements];
@@ -116,59 +116,62 @@ const convertHtmlToRichText = (html: string) => {
 
     const { type, props } = element;
 
+    // Apply the custom style if passed
+    const elementStyle = style ? { ...style } : {};
+
     switch (type) {
       case "p":
         return (
-          <Text key={index} style={styles.paragraph}>
+          <Text key={index} style={[styles.paragraph, elementStyle]}>
             {props.children}
           </Text>
         );
       case "strong":
         return (
-          <Text key={index} style={styles.strong}>
+          <Text key={index} style={[styles.strong, elementStyle]}>
             {props.children}
           </Text>
         );
       case "em":
         return (
-          <Text key={index} style={styles.em}>
+          <Text key={index} style={[styles.em, elementStyle]}>
             {props.children}
           </Text>
         );
       case "h1":
         return (
-          <Text key={index} style={styles.h1}>
+          <Text key={index} style={[styles.h1, elementStyle]}>
             {props.children}
           </Text>
         );
       case "h2":
         return (
-          <Text key={index} style={styles.h2}>
+          <Text key={index} style={[styles.h2, elementStyle]}>
             {props.children}
           </Text>
         );
       case "ul":
         return (
-          <View key={index} style={styles.unorderedList}>
+          <View key={index} style={[styles.unorderedList, elementStyle]}>
             {props.children}
           </View>
         );
       case "ol":
         return (
-          <View key={index} style={styles.orderedList}>
+          <View key={index} style={[styles.orderedList, elementStyle]}>
             {props.children}
           </View>
         );
       case "li":
         return (
-          <View key={index} style={styles.listItem}>
+          <View key={index} style={[styles.listItem, elementStyle]}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemContent}>{props.children}</Text>
           </View>
         );
       case "a":
         return (
-          <Text key={index} style={styles.link}>
+          <Text key={index} style={[styles.link, elementStyle]}>
             {props.children}
           </Text>
         );
@@ -182,7 +185,7 @@ const convertHtmlToRichText = (html: string) => {
 };
 
 
-const RichTextWithHTML: React.FC<{ content: string }> = ({ content }) => {
+const RichTextWithHTML: React.FC<{ content: string, style?: object }> = ({ content, style }) => {
   const [htmlContent, setHtmlContent] = useState<string>("");
 
   useEffect(() => {
@@ -194,7 +197,7 @@ const RichTextWithHTML: React.FC<{ content: string }> = ({ content }) => {
     convertContent();
   }, [content]);
 
-  const parsedContent = convertHtmlToRichText(htmlContent);
+  const parsedContent = convertHtmlToRichText(htmlContent, style);
 
   return <>{parsedContent}</>;
 };
@@ -243,7 +246,8 @@ const PressReleasePDF: React.FC<PressReleasePDFProps> = ({
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.date}>{date}</Text>
 
-        <RichTextWithHTML content={`${subHeadline}`} />
+
+        <RichTextWithHTML content={`${subHeadline}`} style={styles.subHeadlineText} />
 
 
         <View style={styles.spacer} />

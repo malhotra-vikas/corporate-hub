@@ -28,6 +28,8 @@ export interface User {
 }
 
 export interface VaultFile {
+  createdAt: string | number | Date
+  createdDate: any
   _id: string
   originalName: string
   docType: string

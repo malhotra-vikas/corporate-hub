@@ -59,6 +59,8 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
   const [isLoading, setIsLoading] = useState(false)
   const [isPastSessionsCollapsed, setIsPastSessionsCollapsed] = useState(true)
+  const [isChatInterfaceCollapsed, setIsChatInterfaceCollapsed] = useState(false)
+  
   const [isExtractingData, setIsExtractingData] = useState(false)
   let [companyUser, setCompanyUser] = useState()
   const [isDataFetched, setIsDataFetched] = useState(false) // Added state variable
@@ -221,7 +223,21 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       console.log("files  are befoere setVaultFiles ", files)
       vaultFiles = files.files
 
-      setVaultFiles(files.files)
+      // Filter files that are either .docx or .pdf
+      const filteredFiles = files.files.filter(file =>
+        file.originalName.endsWith(".docx") || file.originalName.endsWith(".pdf")
+      );
+
+      console.log("filteredFiles are ", filteredFiles)
+      // Sort by last modified date (assuming file object has a `lastModified` field)
+      const sortedFiles = filteredFiles.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+  
+      console.log("sortedFiles are ", sortedFiles)
+
+      setVaultFiles(sortedFiles);
+
     } catch (error) {
       console.error("Error fetching vault files:", error)
     } finally {
@@ -319,6 +335,10 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
   const togglePastSessions = () => {
     setIsPastSessionsCollapsed(!isPastSessionsCollapsed)
+  }
+
+  const toggleChatInterface = () => {
+    setIsChatInterfaceCollapsed(!isChatInterfaceCollapsed)
   }
 
   const handleUpdateExtractedData = (fileName: string, field: string, value: string) => {
@@ -506,9 +526,11 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         </CardHeader>
         <CardContent className="h-[calc(100%-4rem)] p-0">
           <div className="flex h-full">
+            {/* Past Sessions Panel */}
             <div
-              className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-10" : "w-1/4"
-                } border-r border-gray-200`}
+              className={`transition-all duration-300 ease-in-out ${
+                isPastSessionsCollapsed ? "w-10" : "w-1/4"
+              } border-r border-gray-200`}
             >
               <div className="flex items-center justify-between p-2 bg-gray-50">
                 <h3 className={`text-lg font-semibold text-primary ${isPastSessionsCollapsed ? "hidden" : "block"}`}>
@@ -528,43 +550,50 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                 <PastChatSessions />
               </div>
             </div>
-            <div
-              className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-[calc(100%-2.5rem)]" : "w-3/4"
-                } flex`}
-            >
-              <div className="w-1/2 border-r border-gray-200 p-4 overflow-hidden">
+
+            {/* Main Content Area */}
+            <div className={`flex flex-1 transition-all duration-300 ease-in-out`}>
+              {/* AI Extracted Details */}
+              <div
+                className={`flex-grow overflow-hidden p-4 ${isPastSessionsCollapsed && isChatInterfaceCollapsed ? "w-full" : "w-1/2"}`}
+              >
                 <h3 className="text-lg font-semibold mb-2 text-primary">AI Extracted Details</h3>
                 {isDataFetched && (
-                  <Button
-                    onClick={generatePDF}
-                    className={`mt-2 ${isLoading ? "bg-gray-400" : "bg-primary"}`}
-                  >
-                    {isLoading ? (
-                      <span>Generating...</span>
-                    ) : (
-                      <span>Generate PDF</span>
-                    )}
+                  <Button onClick={generatePDF} className={`mt-2 ${isLoading ? "bg-gray-400" : "bg-primary"}`}>
+                    {isLoading ? <span>Generating...</span> : <span>Generate PDF</span>}
                   </Button>
-                )}                
+                )}
                 <AIExtractedDetails
                   documents={selectedDocuments}
-                  //extractedData={extractedData}
                   onUpdateExtractedData={handleUpdateExtractedData}
-                  isLoading={true}
+                  isLoading={isExtractingData}
                   company={companyUser}
                   updateParentExtractedData={updateParentExtractedData}
                 />
-
-
               </div>
 
-              <div className="w-1/2 p-4 overflow-hidden bg-gray-50">
-                <h3 className="text-lg font-semibold mb-2 text-primary">Chat Assistance</h3>
-                <ChatInterface onSendMessage={handleSendMessage} />
+              {/* Chat Interface Panel */}
+              <div
+                className={`transition-all duration-300 ease-in-out ${
+                  isChatInterfaceCollapsed ? "w-10" : "w-1/2"
+                } bg-gray-50 border-l border-gray-200`}
+              >
+                <div className="flex items-center justify-between p-2 bg-gray-50">
+                  <h3 className={`text-lg font-semibold text-primary ${isChatInterfaceCollapsed ? "hidden" : "block"}`}>
+                    Chat Assistance
+                  </h3>
+                  <Button variant="ghost" size="icon" onClick={toggleChatInterface} className="h-8 w-8 text-primary">
+                    {isChatInterfaceCollapsed ? (
+                      <ChevronLeft className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                {!isChatInterfaceCollapsed && <ChatInterface onSendMessage={handleSendMessage} />}
               </div>
             </div>
           </div>
-
         </CardContent>
       </Card>
     </div>

@@ -121,7 +121,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       "Generate a short, memorable name of no more than 5 words for this press-release using the headline that the user provided. "
 
     const headlinePrompt = `
-        Generate a short, impactful headline of no more than 25 words that captures the core news. Follow the guidelines. Set the Tone with a Strong Headline.
+        Generate a short, impactful headline of no more than 15 words that captures the core news. Follow the guidelines. Set the Tone with a Strong Headline.
         The headline should succinctly convey the key news and its significance. You would never add any assumptions, just convey facts.
         Highlight the value to shareholders, whether it's a new acquisition, a major "milestone, or a growth driver. 
         

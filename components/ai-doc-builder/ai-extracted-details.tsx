@@ -275,10 +275,10 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       // Ensure the response is in the correct JSON format and handle parsing
       try {
         generatedSubHeadlinesJson = JSON.parse(generatedSubHeadlinesJson)
-  
+
         // Iterate through the object and concatenate each key-value pair
         formattedSubHeadlines = Object.entries(generatedSubHeadlinesJson)
-          .map(([key, value]) => `${key}:${value}`)
+          .map(([key, value]) => `${value}`)
           .join("\n");  // Join each pair with a newline character
   
       } catch (error) {

@@ -4,7 +4,7 @@ import type React from "react"
 import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer"
 import { marked } from "marked"
 import { Font } from "@react-pdf/renderer"
-import DOMPurify from "dompurify"
+import he from "he"
 
 // Register Roboto font with TTF format
 Font.register({
@@ -92,9 +92,14 @@ const formatKeyHighlights = (text: string) => {
 }
 
 const renderMarkdownText = (markdown: string) => {
-  return marked(markdown, { mangle: false, headerIds: false })
+  const parsedMarkdown = marked(markdown, { mangle: false, headerIds: false })
     .replace(/<\/?[^>]+(>|$)/g, "") // Remove HTML tags
     .trim()
+  
+    return he.decode(parsedMarkdown) // ✅ Decode HTML entities
+    .replace(/<\/?[^>]+(>|$)/g, "") // Remove HTML tags
+    .trim()
+
 }
 
 const splitIntoParagraphs = (text: string) => {
@@ -134,8 +139,6 @@ const PressReleasePDF: React.FC<PressReleasePDFProps> = ({
           </View>
         ))}
 
-        <View style={styles.spacer} />
-
         {/* Content (Formatted into paragraphs) */}
         {splitIntoParagraphs(renderMarkdownText(content)).map((paragraph, index) => (
           <Text key={index} style={styles.paragraph}>{paragraph}</Text>
@@ -145,12 +148,17 @@ const PressReleasePDF: React.FC<PressReleasePDFProps> = ({
 
         {/* Key Highlights as Bulleted List */}
         <Text style={styles.title}>Key Highlights</Text>
-        {formatKeyHighlights(keyHighlights).map((highlight, index) => (
-          <View key={index} style={styles.bulletPoint}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.bulletText}>{highlight}</Text>
-          </View>
-        ))}
+        {formatKeyHighlights(keyHighlights).map((highlight, index) => {
+          // Remove leading "1. ", "2. ", etc. from the highlight
+          const cleanedHighlight = highlight.replace(/^\d+\.\s*/, "");
+
+          return (
+            <View key={index} style={styles.bulletPoint}>
+              <Text style={styles.bullet}>•</Text>
+              <Text style={styles.bulletText}>{cleanedHighlight}</Text>
+            </View>
+          );
+        })}
 
         <View style={styles.spacer} />
 

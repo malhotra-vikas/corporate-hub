@@ -179,12 +179,6 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
 
       `
 
-    if (toneMessages) {
-      ceoQuotePrompt = ceoQuotePrompt + " The tone should be " + toneMessages
-    } else {
-      ceoQuotePrompt = ceoQuotePrompt + " The tone should be cautiously optimistic. "
-    }
-
     let summaryPrompt = `
         Summarize the following news in 2-3 paragraphs. Use the following guidelines. Keep the tone professional and concise. 
         Capture Attention in the Opening Lines. The first few sentences should hook the reader by emphasizing why the news matters. 
@@ -204,7 +198,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
     if (toneMessages) {
       summaryPrompt = summaryPrompt + " The tone should be " + toneMessages
     } else {
-      summaryPrompt = summaryPrompt + " The tone should be cautiously optimistic. "
+      summaryPrompt = summaryPrompt + " The tone should be optimistic with no implied gaurantees. "
     }
 
     let subHeadlinePrompt = `
@@ -224,7 +218,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
     if (toneMessages) {
       subHeadlinePrompt = subHeadlinePrompt + " The tone should be " + toneMessages
     } else {
-      subHeadlinePrompt = subHeadlinePrompt + " The tone should be cautiously optimistic. "
+      subHeadlinePrompt = subHeadlinePrompt + " The tone should be optimistic with no implied gaurantees. "
     }
 
     let keyHighlightsPrompt = `
@@ -249,7 +243,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
     if (toneMessages) {
       keyHighlightsPrompt = keyHighlightsPrompt + " The tone should be " + toneMessages
     } else {
-      keyHighlightsPrompt = keyHighlightsPrompt + " The tone should be cautiously optimistic. "
+      keyHighlightsPrompt = keyHighlightsPrompt + " The tone should be optimistic with no implied gaurantees. "
     }
     const system_prompt =
       "You are a high-quality IR/PR professional specializing in crafting impactful press releases for companies across various industries."

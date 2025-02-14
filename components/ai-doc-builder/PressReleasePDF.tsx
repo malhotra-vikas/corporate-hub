@@ -129,6 +129,9 @@ const PressReleasePDF: React.FC<PressReleasePDFProps> = ({
       <View style={styles.section}>
         {/* Title and Date */}
         <Text style={styles.title}>{title}</Text>
+
+        <View style={styles.spacer} />
+
         <Text style={styles.date}>{date}</Text>
 
         {/* Subheadline (Now as an italic paragraph) */}
@@ -139,18 +142,23 @@ const PressReleasePDF: React.FC<PressReleasePDFProps> = ({
           </View>
         ))}
 
+        <View style={styles.spacer} />
+
         {/* Content (Formatted into paragraphs) */}
         {splitIntoParagraphs(renderMarkdownText(content)).map((paragraph, index) => (
           <Text key={index} style={styles.paragraph}>{paragraph}</Text>
         ))}
 
         <View style={styles.spacer} />
+        <View style={styles.spacer} />
+        <View style={styles.spacer} />
+        <View style={styles.spacer} />
 
         {/* Key Highlights as Bulleted List */}
         <Text style={styles.title}>Key Highlights</Text>
         {formatKeyHighlights(keyHighlights).map((highlight, index) => {
-          // Remove leading "1. ", "2. ", etc. from the highlight
-          const cleanedHighlight = highlight.replace(/^\d+\.\s*/, "");
+          // Remove leading numbers with ".", ",", ":", or spaces
+          const cleanedHighlight = highlight.replace(/^\d+[\.\,\:\s]*-?\s*/, "");
 
           return (
             <View key={index} style={styles.bulletPoint}>

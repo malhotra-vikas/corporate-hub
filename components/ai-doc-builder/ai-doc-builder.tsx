@@ -23,8 +23,11 @@ import type { VaultFile } from "@/lib/types"
 import PressReleasePDF from "./PressReleasePDF"
 
 import { pdf } from "@react-pdf/renderer"
+import OpenAiApi from "@/lib/api/openApi.api"
 
 type DocumentType = "press_release" | "earnings_statement" | "shareholder_letter" | "other"
+
+const openAiApi = new OpenAiApi();
 
 interface UploadedDocument {
   file: File
@@ -41,8 +44,14 @@ interface Message {
   content: string
 }
 
+interface ChatData {
+  messages: Message[]
+  chatId: string
+}
+
 const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [chatMessages, setChatMessages] = useState<Message[]>([])
+  const [chatData, setChatData] = useState<ChatData>({ messages: [], chatId: "" })
 
   const [selectedDocuments, setSelectedDocuments] = useState<UploadedDocument[]>([])
   const [activeTab, setActiveTab] = useState<"upload" | "vault" | "paste">("upload") // Track active tab
@@ -55,6 +64,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       summary: string
       keyHighlights: string
       ceoQuote: string
+      extractedText: string
     }
   }>({})
 
@@ -124,15 +134,134 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     setIsDataFetched(true)
   }
 
-  const handleMessagesGenerated = (messages: Message[]) => {
-    setChatMessages(messages)
+  const handleMessagesGenerated = (messages: Message[], chatId) => {
+    setChatMessages(messages, chatId)
+  }
+
+  async function assessIntent(userMessage: string) {
+    const interactionTypePrompt =
+      "Is the user asking a follow-up question about the 'CEO Quote', 'Summary', 'Headline' or 'Key-Highlights'  of the press release? If yes, identify which one. Just just the identified type ";
+
+    const system_prompt =
+      "You are a high-quality IR/PR professional specializing in crafting impactful press releases for companies across various industries.";
+
+    const interactionTypeResponse = await openAiApi.completion(
+      [
+        { role: "system", content: system_prompt },
+        { role: "user", content: userMessage },
+      ],
+      interactionTypePrompt,
+    );
+
+    const interactionType =
+      interactionTypeResponse?.data.choices[0].message.content;
+    console.log("interactionType is ", interactionType);
+
+    return interactionType;
   }
 
 
-  const handleSendMessage = async (message: string) => {
-    // Here you would typically send the message to your AI service and get a response
-    // For now, we'll just echo the message back
-    return `You said: ${message}`
+  async function processMessage(prompt: string, userMessage: string) {
+    const system_prompt =
+      "You are a high-quality IR/PR professional specializing in crafting impactful press releases for companies across various industries.";
+
+    console.log("Sending requests to OpenAI APIs");
+
+    const responseObject = await openAiApi.completion(
+      [
+        { role: "system", content: system_prompt },
+        { role: "user", content: userMessage },
+      ],
+      prompt,
+    );
+
+    const aiResponse = responseObject?.data.choices[0].message.content;
+    console.log("aiResponse is ", aiResponse);
+
+    return aiResponse;
+  }
+
+  const handleSendMessage = async (userMessage: string) => {
+    if (!userMessage.trim()) return;
+    setIsLoading(true);
+
+    try {
+      const intent = await assessIntent(userMessage);
+
+      console.log("Old extracted data is ", extractedData)
+      const dynamicKey = Object.keys(extractedData)[0] // Get the first key dynamically
+      const data = extractedData[dynamicKey] // Access data for that key
+
+      if (intent === "CEO Quote") {
+        console.log("CEO Quote needs to be updated");
+
+        let prompt = `Update the CEO Quote based on user's message: ${userMessage}. 
+        The earlier CEO Quote was ${data.ceoQuote}. 
+        The extracted text for the news is ${data.extractedText}
+        Return only the quote and nothing else. Do not add any formatting.
+        `;
+
+        console.log("prompt is ", prompt)
+
+        let aiResponse = await processMessage(prompt, userMessage);
+        aiResponse = "ceoQuote" + "--:--" + aiResponse
+
+        console.log("aiResponse is ", aiResponse);
+
+        return `${aiResponse}`        
+      } else if (intent === "Summary") {
+        console.log("Summary needs to be updated");
+
+        let prompt = `Update the Summary based on user's message: ${userMessage}. 
+        The earlier Summary was ${data.summary}.
+        The extracted text for the news is ${data.extractedText}
+        Return only the summary and nothing else. Do not add any formatting.
+        `;
+
+        let aiResponse = await processMessage(prompt, userMessage);
+        aiResponse = "summary" + "--:--" + aiResponse
+
+        console.log("aiResponse is ", aiResponse);
+        return `${aiResponse}`    
+
+      } else if (intent === "Headline") {
+        let prompt = `Update the Headline based on user's message: ${userMessage}. 
+        The earlier Headline was ${data.headline}. 
+        The extracted text for the news is ${data.extractedText}
+        Return only the headline and nothing else. Do not add any formatting.
+        `;
+
+        let aiResponse = await processMessage(prompt, userMessage);
+        aiResponse = "headline" + "--:--" + aiResponse
+
+        console.log("aiResponse is ", aiResponse);
+
+        return `${aiResponse}`    
+                
+      } else if (intent === "Key-Highlights") {
+        let prompt = `Update the Key-Highlights based on user's message: ${userMessage}. 
+        The earlier Key-Highlights was ${data.keyHighlights}. 
+        The extracted text for the news is ${data.extractedText}
+        Return only the Key-Highlights and nothing else. Do not add any formatting.
+        `;
+
+        let aiResponse = await processMessage(prompt, userMessage);
+        aiResponse = "keyHighlights" + "--:--" + aiResponse
+
+        console.log("aiResponse is ", aiResponse);
+        return `${aiResponse}`    
+                
+      }
+
+    } catch (error) {
+      toast.error("Failed to send message. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+
+
+
+    
   }
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -224,6 +353,29 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     const updatedDocuments = [...selectedDocuments]
     updatedDocuments[index].type = type || defaultType
     setSelectedDocuments(updatedDocuments)
+  }
+
+  const handleUpdateField = (field: string, value: string) => {
+
+    console.log("REcieved a command to update the fields ", field)
+    console.log("REcieved a command to update the field with value ", value)
+
+    if (!extractedData || Object.keys(extractedData).length === 0) {
+      console.warn("No documents found in extractedData. Cannot update.");
+      return;
+    }
+
+      // ✅ Find the first available documentId
+    const firstDocumentId = Object.keys(extractedData)[0];
+
+    setExtractedData((prevData) => ({
+      ...prevData,
+      [firstDocumentId]: {
+        ...(prevData[firstDocumentId] || {}), // ✅ Ensure document exists
+        [field]: value, // ✅ Update only the specified field
+      },
+    }));
+
   }
 
   const handleVaultSelection = async () => {
@@ -356,6 +508,8 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         [field]: value,
       },
     }))
+
+    handleUpdateField(field, value) // Update local state as well
   }
 
   const handleRemoveDocument = (index: number) => {
@@ -566,6 +720,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                   company={companyUser}
                   updateParentExtractedData={updateParentExtractedData}
                   onMessagesGenerated={handleMessagesGenerated}
+                  returnExtractedData={extractedData} // Pass the extracted data
                 />
               </div>
 
@@ -589,7 +744,9 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                 </div>
                 {!isChatInterfaceCollapsed && 
                 <ChatInterface onSendMessage={handleSendMessage} 
-                initialMessages={chatMessages} />}
+                initialMessages={chatMessages} 
+                chatId={chatData.chatId}
+                onUpdateField={handleUpdateField}/>}
               </div>
             </div>
           </div>

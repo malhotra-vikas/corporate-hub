@@ -23,6 +23,7 @@ export interface ExtractedData {
   summary: string
   keyHighlights: string
   ceoQuote: string
+  extractedText: string
 }
 
 interface Message {
@@ -44,7 +45,8 @@ interface AIExtractedDetailsProps {
   isLoading: boolean
   company: any
   updateParentExtractedData: (data: { [key: string]: ExtractedData }) => void
-  onMessagesGenerated: (messages: Message[]) => void
+  onMessagesGenerated: (messages: Message[], chatId: string) => void
+  returnExtractedData: any // New prop for updated extracted data
 }
 
 const fieldLabels = {
@@ -62,6 +64,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   company,
   updateParentExtractedData,
   onMessagesGenerated,
+  returnExtractedData
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(initialIsLoading)
   const [editingFields, setEditingFields] = useState<{ [key: string]: string[] }>({})
@@ -88,6 +91,37 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   console.log("In AIExtractedDetails - documents ", documents)
   console.log("In AIExtractedDetails - company ", company)
 
+  useEffect(() => {
+    if (!returnExtractedData || Object.keys(returnExtractedData).length === 0) {
+      console.warn("returnExtractedData is undefined or empty");
+      return; // Exit early to prevent errors
+    }
+  
+    setExtractedData((prevData) => {
+      if (!prevData) {
+        console.warn("prevData is undefined, initializing an empty object.");
+        return { ...returnExtractedData };
+      }
+  
+      const updatedData = { ...prevData };
+
+      console.log("Data to be updated ", returnExtractedData)
+  
+      Object.keys(returnExtractedData).forEach((key) => {
+        console.log("lookup Key ", key)
+
+        if (key in updatedData) {
+          updatedData[key] = returnExtractedData[key]; // ✅ Update only matching keys
+        }
+      });
+
+      console.log("Updated Data to be painted ", updatedData)
+
+  
+      return updatedData;
+    });
+  }, [returnExtractedData]);
+    
   useEffect(() => {
     const fetchData = async () => {
       setLoggedinUser(company._id)
@@ -336,6 +370,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
           summary: generatedSummary,
           keyHighlights: formattedkeyhighlights,
           ceoQuote: generatedCeoQuote,
+          extractedText: cumulativeExtractedText
         },
       }
   
@@ -401,7 +436,6 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
     
           console.log("Creating new chat name as ", data.name)
 
-          onMessagesGenerated(messages)
 
           const newChatResponse = await chatApi.newChat({
             userid: loggedInUser,
@@ -410,13 +444,16 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
             chatName: data.name,
           })
 
+          let chatId = ''
           if (newChatResponse) {
-            const chatId = newChatResponse.data._id
+            chatId = newChatResponse.data._id
 
             console.log("Newe chat id is ", chatId)
             setCurrentChatId(chatId)
           }
         
+          onMessagesGenerated(messages, chatId)
+
           // Update messages state with new chat content
           setMessages((prevMessages) => [...prevMessages, ...newChatContent])
         } catch (error) {

@@ -14,17 +14,21 @@ type Message = {
 }
 
 interface ChatInterfaceProps {
-    onSendMessage: (message: string) => Promise<string>
+    onSendMessage: (message: string, chatId: string) => Promise<string>
     initialMessages: Message[] // Add this new prop
+    chatId: string
+    onUpdateField: (field: string, value: string) => void // New prop for updating fields
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
-    onSendMessage, initialMessages }) => {
+    onSendMessage, initialMessages, chatId, onUpdateField }) => {
     const [messages, setMessages] = useState<Message[]>([
         { role: "assistant", content: "Hello! How can I help you refine the document?" },
     ])
     const [input, setInput] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+    const [currentChatId, setCurrentChatId] = useState()
+
 
     useEffect(() => {
         // Update messages when initialMessages prop changes
@@ -42,9 +46,27 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             setInput("")
 
             try {
-                const response = await onSendMessage(input)
+                const response = await onSendMessage(input, chatId)
+
                 const assistantMessage: Message = { role: "assistant", content: response }
                 setMessages((prevMessages) => [...prevMessages, assistantMessage])
+
+                console.log("response recieved back is ", response)
+
+                let match = response.match(/^(.+?)--:--([\s\S]+)$/);
+
+                if (!match) {
+                    console.error("No match found! Check response format:", response);
+                } else {
+                    const field = match[1].trim();
+                    const value = match[2].trim();
+                
+                    console.log("Response received back is for field:", field);
+                    console.log("Response received back is for value:", value);
+                
+                    onUpdateField(field, value);
+                }
+                                
             } catch (error) {
                 console.error("Error sending message:", error)
                 // Handle error (e.g., show an error message to the user)

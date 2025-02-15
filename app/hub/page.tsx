@@ -418,7 +418,7 @@ export default function HubPage() {
                                     <AccordionItem
                                         key={index}
                                         value={`item-${index}`}
-                                        className="border rounded-lg overflow-hidden bg-card hover:bg-accent/50 transition-colors"
+                                        className="border rounded-lg overflow-hidden bg-card transition-colors"
                                     >
                                         <AccordionTrigger className="hover:no-underline px-4 py-3 [&[data-state=open]>div>div>.chevron]:rotate-90">
                                             <div className="flex items-center justify-between w-full">

@@ -38,8 +38,8 @@ export function MainNav() {
                                     <Link href="/hub" legacyBehavior passHref>
                                         <NavigationMenuLink
                                             className={cn(
-                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
-                                                pathname === "/hub" ? "bg-accent" : "bg-transparent",
+                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-[#0196FD] focus:text-white disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-[#0196FD] hover:text-white h-10 py-2 px-4 group w-max",
+                                                pathname === "/ai-doc-builder/press-release" ? "bg-[#0196FD]" : "bg-transparent"
                                             )}
                                         >
                                             IR Hub
@@ -50,8 +50,8 @@ export function MainNav() {
                                     <Link href="/dashboard/vault" legacyBehavior passHref>
                                         <NavigationMenuLink
                                             className={cn(
-                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
-                                                pathname === "/dashboard/vault" ? "bg-accent" : "bg-transparent",
+                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-[#0196FD] focus:text-white disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-[#0196FD] hover:text-white h-10 py-2 px-4 group w-max",
+                                                pathname === "/ai-doc-builder/press-release" ? "bg-[#0196FD]" : "bg-transparent"
                                             )}
                                         >
                                             Vault
@@ -62,8 +62,8 @@ export function MainNav() {
                                     <Link href="/ai-doc-builder/press-release" legacyBehavior passHref>
                                         <NavigationMenuLink
                                             className={cn(
-                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
-                                                pathname === "/ai-doc-builder/press-release" ? "bg-accent" : "bg-transparent",
+                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-[#0196FD] focus:text-white disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-[#0196FD] hover:text-white h-10 py-2 px-4 group w-max",
+                                                pathname === "/ai-doc-builder/press-release" ? "bg-[#0196FD]" : "bg-transparent"
                                             )}
                                         >
                                             AI-Doc-Builder

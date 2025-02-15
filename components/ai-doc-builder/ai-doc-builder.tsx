@@ -746,7 +746,6 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                 </div>
                 {!isChatInterfaceCollapsed && 
                 <ChatInterface onSendMessage={handleSendMessage} 
-                initialMessages={chatMessages} 
                 chatId={chatData.chatId}
                 onUpdateField={handleUpdateField}/>}
               </div>

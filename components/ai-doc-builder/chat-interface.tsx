@@ -15,13 +15,12 @@ type Message = {
 
 interface ChatInterfaceProps {
     onSendMessage: (message: string, chatId: string) => Promise<string>
-    initialMessages: Message[] // Add this new prop
     chatId: string
     onUpdateField: (field: string, value: string) => void // New prop for updating fields
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
-    onSendMessage, initialMessages, chatId, onUpdateField }) => {
+    onSendMessage, chatId, onUpdateField }) => {
     const [messages, setMessages] = useState<Message[]>([
         { role: "assistant", content: "Hello! How can I help you refine the document?" },
     ])
@@ -29,13 +28,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     const [isLoading, setIsLoading] = useState(false)
     const [currentChatId, setCurrentChatId] = useState()
 
-
-    useEffect(() => {
-        // Update messages when initialMessages prop changes
-        if (initialMessages.length > 0) {
-          setMessages((prevMessages) => [...prevMessages, ...initialMessages])
-        }
-      }, [initialMessages])
 
       
     const handleSend = async () => {
@@ -84,7 +76,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         <Card
                             className={`inline-block p-2 rounded-lg text-sm ${message.role === "user"
                                     ? "bg-primary text-primary-foreground"
-                                    : "bg-secondary text-secondary-foreground"
+                                    : "bg-[#81C3F1] text-black"
                                 }`}
                         >
                             {message.content}

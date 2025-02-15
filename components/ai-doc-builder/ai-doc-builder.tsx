@@ -387,7 +387,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
       // Filter files that are either .docx or .pdf
       const filteredFiles = files.files.filter(
-        (file) => file.originalName.endsWith(".docx") || file.originalName.endsWith(".pdf"),
+        (file) => file.originalName.endsWith(".docx") || file.originalName.endsWith(".pdf") || file.docType === "8-K",
       )
 
       console.log("filteredFiles are ", filteredFiles)

@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
+import UserApi from "@/lib/api/user.api"
+import { Badge } from "@/components/ui/badge"
 
 export function UserNav() {
     const router = useRouter()
@@ -24,15 +26,27 @@ export function UserNav() {
         router.push("/")
     }
 
+    const userApi = new UserApi()
+
     if (!user) return null
+
+    if (user) {
+        const ticker = user.companyTicker
+
+        console.log("User Company Ticket ", ticker)
+    }
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.photoURL || undefined} alt={user.displayName || "User avatar"} />
-                        <AvatarFallback>{user.displayName ? user.displayName.slice(0, 2).toUpperCase() : "U"}</AvatarFallback>
+                <Button variant="ghost" className="relative h-8 w-auto rounded-lg px-2">
+                    <Avatar className="flex items-center justify-center h-8 w-auto">
+                        <Badge
+                            variant="beat"
+                            className="flex items-center gap-1 px-3 py-1 bg-[#81C3F1] text-black min-w-max rounded-md"
+                        >
+                            {user.companyTicker ? user.companyTicker.toUpperCase() : "USER"}
+                        </Badge>
                     </Avatar>
                 </Button>
             </DropdownMenuTrigger>

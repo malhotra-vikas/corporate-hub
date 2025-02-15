@@ -524,7 +524,9 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
           <CardTitle className="text-2xl font-bold">AI Document Builder</CardTitle>
           <CardDescription>Upload, select, or paste your documents for analysis</CardDescription>
         </CardHeader>
+        
         <CardContent>
+       
           <Tabs
             value={activeTab}
             onValueChange={(value) => setActiveTab(value as "upload" | "vault" | "paste")}
@@ -533,7 +535,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="upload">Upload Documents</TabsTrigger>
               <TabsTrigger value="vault">Select from Vault</TabsTrigger>
-              <TabsTrigger value="paste">Paste Document</TabsTrigger>
+              <TabsTrigger value="paste">Paste Text</TabsTrigger>
             </TabsList>
             <TabsContent value="upload" className="space-y-4">
               <div className="grid w-full items-center gap-1.5">
@@ -573,7 +575,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                 ) : (
                   <>
                     <Upload className="mr-2 h-4 w-4" />
-                    Reload Vault Documents
+                    Refresh Vault Documents
                   </>
                 )}
               </Button>

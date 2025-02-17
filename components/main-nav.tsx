@@ -121,6 +121,13 @@ export function MainNav() {
                                         </ul>
                                     </NavigationMenuContent>
                                 </NavigationMenuItem>
+                                <NavigationMenuItem>
+                                    <Link href="/pricing" legacyBehavior passHref>
+                                        <NavigationMenuLink className="px-4 py-2 text-sm font-medium hover:text-[#0196FD] transition-colors">
+                                            Pricing
+                                        </NavigationMenuLink>
+                                    </Link>
+                                </NavigationMenuItem>
                             </>
                         )}
                     </NavigationMenuList>
@@ -132,7 +139,9 @@ export function MainNav() {
                         <>
                             <LoginButton />
                             <Link href="/signup">
-                                <Button>Sign Up</Button>
+                                <Button className="bg-[#0196FD] text-white hover:bg-[#017ACC] transition-colors">
+                                    Sign Up
+                                </Button>
                             </Link>
                         </>
                     )}

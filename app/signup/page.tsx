@@ -213,6 +213,7 @@ export default function SignUp() {
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <ToastContainer position="top-right" autoClose={5000} />
             <Card className="w-[400px]">
+
                 <CardHeader>
                     <CardTitle>Sign Up</CardTitle>
                     <CardDescription>Create a new account to get started</CardDescription>
@@ -271,7 +272,7 @@ export default function SignUp() {
                         </div>
                         <Button
                             type="submit"
-                            className="w-full bg-[#cdf683] text-black hover:bg-[#b8e15e]"
+                            className="w-full bg-[#0196FD] text-black hover:bg-[#b8e15e]"
                             disabled={isLoading || !companyDetails}
                         >
                             Sign Up

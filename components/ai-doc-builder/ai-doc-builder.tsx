@@ -519,105 +519,133 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
   if (!isDocumentSelected) {
     return (
-      <Card className="w-full mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">AI Document Builder</CardTitle>
-          <CardDescription>Upload, select, or paste your documents for analysis</CardDescription>
-        </CardHeader>
-        
-        <CardContent>
-       
-          <Tabs
-            value={activeTab}
-            onValueChange={(value) => setActiveTab(value as "upload" | "vault" | "paste")}
-            className="space-y-4"
-          >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="upload">Upload Documents</TabsTrigger>
-              <TabsTrigger value="vault">Select from Vault</TabsTrigger>
-              <TabsTrigger value="paste">Paste Text</TabsTrigger>
-            </TabsList>
-            <TabsContent value="upload" className="space-y-4">
-              <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="file-upload" className="text-lg font-semibold">
-                  Upload source documents
-                </Label>
-                <Input id="file-upload" type="file" multiple onChange={handleFileUpload} className="cursor-pointer" />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="paste" className="space-y-4">
-              <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="paste-doc" className="text-lg font-semibold">
-                  Paste source documents
-                </Label>
-                <textarea
-                  id="paste-doc"
-                  rows={8}
-                  className="w-full p-2 border border-gray-300 rounded-md resize-vertical"
-                  placeholder="Paste your document content here..."
-                  value={documentContent}
-                  onChange={(e) => setDocumentContent(e.target.value)}
-                />
-                <Button onClick={handlePasteSubmit} className="mt-2 bg-primary">
-                  Submit Document
-                </Button>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="vault" className="space-y-4">
-              <Button 
-                onClick={handleVaultSelection} 
-                disabled={isLoading} 
-                className="w-full bg-[#1B2559] text-white hover:bg-[#0196FD] transition-colors"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Loading Vault Documents
-                  </>
-                ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Refresh Vault Documents
-                  </>
-                )}
-              </Button>
-              {vaultFiles.length > 0 && (
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {vaultFiles.map((file) => (
-                    <Card key={file._id} className="bg-gray-50">
-                      <CardContent className="flex items-center justify-between p-4">
-                        <div className="flex items-center space-x-4">
-                          <Checkbox
-                            id={file._id}
-                            onCheckedChange={(checked) => handleVaultFileSelection(file, checked as boolean)}
-                          />
-                          <Label
-                            htmlFor={file._id}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {file.originalName}
-                          </Label>
-                        </div>
-                        <span className="text-sm text-muted-foreground">{file.uploadedDate}</span>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-
-          {selectedDocuments.length > 0 && (
-            <Button onClick={handleContinue} className="mt-4 w-full bg-primary text-white">
-              Continue with {selectedDocuments.length} selected document{selectedDocuments.length > 1 ? "s" : ""}
+      <div className="flex">
+        {/* Past Sessions Panel */}
+        <div
+          className={`transition-all duration-300 ease-in-out ${
+            isPastSessionsCollapsed ? "w-10" : "w-1/4"
+          } border-r border-gray-200`}
+        >
+          <div className="flex items-center justify-between p-2 bg-gray-50">
+            <h3 className={`text-lg font-semibold text-[#1B2559] ${isPastSessionsCollapsed ? "hidden" : "block"}`}>
+              Past Sessions
+            </h3>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={togglePastSessions}
+              className="h-8 w-8 text-primary"
+              aria-label={isPastSessionsCollapsed ? "Expand past sessions" : "Collapse past sessions"}
+            >
+              {isPastSessionsCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             </Button>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+          <div className={isPastSessionsCollapsed ? "hidden" : "block h-[calc(100%-3rem)] overflow-hidden"}>
+            <PastChatSessions />
+          </div>
+        </div>
+        
+        {/* AI Document Builder Panel */}
+        <Card className="w-full mx-auto">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">AI Document Builder</CardTitle>
+            <CardDescription>Upload, select, or paste your documents for analysis</CardDescription>
+          </CardHeader>
+          
+          <CardContent>
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => setActiveTab(value as "upload" | "vault" | "paste")}
+              className="space-y-4"
+            >
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="upload">Upload Documents</TabsTrigger>
+                <TabsTrigger value="vault">Select from Vault</TabsTrigger>
+                <TabsTrigger value="paste">Paste Text</TabsTrigger>
+              </TabsList>
+              <TabsContent value="upload" className="space-y-4">
+                <div className="grid w-full items-center gap-1.5">
+                  <Label htmlFor="file-upload" className="text-lg font-semibold">
+                    Upload source documents
+                  </Label>
+                  <Input id="file-upload" type="file" multiple onChange={handleFileUpload} className="cursor-pointer" />
+                </div>
+              </TabsContent>
+  
+              <TabsContent value="paste" className="space-y-4">
+                <div className="grid w-full items-center gap-1.5">
+                  <Label htmlFor="paste-doc" className="text-lg font-semibold">
+                    Paste source documents
+                  </Label>
+                  <textarea
+                    id="paste-doc"
+                    rows={8}
+                    className="w-full p-2 border border-gray-300 rounded-md resize-vertical"
+                    placeholder="Paste your document content here..."
+                    value={documentContent}
+                    onChange={(e) => setDocumentContent(e.target.value)}
+                  />
+                  <Button onClick={handlePasteSubmit} className="mt-2 bg-primary">
+                    Submit Document
+                  </Button>
+                </div>
+              </TabsContent>
+  
+              <TabsContent value="vault" className="space-y-4">
+                <Button 
+                  onClick={handleVaultSelection} 
+                  disabled={isLoading} 
+                  className="w-full bg-[#1B2559] text-white hover:bg-[#0196FD] transition-colors"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading Vault Documents
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Refresh Vault Documents
+                    </>
+                  )}
+                </Button>
+                {vaultFiles.length > 0 && (
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {vaultFiles.map((file) => (
+                      <Card key={file._id} className="bg-gray-50">
+                        <CardContent className="flex items-center justify-between p-4">
+                          <div className="flex items-center space-x-4">
+                            <Checkbox
+                              id={file._id}
+                              onCheckedChange={(checked) => handleVaultFileSelection(file, checked as boolean)}
+                            />
+                            <Label
+                              htmlFor={file._id}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {file.originalName}
+                            </Label>
+                          </div>
+                          <span className="text-sm text-muted-foreground">{file.uploadedDate}</span>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+  
+            {selectedDocuments.length > 0 && (
+              <Button onClick={handleContinue} className="mt-4 w-full bg-primary text-white">
+                Continue with {selectedDocuments.length} selected document{selectedDocuments.length > 1 ? "s" : ""}
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     )
   }
+  
 
   const generatePDF = async () => {
     setIsLoading(true)

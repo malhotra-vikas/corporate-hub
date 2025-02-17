@@ -56,12 +56,12 @@ export const PastChatSessions: React.FC<PastChatSessionsProps> = ({ onSelectSess
                 >
                     <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-semibold text-primary">{session.title}</h3>
+                            <h3 className="font-semibold text-[#1B2559]">{session.title}</h3>
                             <span className="text-sm text-muted-foreground">{session.date}</span>
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">{session.preview}</p>
                         <div className="flex justify-between items-center">
-                            <Button variant="ghost" size="sm" className="px-0 text-primary">
+                            <Button variant="ghost" size="sm" className="px-0 text-[#1B2559]">
                                 <MessageSquare className="h-4 w-4 mr-2" />
                                 View Chat
                             </Button>

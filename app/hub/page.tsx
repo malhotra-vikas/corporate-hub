@@ -326,7 +326,7 @@ export default function HubPage() {
 
             <div className="grid md:grid-cols-2 gap-6">
                 {/* Competitors Section */}
-                <Card className="border-primary border">
+                <Card className="border-[#1B2559] border">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Competitors / Peers</CardTitle>
                     </CardHeader>
@@ -403,7 +403,7 @@ export default function HubPage() {
                 </Card>
 
                 {/* Earnings Hub Section */}
-                <Card className="border-primary border">
+                <Card className="border-[#1B2559] border">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <CalendarIcon className="h-5 w-5 text-primary" />
@@ -460,7 +460,7 @@ export default function HubPage() {
                 {/*
 
                 {/* News Hub Section */}
-                <Card className="md:col-span-2 border-primary border">
+                <Card className="md:col-span-2 border-[#1B2559] border">
                     <CardHeader>
                         <CardTitle>News Hub</CardTitle>
                     </CardHeader>

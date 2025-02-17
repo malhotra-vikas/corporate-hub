@@ -566,7 +566,11 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
             </TabsContent>
 
             <TabsContent value="vault" className="space-y-4">
-              <Button onClick={handleVaultSelection} disabled={isLoading} className="w-full bg-primary text-white">
+              <Button 
+                onClick={handleVaultSelection} 
+                disabled={isLoading} 
+                className="w-full bg-[#1B2559] text-white hover:bg-[#0196FD] transition-colors"
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -673,7 +677,11 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     <div className="w-full p-4">
       <Card className="h-screen bg-white shadow-lg">
         <CardHeader className="pb-2">
-          <CardTitle className="text-2xl text-primary">AI Document Analysis</CardTitle>
+          <CardTitle 
+            className="text-2xl text-[#1B2559]"
+          >
+            AI Document Analysis
+          </CardTitle>
           <CardDescription>Review AI-extracted details and refine with chat assistance</CardDescription>
         </CardHeader>
         <CardContent className="h-[calc(100%-4rem)] p-0">
@@ -709,7 +717,8 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
               <div
                 className={`flex-grow overflow-hidden p-4 ${isPastSessionsCollapsed && isChatInterfaceCollapsed ? "w-full" : "w-1/2"}`}
               >
-                <h3 className="text-lg font-semibold mb-2 text-primary">AI Extracted Details</h3>
+                <h3 className="text-lg font-semibold mb-2 text-[#1B2559]">AI Extracted Details</h3>
+
                 {isDataFetched && (
                   <Button onClick={generatePDF} className={`mt-2 ${isLoading ? "bg-gray-400" : "bg-primary"}`}>
                     {isLoading ? <span>Generating...</span> : <span>Generate PDF</span>}
@@ -733,7 +742,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                 } bg-gray-50 border-l border-gray-200`}
               >
                 <div className="flex items-center justify-between p-2 bg-gray-50">
-                  <h3 className={`text-lg font-semibold text-primary ${isChatInterfaceCollapsed ? "hidden" : "block"}`}>
+                  <h3 className={`text-lg font-semibold text-[#1B2559] ${isChatInterfaceCollapsed ? "hidden" : "block"}`}>
                     Chat Assistance
                   </h3>
                   <Button variant="ghost" size="icon" onClick={toggleChatInterface} className="h-8 w-8 text-primary">

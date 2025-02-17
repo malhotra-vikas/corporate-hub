@@ -567,7 +567,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
               }} />
           ) : (
             <div className="space-y-2">
-              <Label htmlFor={`${fileId}-${field}`}>{fieldName}</Label>
+              <Label htmlFor={`${fileId}-${field}`} className="text-[#1B2559] font-semibold">{fieldName}</Label>
               <Input
                 id={`${fileId}-${field}`}
                 value={value}
@@ -597,9 +597,9 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
 
     if (isLoading) {
       return (
-        <div className="flex items-center justify-center h-full">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2 text-lg font-semibold text-primary">Extracting data...</span>
+        <div className="flex items-center justify-center h-full text-[#1B2559]">
+          <Loader2 className="h-8 w-8 animate-spin text-[#1B2559]" />
+          <span className="ml-2 text-lg font-semibold text-[#1B2559]">Thinking...</span>
         </div>
       )
     }
@@ -607,7 +607,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
     return (
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <h4 className="font-semibold text-primary">{fieldName}</h4>
+          <h4 className="font-semibold text-[#1B2559]">{fieldName}</h4>
           <Button variant="outline" size="sm" onClick={() => handleEdit(fileId, field)}>
             Edit
           </Button>

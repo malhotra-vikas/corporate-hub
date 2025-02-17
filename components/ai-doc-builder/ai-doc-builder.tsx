@@ -686,30 +686,6 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         </CardHeader>
         <CardContent className="h-[calc(100%-4rem)] p-0">
           <div className="flex h-full">
-            {/* Past Sessions Panel */}
-            <div
-              className={`transition-all duration-300 ease-in-out ${
-                isPastSessionsCollapsed ? "w-10" : "w-1/4"
-              } border-r border-gray-200`}
-            >
-              <div className="flex items-center justify-between p-2 bg-gray-50">
-                <h3 className={`text-lg font-semibold text-primary ${isPastSessionsCollapsed ? "hidden" : "block"}`}>
-                  Past Sessions
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={togglePastSessions}
-                  className="h-8 w-8 text-primary"
-                  aria-label={isPastSessionsCollapsed ? "Expand past sessions" : "Collapse past sessions"}
-                >
-                  {isPastSessionsCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-                </Button>
-              </div>
-              <div className={isPastSessionsCollapsed ? "hidden" : "block h-[calc(100%-3rem)] overflow-hidden"}>
-                <PastChatSessions />
-              </div>
-            </div>
 
             {/* Main Content Area */}
             <div className={`flex flex-1 transition-all duration-300 ease-in-out`}>
@@ -754,9 +730,11 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                   </Button>
                 </div>
                 {!isChatInterfaceCollapsed && 
-                <ChatInterface onSendMessage={handleSendMessage} 
-                chatId={chatData.chatId}
-                onUpdateField={handleUpdateField}/>}
+                  <ChatInterface onSendMessage={handleSendMessage} 
+                    chatId={chatData.chatId}
+                    onUpdateField={handleUpdateField}
+                  />
+                }
               </div>
             </div>
           </div>

@@ -111,7 +111,13 @@ export default function VaultPage() {
       const companyUser = await userApi.getClientByEmail(user?.email || "")
       const vaultFilesResponse = await vaultApi.getSpecificFiles({ user_id: companyUser._id })
 
-      const files = vaultFilesResponse?.data || []
+      let files = vaultFilesResponse?.data || []
+
+      // Sort by last modified date (assuming file object has a `lastModified` field)
+      files = files.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      
       console.log("Loaded files count:", files.length)
 
       setFiles(files)
@@ -210,19 +216,16 @@ export default function VaultPage() {
                 <TableHead>
                   <Link href="#" onClick={() => toggleSort("name")} className="flex items-center">
                     File Name
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Link>
                 </TableHead>
                 <TableHead>
                   <Link href="#" onClick={() => toggleSort("size")} className="flex items-center">
                     Document Type
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Link>
                 </TableHead>
                 <TableHead>
                   <Link href="#" onClick={() => toggleSort("uploadDate")} className="flex items-center">
                     Uploaded
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Link>
                 </TableHead>
                 <TableHead>Actions</TableHead>
@@ -265,7 +268,7 @@ export default function VaultPage() {
                     </div>
                   </TableCell>
                   <TableCell>{file.docType}</TableCell>
-                  <TableCell>{file.uploadedDate ? new Date(file.uploadedDate).toLocaleDateString() : "N/A"}</TableCell>
+                  <TableCell>{file.createdAt ? new Date(file.createdAt).toLocaleDateString() : "N/A"}</TableCell>
                   <TableCell>
                     <form onSubmit={handleDeleteFiles}>
                       <input type="hidden" name="fileIds" value={file._id} />

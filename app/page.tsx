@@ -1,9 +1,28 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { themeConfig } from "@/lib/theme-config"
+import { useAuth } from "@/lib/auth-context"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 export default function HomePage() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/hub") // Redirect logged-in users to /hub
+    }
+  }, [user, loading, router])
+
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>
+  }
+
+  
   return (
     <div className="flex flex-col min-h-[calc(100vh-4rem)]">
       <section className="bg-gradient-to-b from-primary to-primary-dark text-white space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">

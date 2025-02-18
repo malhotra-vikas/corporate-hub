@@ -68,7 +68,7 @@ export function MainNav() {
                                                 pathname === "/ai-doc-builder/press-release" ? "bg-[#0196FD]" : "bg-transparent"
                                             )}
                                         >
-                                            AI-Doc-Builder
+                                            Press Release Builder
                                         </NavigationMenuLink>
                                     </Link>
                                 </NavigationMenuItem>

@@ -40,7 +40,16 @@ export const PastChatSessions: React.FC<PastChatSessionsProps> = ({ onSelectSess
                 if (companyUser._id) {
                     const pastSessions = await chatApi.getAllChat({ id: companyUser._id });
                     console.log("in past tsx - pastSessions are ", pastSessions.data)
-                    setSessions(pastSessions.data);
+
+                    // Sort sessions by `updatedAt` in descending order (most recent first)
+                    const sortedSessions = pastSessions.data.sort(
+                        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+                    );
+
+                    console.log("in past tsx - sortedSessions are ", sortedSessions)
+
+
+                    setSessions(sortedSessions);
                 }
             } catch (error) {
                 console.error("Error fetching chat sessions:", error);

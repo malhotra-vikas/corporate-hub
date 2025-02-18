@@ -75,7 +75,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   let [vaultFiles, setVaultFiles] = useState<VaultFile[]>([])
 
   const [isLoading, setIsLoading] = useState(false)
-  const [isPastSessionsCollapsed, setIsPastSessionsCollapsed] = useState(true)
+  const [isPastSessionsCollapsed, setIsPastSessionsCollapsed] = useState(false)
   const [isChatInterfaceCollapsed, setIsChatInterfaceCollapsed] = useState(false)
 
   const [isExtractingData, setIsExtractingData] = useState(false)
@@ -552,7 +552,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         {/* AI Document Builder Panel */}
         <Card className="w-full mx-auto">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">AI Document Builder</CardTitle>
+            <CardTitle className="text-2xl font-bold">AI Press Release Builder</CardTitle>
             <CardDescription>Upload, select, or paste your documents for analysis</CardDescription>
           </CardHeader>
           

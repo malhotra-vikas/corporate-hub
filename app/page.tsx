@@ -33,7 +33,7 @@ export default function HomePage() {
               <CardDescription>DRaft press release in seconds</CardDescription>
             </CardHeader>
             <CardContent>
-              <img src="/icons/shield.svg" alt="Security" className="h-12 w-12 mx-auto" />
+              <img src="press-release_5395863.png" alt="Press Releases" className="h-12 w-12 mx-auto" />
             </CardContent>
           </Card>
           <Card>
@@ -42,7 +42,7 @@ export default function HomePage() {
               <CardDescription>Generate earnings press releases and scripts</CardDescription>
             </CardHeader>
             <CardContent>
-              <img src="/icons/users.svg" alt="Collaboration" className="h-12 w-12 mx-auto" />
+              <img src="earnings.png" alt="Earnings" className="h-12 w-12 mx-auto" />
             </CardContent>
           </Card>
           <Card>
@@ -60,7 +60,7 @@ export default function HomePage() {
               <CardDescription>A.I. Powered news tailored to you</CardDescription>
             </CardHeader>
             <CardContent>
-              <img src="/icons/git-branch.svg" alt="Version Control" className="h-12 w-12 mx-auto" />
+              <img src="news.png" alt="News" className="h-12 w-12 mx-auto" />
             </CardContent>
           </Card>          <Card>
             <CardHeader>
@@ -76,7 +76,7 @@ export default function HomePage() {
               <CardDescription>Your own Large Language Model trained on your company’s documents and preferences</CardDescription>
             </CardHeader>
             <CardContent>
-              <img src="/icons/git-branch.svg" alt="Version Control" className="h-12 w-12 mx-auto" />
+              <img src="ai-llm.png" alt="AI" className="h-12 w-12 mx-auto" />
             </CardContent>
           </Card>
         </div>

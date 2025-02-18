@@ -750,7 +750,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                   company={companyUser}
                   updateParentExtractedData={updateParentExtractedData}
                   onMessagesGenerated={handleMessagesGenerated}
-                  //returnExtractedData={extractedData} // Pass the extracted data
+                  returnExtractedData={extractedData} // Pass the extracted data
                 />
               </div>
 

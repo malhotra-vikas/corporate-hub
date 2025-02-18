@@ -49,7 +49,7 @@ interface AIExtractedDetailsProps {
   company: any
   updateParentExtractedData: (data: { [key: string]: ExtractedData }) => void
   onMessagesGenerated: (messages: Message[], chatId: string) => void
-  //returnExtractedData: any // New prop for updated extracted data
+  returnExtractedData: any // New prop for updated extracted data
 }
 
 const fieldLabels = {
@@ -67,7 +67,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   company,
   updateParentExtractedData,
   onMessagesGenerated,
-  //returnExtractedData
+  returnExtractedData
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(initialIsLoading)
   const [editingFields, setEditingFields] = useState<{ [key: string]: string[] }>({})
@@ -94,14 +94,9 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   console.log("In AIExtractedDetails - documents ", documents)
   console.log("In AIExtractedDetails - company ", company)
 
-  /*
+  
   useEffect(() => {
     
-    if (!returnExtractedData || Object.keys(returnExtractedData).length === 0) {
-      console.warn("returnExtractedData is undefined or empty");
-      return; // Exit early to prevent errors
-    }
-  
     setExtractedData((prevData) => {
       if (!prevData) {
         console.warn("prevData is undefined, initializing an empty object.");
@@ -126,7 +121,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       return updatedData;
     });
   }, [returnExtractedData]);
-    */
+
 
   useEffect(() => {
     const fetchData = async () => {

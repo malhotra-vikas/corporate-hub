@@ -56,6 +56,8 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [selectedDocuments, setSelectedDocuments] = useState<UploadedDocument[]>([])
   const [activeTab, setActiveTab] = useState<"upload" | "vault" | "paste">("upload") // Track active tab
   const [documentContent, setDocumentContent] = useState<string>("") // Store pasted content
+  const [documentName, setDocumentName] = useState<string>("") // Store pasted content
+
   const [extractedData, setExtractedData] = useState<{
     [key: string]: {
       name: string
@@ -327,11 +329,11 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   // Triggered when user submits (done typing)
   const handlePasteSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    handleFileUploadFromPaste(documentContent) // Submit the document content
+    handleFileUploadFromPaste(documentContent, documentName) // Submit the document content
     // You can add additional logic after submitting, like clearing the text area or moving to the next step
   }
 
-  const handleFileUploadFromPaste = async (content: string) => {
+  const handleFileUploadFromPaste = async (content: string, name: string) => {
     setDocumentContent(content)
 
     if (user) {
@@ -339,7 +341,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     }
 
     const response = await vaultApi.createFileFromText({
-      fileName: "UserText Input for PR",
+      fileName: documentName,
       fileContent: content,
       user_id: companyUser._id,
       docType: "Paste-News"
@@ -575,6 +577,18 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   
               <TabsContent value="paste" className="space-y-4">
                 <div className="grid w-full items-center gap-1.5">
+                  <Label htmlFor="paste-doc-name" className="text-lg font-semibold">
+                    Document Name
+                  </Label>
+                  <input
+                    id="paste-doc-name"
+                    type="text"
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    placeholder="Enter document name..."
+                    value={documentName}
+                    onChange={(e) => setDocumentName(e.target.value)}
+                  />
+
                   <Label htmlFor="paste-doc" className="text-lg font-semibold">
                     Paste source documents
                   </Label>

@@ -44,6 +44,7 @@ interface AIExtractedDetailsProps {
     }
     type: string
   }>
+  chatSessionId: string
   onUpdateExtractedData: (fileId: string, field: string, value: string) => void
   isLoading: boolean
   company: any
@@ -67,7 +68,8 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   company,
   updateParentExtractedData,
   onMessagesGenerated,
-  returnExtractedData
+  returnExtractedData,
+  chatSessionId
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(initialIsLoading)
   const [editingFields, setEditingFields] = useState<{ [key: string]: string[] }>({})
@@ -121,6 +123,28 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       return updatedData;
     });
   }, [returnExtractedData]);
+
+
+  useEffect(() => {
+    const fetchExtractedData = async () => {
+      setIsLoading(true);
+      try {
+        const chatApi = new ChatApi();
+        const response = await chatApi.getChatById({ id: chatSessionId });
+        console.log(" Datqa for past chat ", response.data)
+        
+        setExtractedData(response.data);
+      } catch (error) {
+        console.error("Error fetching extracted data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (chatSessionId) {
+      fetchExtractedData();
+    }
+  }, [chatSessionId]);
 
 
   useEffect(() => {

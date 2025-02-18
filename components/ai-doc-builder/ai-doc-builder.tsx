@@ -57,6 +57,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [activeTab, setActiveTab] = useState<"upload" | "vault" | "paste">("upload") // Track active tab
   const [documentContent, setDocumentContent] = useState<string>("") // Store pasted content
   const [documentName, setDocumentName] = useState<string>("") // Store pasted content
+  let [selectedSessionId, setSelectedSessionId] = useState<string>("") // Store pasted content
 
   const [extractedData, setExtractedData] = useState<{
     [key: string]: {
@@ -544,7 +545,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
             </Button>
           </div>
           <div className={isPastSessionsCollapsed ? "hidden" : "block h-[calc(100%-3rem)] overflow-hidden"}>
-            <PastChatSessions />
+          <PastChatSessions onSelectSession={(selectedSessionId) => console.log("Selected session:", selectedSessionId)} />
           </div>
         </div>
         

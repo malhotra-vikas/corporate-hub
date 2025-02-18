@@ -39,7 +39,7 @@ export const PastChatSessions: React.FC<PastChatSessionsProps> = ({ onSelectSess
 
                 if (companyUser._id) {
                     const pastSessions = await chatApi.getAllChat({ id: companyUser._id });
-                    console.log("pastSessions are ", pastSessions.data)
+                    console.log("in past tsx - pastSessions are ", pastSessions.data)
                     setSessions(pastSessions.data);
                 }
             } catch (error) {

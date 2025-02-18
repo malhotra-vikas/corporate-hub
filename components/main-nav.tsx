@@ -25,21 +25,23 @@ export function MainNav() {
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center">
+                {/* Logo */}
                 <Link href="/" className="flex items-center space-x-2">
                     <img src="/airhub-logo.png" alt={themeConfig.name} className="h-8 w-auto" />
                     <span className="font-bold text-xl">{themeConfig.name}</span>
                 </Link>
+
+                {/* Navigation Menu */}
                 <NavigationMenu className="mx-6">
                     <NavigationMenuList>
                         {user ? (
-                            // Logged in navigation items
                             <>
                                 <NavigationMenuItem>
                                     <Link href="/hub" legacyBehavior passHref>
                                         <NavigationMenuLink
                                             className={cn(
-                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-[#0196FD] focus:text-white disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-[#0196FD] hover:text-white h-10 py-2 px-4 group w-max",
-                                                pathname === "/ai-doc-builder/press-release" ? "bg-[#0196FD]" : "bg-transparent"
+                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-[#0196FD] focus:text-white hover:bg-[#0196FD] hover:text-white h-10 py-2 px-4 group",
+                                                pathname === "/hub" ? "bg-[#0196FD]" : "bg-transparent"
                                             )}
                                         >
                                             IR Hub
@@ -50,8 +52,8 @@ export function MainNav() {
                                     <Link href="/dashboard/vault" legacyBehavior passHref>
                                         <NavigationMenuLink
                                             className={cn(
-                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-[#0196FD] focus:text-white disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-[#0196FD] hover:text-white h-10 py-2 px-4 group w-max",
-                                                pathname === "/ai-doc-builder/press-release" ? "bg-[#0196FD]" : "bg-transparent"
+                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-[#0196FD] focus:text-white hover:bg-[#0196FD] hover:text-white h-10 py-2 px-4 group",
+                                                pathname === "/dashboard/vault" ? "bg-[#0196FD]" : "bg-transparent"
                                             )}
                                         >
                                             Vault
@@ -62,7 +64,7 @@ export function MainNav() {
                                     <Link href="/ai-doc-builder/press-release" legacyBehavior passHref>
                                         <NavigationMenuLink
                                             className={cn(
-                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-[#0196FD] focus:text-white disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-[#0196FD] hover:text-white h-10 py-2 px-4 group w-max",
+                                                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-[#0196FD] focus:text-white hover:bg-[#0196FD] hover:text-white h-10 py-2 px-4 group",
                                                 pathname === "/ai-doc-builder/press-release" ? "bg-[#0196FD]" : "bg-transparent"
                                             )}
                                         >
@@ -72,24 +74,11 @@ export function MainNav() {
                                 </NavigationMenuItem>
                             </>
                         ) : (
-                            // Original navigation items for non-logged in users
                             <>
                                 <NavigationMenuItem>
                                     <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
                                     <NavigationMenuContent>
                                         <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr] bg-white rounded-md shadow-md">
-                                            <li className="row-span-3">
-                                                <NavigationMenuLink asChild>
-                                                    <a
-                                                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/50 to-primary p-6 no-underline outline-none focus:shadow-md"
-                                                        href="/"
-                                                    >
-                                                        <img src="/airhub-logo.png" alt={themeConfig.name} className="h-6 w-auto mb-2" />
-                                                        <div className="mb-2 mt-4 text-lg font-medium text-white">{themeConfig.name}</div>
-                                                        <p className="text-sm leading-tight text-white/90">{themeConfig.description}</p>
-                                                    </a>
-                                                </NavigationMenuLink>
-                                            </li>
                                             <ListItem href="/features" title="Document Management">
                                                 Secure storage and organization of corporate documents
                                             </ListItem>
@@ -132,6 +121,8 @@ export function MainNav() {
                         )}
                     </NavigationMenuList>
                 </NavigationMenu>
+
+                {/* Right-side Controls (Login / User Profile) */}
                 <div className="ml-auto flex items-center space-x-4">
                     {user ? (
                         <UserNav />
@@ -151,6 +142,7 @@ export function MainNav() {
     )
 }
 
+/** ListItem Component for Dropdowns */
 const ListItem = React.forwardRef<React.ElementRef<"a">, React.ComponentPropsWithoutRef<"a"> & { title: string }>(
     ({ className, title, children, ...props }, ref) => {
         return (
@@ -170,7 +162,6 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, React.ComponentPropsWit
                 </NavigationMenuLink>
             </li>
         )
-    },
-)
-ListItem.displayName = "ListItem"
-
+    }
+);
+ListItem.displayName = "ListItem";

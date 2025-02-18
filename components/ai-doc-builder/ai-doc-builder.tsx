@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -83,6 +83,40 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [isDataFetched, setIsDataFetched] = useState(false) // Added state variable
 
   const { user, loading } = useAuth()
+
+  const handleVaultSelection = async () => {
+    setIsLoading(true)
+    try {
+      const files = await getFiles()
+      console.log("files  are befoere setVaultFiles ", files)
+      vaultFiles = files.files
+
+      // Filter files that are either .docx or .pdf
+      const filteredFiles = files.files.filter(
+        (file) => file.originalName.endsWith(".docx") || file.originalName.endsWith(".pdf") || file.docType === "8-K",
+      )
+
+      console.log("filteredFiles are ", filteredFiles)
+      // Sort by last modified date (assuming file object has a `lastModified` field)
+      const sortedFiles = filteredFiles.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+
+      console.log("sortedFiles are ", sortedFiles)
+
+      setVaultFiles(sortedFiles)
+    } catch (error) {
+      console.error("Error fetching vault files:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!isLoading && user && !isDataFetched && activeTab === 'vault') {
+      handleVaultSelection(); // Auto-fetch vault docs
+    }
+  }, [user, activeTab]);
 
   if (!user) return
 
@@ -382,34 +416,6 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
   }
 
-  const handleVaultSelection = async () => {
-    setIsLoading(true)
-    try {
-      const files = await getFiles()
-      console.log("files  are befoere setVaultFiles ", files)
-      vaultFiles = files.files
-
-      // Filter files that are either .docx or .pdf
-      const filteredFiles = files.files.filter(
-        (file) => file.originalName.endsWith(".docx") || file.originalName.endsWith(".pdf") || file.docType === "8-K",
-      )
-
-      console.log("filteredFiles are ", filteredFiles)
-      // Sort by last modified date (assuming file object has a `lastModified` field)
-      const sortedFiles = filteredFiles.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )
-
-      console.log("sortedFiles are ", sortedFiles)
-
-      setVaultFiles(sortedFiles)
-    } catch (error) {
-      console.error("Error fetching vault files:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const handleVaultFileSelection = (file: File, isSelected: boolean) => {
     if (isSelected) {
       setSelectedDocuments([...selectedDocuments, { file, type: file.category as DocumentType }])
@@ -626,7 +632,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                   )}
                 </Button>
                 {vaultFiles.length > 0 && (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                  <div className="space-y-2 max-h-[40rem] overflow-y-auto">
                     {vaultFiles.map((file) => (
                       <Card key={file._id} className="bg-gray-50">
                         <CardContent className="flex items-center justify-between p-4">

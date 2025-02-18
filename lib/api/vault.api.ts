@@ -49,6 +49,12 @@ export default class VaultApi extends BaseApi {
     return data;
   }
 
+  async fetchSecText(url: string ) {
+    const data = await VaultApi.get(`${this.baseUrl}fetch-sec-text?url=${encodeURIComponent(url)}`);
+    return data;
+  }
+
+
   async fetchCompanyPastDocuments(dto: { ticker: string, fileType: string, duration: string }) {
     const data = await VaultApi.post(`${this.baseUrl}getSECFiles`, dto);
     return data;

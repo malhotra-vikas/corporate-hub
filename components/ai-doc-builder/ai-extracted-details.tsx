@@ -34,8 +34,10 @@ interface Message {
 interface AIExtractedDetailsProps {
   documents: Array<{
     file: {
+      filePath: any
       extractedData: string
       name: string
+      docType: string
       user_id: string
       _id: string
     }
@@ -46,7 +48,7 @@ interface AIExtractedDetailsProps {
   company: any
   updateParentExtractedData: (data: { [key: string]: ExtractedData }) => void
   onMessagesGenerated: (messages: Message[], chatId: string) => void
-  returnExtractedData: any // New prop for updated extracted data
+  //returnExtractedData: any // New prop for updated extracted data
 }
 
 const fieldLabels = {
@@ -64,7 +66,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   company,
   updateParentExtractedData,
   onMessagesGenerated,
-  returnExtractedData
+  //returnExtractedData
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(initialIsLoading)
   const [editingFields, setEditingFields] = useState<{ [key: string]: string[] }>({})
@@ -91,7 +93,9 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   console.log("In AIExtractedDetails - documents ", documents)
   console.log("In AIExtractedDetails - company ", company)
 
+  /*
   useEffect(() => {
+    
     if (!returnExtractedData || Object.keys(returnExtractedData).length === 0) {
       console.warn("returnExtractedData is undefined or empty");
       return; // Exit early to prevent errors
@@ -121,7 +125,8 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       return updatedData;
     });
   }, [returnExtractedData]);
-    
+    */
+
   useEffect(() => {
     const fetchData = async () => {
       setLoggedinUser(company._id)
@@ -136,19 +141,43 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
 
         console.log("In AIExtractedDetails - relevantDoc file id ", relevantDoc.file._id)
         console.log("In AIExtractedDetails - relevantDoc user id ", relevantDoc.file.user_id)
+        console.log("In AIExtractedDetails - relevantDoc file type  is ", relevantDoc.file.docType)
 
-        console.log("Converting PDF to text");
-        const pdfToTextResponse = await vaultApi.getFileData({
-          user_id: relevantDoc.file.user_id,
-          docType: "pdf",
-          fileId: relevantDoc.file._id,
-        });
-        const extractedText = pdfToTextResponse.data;
+        if (relevantDoc.file.docType === '8-K') {
+          const extractedTextLink = relevantDoc.file.filePath
+          console.log("8K Text link is  ", extractedTextLink)
 
+          try {
+            const response = await vaultApi.fetchSecText(extractedTextLink)
+            console.log("Fetched text from 8-K link:", response); // Log first 500 chars for debugging
 
-        console.log("In AIExtractedDetails - cumulativeExtractedText ", pdfToTextResponse)
+            const extractedText = await response.data;
+          
+                      
+            console.log("Fetched text from 8-K link:", extractedText.slice(0, 500)); // Log first 500 chars for debugging
+        
+            // Run AI processing on extracted text
+            await runAi(extractedText, relevantDoc.file._id, company._id);
+          } catch (error) {
+            console.error("Error fetching 8-K text:", error);
+          }
+        
+        } else {
+          console.log("Converting PDF to text");
+          const pdfToTextResponse = await vaultApi.getFileData({
+            user_id: relevantDoc.file.user_id,
+            docType: "pdf",
+            fileId: relevantDoc.file._id,
+          });
+          const extractedText = pdfToTextResponse.data;
+  
+  
+          console.log("In AIExtractedDetails - cumulativeExtractedText ", pdfToTextResponse)
+  
+          await runAi(pdfToTextResponse.data, relevantDoc.file._id, company._id)
+  
+        }
 
-        await runAi(pdfToTextResponse.data, relevantDoc.file._id, company._id)
       }
     }
 
@@ -255,6 +284,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       ceoQuote: ceoQuotePrompt,
       subHeadline: subHeadlinePrompt,
       keyHighlights: keyHighlightsPrompt,
+      cumulativeExtractedText: cumulativeExtractedText
     })
 
 
@@ -310,6 +340,8 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       // Ensure the response is in the correct JSON format and handle parsing
       try {
         generatedSubHeadlinesJson = JSON.parse(generatedSubHeadlinesJson)
+
+        console.log("generatedSubHeadlinesJson is ", generatedSubHeadlinesJson)
 
         // Iterate through the object and concatenate each key-value pair
         formattedSubHeadlines = Object.entries(generatedSubHeadlinesJson)

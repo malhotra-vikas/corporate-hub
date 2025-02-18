@@ -342,6 +342,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       fileName: "UserText Input for PR",
       fileContent: content,
       user_id: companyUser._id,
+      docType: "Paste-News"
     })
 
     //setSelectedDocuments((prev) => [...prev, newDocument])

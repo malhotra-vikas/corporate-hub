@@ -34,6 +34,7 @@ interface Message {
 interface AIExtractedDetailsProps {
   documents: Array<{
     file: {
+      extractedText: any
       filePath: any
       extractedData: string
       name: string
@@ -143,7 +144,14 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         console.log("In AIExtractedDetails - relevantDoc user id ", relevantDoc.file.user_id)
         console.log("In AIExtractedDetails - relevantDoc file type  is ", relevantDoc.file.docType)
 
-        if (relevantDoc.file.docType === '8-K') {
+        if (relevantDoc.file.docType === 'Paste-News') {
+          const extractedText = relevantDoc.file.extractedText
+
+          console.log("Paste-News Extracted Text is  ", extractedText)
+
+          await runAi(extractedText, relevantDoc.file._id, company._id);
+
+        } else if (relevantDoc.file.docType === '8-K') {
           const extractedTextLink = relevantDoc.file.filePath
           console.log("8K Text link is  ", extractedTextLink)
 
@@ -231,18 +239,26 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
     }
 
     let subHeadlinePrompt = `
-        Generate 2 consise, impactful bullet points to highlight Sub-Headlines to Expand on the Value Proposition. 
-        Each sub-headline should be no more than 30 words that captures the core news. You would never add any assumptions, just convey facts.
-
-        Sub-headlines offer an opportunity to elaborate on the key metrics or context. These should succinctly convey the key news and its significance. 
-        Highlight the value to shareholders, whether it's a new acquisition, a major milestone, or a growth driver. Do not add any formating. 
-
-        Include financial specifics and revenue forcasts if the news includes that. 
-        Leverage High-Performing professional Keywords to enhance engagement and convey confidence. Return the output in a JSON format like with 
-        {
-          Bullet Point hook: Bullet Point Details
-        }
-      `
+    Generate 2 concise, impactful bullet points to highlight Sub-Headlines that expand on the Value Proposition. 
+    Each sub-headline should be **no more than 30 words** and should capture **only the core news**, without assumptions.
+    
+    Sub-headlines should:
+    - Elaborate on key **metrics** or **context** related to the news.
+    - Succinctly convey the **key news** and its **significance**.
+    - Highlight **value to shareholders**, whether it's **a new acquisition, milestone, or growth driver**.
+    - Include **financial specifics and revenue forecasts** if relevant.
+    - Use **high-performing professional keywords** to enhance engagement and convey confidence.
+    
+    ### **Response Format**
+    Return a **valid JSON object** in the following structure:
+    \`\`\`json
+    {
+      "subHeadline-1": "Concise and impactful sub-headline about revenue growth...",
+      "subHeadline-2": "Concise and impactful sub-headline about strategic partnership..."
+    }
+    \`\`\`
+    DO NOT add extra text, explanations, or formatting outside this JSON structure.
+    `;
 
     if (toneMessages) {
       subHeadlinePrompt = subHeadlinePrompt + " The tone should be " + toneMessages
@@ -339,9 +355,13 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   
       // Ensure the response is in the correct JSON format and handle parsing
       try {
+        generatedSubHeadlinesJson = cleanJsonString(generatedSubHeadlinesJson)
+        console.log("UnParsed generatedSubHeadlinesJson is ", generatedSubHeadlinesJson)
+
+
         generatedSubHeadlinesJson = JSON.parse(generatedSubHeadlinesJson)
 
-        console.log("generatedSubHeadlinesJson is ", generatedSubHeadlinesJson)
+        console.log("Parsed generatedSubHeadlinesJson is ", generatedSubHeadlinesJson)
 
         // Iterate through the object and concatenate each key-value pair
         formattedSubHeadlines = Object.entries(generatedSubHeadlinesJson)
@@ -682,5 +702,10 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
 
 function delay(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
+
+function cleanJsonString(generatedSubHeadlinesJson: string): string {
+  // Remove triple backticks and potential formatting artifacts
+  return generatedSubHeadlinesJson.replace(/^```json|```$/g, '').trim();
 }
 

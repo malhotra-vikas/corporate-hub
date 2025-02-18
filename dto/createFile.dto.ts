@@ -4,6 +4,7 @@ export class CreateFileDto {
   fileName?: string;
   fileContent?: string;
   user_id?: string;
+  docType?: string;
 
   static yupSchema() {
     const restrictedKeywords = [

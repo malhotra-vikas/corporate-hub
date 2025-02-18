@@ -83,4 +83,5 @@ export interface HubData {
   earningsCalendar: EarningsEvent[]
   companyNews: NewsItem[]
   trendingNews: NewsItem[]
+  industryNews: NewsItem[]
 }

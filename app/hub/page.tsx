@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { EarningsEvent, HubData } from "@/lib/types"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 import { CreateUserDto } from "@/dto/createUser.dto"
 import {
@@ -468,49 +469,87 @@ export default function HubPage() {
                         <Tabs defaultValue="company-news">
                             <TabsList>
                                 {/* Tabs for switching between Company News and Trending News */}
-                                <TabsTrigger value="company-news">Industry News</TabsTrigger>
+                                <TabsTrigger value="company-news">Comps News</TabsTrigger>
                                 <TabsTrigger value="trending-news">Trending News</TabsTrigger>
+                                <TabsTrigger value="industry-news">Industry News</TabsTrigger>
                             </TabsList>
 
                             {/* Tab content for Company News */}
                             <TabsContent value="company-news">
                                 <div className="space-y-4">
-                                    {hubData.companyNews.map((item, index) => (
-                                        <div key={index} className="flex items-start gap-4">
-                                            <div className="flex-1">
-                                                <div className="text-sm text-gray-500">
-                                                    {item.source} • {item.time}
-                                                </div>
-                                                <div className="font-medium">
-                                                    <a href={item.link} target="_blank" rel="noopener noreferrer">
-                                                        {item.title}
-                                                    </a>
+                                    {hubData.companyNews.map((item, index) => {
+                                        // Format time using `date-fns`
+                                        const formattedTime = formatDistanceToNow(parseISO(item.time), { addSuffix: true });
+
+                                        return (
+                                            <div key={index} className="flex items-start gap-4">
+                                                <div className="flex-1">
+                                                    <div className="text-sm text-gray-500">
+                                                        {item.source} • {formattedTime}
+                                                    </div>
+                                                    <div className="font-medium">
+                                                        <a href={item.link} target="_blank" rel="noopener noreferrer">
+                                                            {item.title}
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </TabsContent>
+
 
                             {/* Tab content for Trending News */}
                             <TabsContent value="trending-news">
                                 <div className="space-y-4">
-                                    {hubData.trendingNews.map((item, index) => (
-                                        <div key={index} className="flex items-start gap-4">
-                                            <div className="flex-1">
-                                                <div className="text-sm text-gray-500">
-                                                    {item.source} • {item.time}
-                                                </div>
-                                                <div className="font-medium">
-                                                    <a href={item.link} target="_blank" rel="noopener noreferrer">
-                                                        {item.title}
-                                                    </a>
+                                    {hubData.trendingNews.map((item, index) => {
+                                        // Format time using `date-fns`
+                                        const formattedTime = formatDistanceToNow(parseISO(item.time), { addSuffix: true });
+
+                                        return (
+                                            <div key={index} className="flex items-start gap-4">
+                                                <div className="flex-1">
+                                                    <div className="text-sm text-gray-500">
+                                                        {item.source} • {formattedTime}
+                                                    </div>
+                                                    <div className="font-medium">
+                                                        <a href={item.link} target="_blank" rel="noopener noreferrer">
+                                                            {item.title}
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </TabsContent>
+
+                            {/* Tab content for Industry News */}
+                            <TabsContent value="industry-news">
+                                <div className="space-y-4">
+                                    {hubData.industryNews.map((item, index) => {
+                                        // Format time using `date-fns`
+                                        const formattedTime = formatDistanceToNow(parseISO(item.time), { addSuffix: true });
+
+                                        return (
+                                            <div key={index} className="flex items-start gap-4">
+                                                <div className="flex-1">
+                                                    <div className="text-sm text-gray-500">
+                                                        {item.source} • {formattedTime}
+                                                    </div>
+                                                    <div className="font-medium">
+                                                        <a href={item.link} target="_blank" rel="noopener noreferrer">
+                                                            {item.title}
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </TabsContent>
+
                         </Tabs>
                     </CardContent>
                 </Card>

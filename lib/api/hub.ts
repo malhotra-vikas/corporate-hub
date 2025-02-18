@@ -44,9 +44,17 @@ export default class HubApi extends BaseApi {
     async buildNews(newsData: any) {
         console.log("newsData is ", newsData);
 
-        let companyNews: { source: any; time: any; link: any; title: any; image: any; }[] = [];
-        let trendingNews: { source: any; time: any; link: any; title: any; image: any; }[] = [];
+        if (!newsData || !Array.isArray(newsData)) {
+            console.error("Error: newsData is undefined or not an array", newsData);
+            return []; // Return an empty array instead of breaking
+        }
     
+        //let companyNews: { source: any; time: any; link: any; title: any; image: any; }[] = [];
+        //let trendingNews: { source: any; time: any; link: any; title: any; image: any; }[] = [];
+        //let industryNews: { source: any; time: any; link: any; title: any; image: any; }[] = [];
+
+        let genericNews: { source: any; time: any; link: any; title: any; image: any; }[] = [];
+
         // Example logic for separating into categories (can be customized as needed)
         newsData.forEach(news => {
             const newsItem = {
@@ -57,7 +65,7 @@ export default class HubApi extends BaseApi {
                 link: news.url,
                 image: news.image || 'default-image-url.png', // Fallback for images
             };
-            companyNews.push(newsItem);
+            genericNews.push(newsItem);
         });
 
         // Function to parse relative time like "1 day ago", "4 hours ago"
@@ -100,17 +108,26 @@ export default class HubApi extends BaseApi {
             return compareAsc(dateB, dateA); // Sort latest first
         };
         
-        companyNews.sort(sortByDate);
-        trendingNews.sort(sortByDate);
+        genericNews.sort(sortByDate);
+        //trendingNews.sort(sortByDate);
+        //industryNews.sort(sortByDate);
 
-        const sortedCompanyNews = companyNews.sort((a, b) => new Date(b.time) - new Date(a.time));
-        const sortedTrendingNews = trendingNews.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+        //const sortedCompanyNews = companyNews.sort((a, b) => new Date(b.time) - new Date(a.time));
+        //const sortedTrendingNews = trendingNews.sort((a, b) => new Date(b.time) - new Date(a.time));
+        //const sortedIndustryNews = industryNews.sort((a, b) => new Date(b.time) - new Date(a.time));
+        const sortedGenericNews = genericNews.sort((a, b) => new Date(b.time) - new Date(a.time));
 
         // Combine them into an object to return both categories
+        /*
         return {
             companyNews: sortedCompanyNews,
-            trendingNews: sortedTrendingNews
+            trendingNews: sortedTrendingNews,
+            industryNews: sortedIndustryNews
         };
+        */
+
+        return sortedGenericNews
 
     }
 
@@ -167,20 +184,27 @@ export default class HubApi extends BaseApi {
         console.log("companyDetails ", companyDetails.data)
 
         const interestTickers = companyUser.interestTickers
+        const companyIndustry = companyUser.industry
+
 
         const competitors = await serpApi.getCompanyCompetitorDataViaFinancialModeling(interestTickers)
 
         console.log("competitors are ", competitors.data);
 
-        const news = await serpApi.getCompanyCompetitorNewsViaFinancialModeling(interestTickers)
+        const compNews = await serpApi.getCompanyCompetitorNewsViaFinancialModeling(interestTickers)
+        console.log("compNews are ", compNews.data);
 
-        console.log("news are ", news.data);
+        const trendNews = await serpApi.getTrendingNews()
+        console.log("trendNews are ", trendNews.data);
 
-        const trendingNews = null
+        const indNews = await serpApi.getCompanyIndustryNews(companyIndustry)
+        console.log("indNews are ", indNews.data);
+
 
         // Build competitors from the given data
-        const newss = await this.buildNews(news.data);
-        //console.log('Transformed News:', news);
+        const companyNews = await this.buildNews(compNews.data);
+        const trendingNews = await this.buildNews(trendNews.data);
+        const industryNews = await this.buildNews(indNews.data);
 
         const earnings = await earningsApi.getEarningsForInterestsTickers(interestTickers)
 
@@ -188,8 +212,9 @@ export default class HubApi extends BaseApi {
             company: companyDetails.data,
             competitors: competitors.data,
             earningsCalendar: earnings.data,
-            companyNews: newss.companyNews,
-            trendingNews: newss.trendingNews,
+            companyNews: companyNews,
+            trendingNews: trendingNews,
+            industryNews: industryNews,
         }
 
         return hubData;

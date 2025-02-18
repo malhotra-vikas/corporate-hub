@@ -34,22 +34,51 @@ export default class SerpApi extends BaseApi {
   }
 
 
-  async getCompanyCompetitorNewsViaFinancialModeling(interestTickers: any) {
-      // Convert the array of tickers into a comma-separated string
-      const tickersString = interestTickers.join(',');
+  async getTrendingNews() {
 
-      // Construct the query string using the comma-separated tickers
-      const queryString = `tickers=${tickersString}`;
-  
-      console.log("IN getCompanyCompetitorNewsViaFinancialModeling queryString is ", queryString)
-  
-      const news = await SerpApi.get(
-        `${this.baseUrl}getCompanyCompetitorNewsViaFinancialModeling?${queryString}`,
-      );
-  
-      console.log("IN getCompanyCompetitorNewsViaFinancialModeling news is ", news)
-      return news;
-  
+    const news = await SerpApi.get(
+      `${this.baseUrl}getTrendingNews`,
+    );
+
+    console.log("IN getTrendingNews news is ", news)
+    return news;
+
+  }
+
+
+  async getCompanyIndustryNews(companyIndustry: string) {
+
+    // Construct the query string using the comma-separated tickers
+    const queryString = `companyIndustry=${companyIndustry}`;
+
+    console.log("IN getCompanyIndustryNews queryString is ", queryString)
+
+    const news = await SerpApi.get(
+      `${this.baseUrl}getCompanyIndustryNews?${queryString}`,
+    );
+
+    console.log("IN getCompanyIndustryNews news is ", news)
+    return news;
+
+
+  }
+
+  async getCompanyCompetitorNewsViaFinancialModeling(interestTickers: any) {
+    // Convert the array of tickers into a comma-separated string
+    const tickersString = interestTickers.join(',');
+
+    // Construct the query string using the comma-separated tickers
+    const queryString = `tickers=${tickersString}`;
+
+    console.log("IN getCompanyCompetitorNewsViaFinancialModeling queryString is ", queryString)
+
+    const news = await SerpApi.get(
+      `${this.baseUrl}getCompanyCompetitorNewsViaFinancialModeling?${queryString}`,
+    );
+
+    console.log("IN getCompanyCompetitorNewsViaFinancialModeling news is ", news)
+    return news;
+
   }
 
   async getCompanyCompetitorDataViaFinancialModeling(interestTickers: any) {

@@ -10,6 +10,7 @@ export interface NewChaDto {
   chat_type: string;
   messages: MessageDto[];
   chatName?: string;
+  file_id?: string
 }
 
 export interface UpdateChaDto {

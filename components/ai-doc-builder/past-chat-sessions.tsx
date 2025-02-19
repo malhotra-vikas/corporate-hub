@@ -6,6 +6,7 @@ import { ChevronRight, MessageSquare } from "lucide-react";
 import ChatApi from "@/lib/api/chat.api";
 import UserApi from "@/lib/api/user.api";
 import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation"
 
 interface ChatSession {
     _id: string;
@@ -25,6 +26,8 @@ export const PastChatSessions: React.FC<PastChatSessionsProps> = ({ onSelectSess
     const [sessions, setSessions] = useState<ChatSession[]>([]);
     const [selectedSession, setSelectedSession] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const router = useRouter()
 
     useEffect(() => {
         const fetchChatSessions = async () => {
@@ -64,6 +67,7 @@ export const PastChatSessions: React.FC<PastChatSessionsProps> = ({ onSelectSess
     const handleSelectSession = (sessionId: string) => {
         setSelectedSession(sessionId);
         onSelectSession(sessionId);
+        router.push(`/ai-doc-builder/press-release?chatSessionId=${sessionId}`); // Navigate with session ID
     };
 
     if (loading || isLoading) {

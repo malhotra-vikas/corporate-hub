@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Loader2, Upload, ChevronLeft, ChevronRight, Loader, FileText, UploadIcon } from "lucide-react"
 import { AIExtractedDetails } from "./ai-extracted-details"
 import type { ExtractedData } from "./ai-extracted-details"
+import { useSearchParams } from "next/navigation";
 
 import { ChatInterface } from "./chat-interface"
 import { PastChatSessions } from "./past-chat-sessions"
@@ -17,6 +18,8 @@ import { PastChatSessions } from "./past-chat-sessions"
 import type { File } from "@/app/actions/upload-file"
 import { useAuth } from "@/lib/auth-context"
 import UserApi from "@/lib/api/user.api"
+import ChatAPI from "@/lib/api/chat.api"
+
 import VaultApi from "@/lib/api/vault.api"
 import { toast } from "react-toastify"
 import type { VaultFile } from "@/lib/types"
@@ -59,6 +62,9 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [documentName, setDocumentName] = useState<string>("") // Store pasted content
   let [selectedSessionId, setSelectedSessionId] = useState<string>("") // Store pasted content
 
+  const searchParams = useSearchParams();
+  const chatSessionId = searchParams.get("chatSessionId");
+
   const [extractedData, setExtractedData] = useState<{
     [key: string]: {
       name: string
@@ -86,6 +92,47 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
   const [panelWidth, setPanelWidth] = useState(60); // Default: 60% AI Details, 40% Chat
   const isResizing = useRef(false);
+
+  useEffect(() => {
+    if (chatSessionId) {
+      setSelectedSessionId(chatSessionId);
+
+      fetchPastSessionData(chatSessionId);
+    }
+  }, [chatSessionId]);
+
+  const fetchPastSessionData = async (chatSessionId: string) => {
+    setIsLoading(true);
+    try {
+      const chatApi = new ChatAPI()
+      const chatResponse = await chatApi.getChatById({ id: chatSessionId });
+
+      console.log("Past chat is ", chatResponse.data)
+
+      const fileResponse = await vaultApi.getFileByFileId({file_id: chatResponse.data.file_id})
+      console.log("Past File for this chat is ", fileResponse.data)
+
+      const newExtractedData = {
+        [chatResponse.data.file_id]: {
+          name: chatResponse.data.chatName,
+          headline: fileResponse.data.extractedTextHeadline,
+          subHeadline: fileResponse.data.extractedSubHeadline,
+          summary: fileResponse.data.extractedTextSummary,
+          keyHighlights: fileResponse.data.extractedKeyHighlights,
+          ceoQuote: fileResponse.data.extractedCeoQuote,
+          extractedText: fileResponse.data.extractedText
+        }
+      }
+
+      //setExtractedData(newExtractedData);
+
+
+    } catch (error) {
+      console.error("Error fetching chat session:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleVaultSelection = async () => {
     setIsLoading(true)

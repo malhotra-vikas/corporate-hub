@@ -57,12 +57,18 @@ export default class HubApi extends BaseApi {
 
         // Example logic for separating into categories (can be customized as needed)
         newsData.forEach(news => {
+            const formattedDate = news.publishedDate 
+            ? new Date(news.publishedDate).toISOString() 
+            : news.date 
+                ? new Date(news.date.replace(", +0000 UTC", " UTC")).toISOString() 
+                : new Date().toISOString(); // Default to current time if no date is provided
+    
             const newsItem = {
-                source: news.site,
-                time: news.publishedDate,
+                source: news.site || news.source?.name,
+                time: formattedDate,
                 title: news.title,
-                text: news.text,
-                link: news.url,
+                text: news.text || "",
+                link: news.url || news.link,
                 image: news.image || 'default-image-url.png', // Fallback for images
             };
             genericNews.push(newsItem);
@@ -184,7 +190,9 @@ export default class HubApi extends BaseApi {
         console.log("companyDetails ", companyDetails.data)
 
         const interestTickers = companyUser.interestTickers
-        const companyIndustry = companyUser.industry
+        const companyIndustry = companyUser.companyIndustry
+
+        console.log("companyIndustry befoore building news is ", companyIndustry)
 
 
         const competitors = await serpApi.getCompanyCompetitorDataViaFinancialModeling(interestTickers)

@@ -450,7 +450,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       await updateVaultWithInitialExtractedData(file_id, newExtractedData[file_id])
 
       // Persist the extracted data in Chat DB and Chat Window
-      await updateNewChatWithNewMessages(loggedInUser, newExtractedData[file_id])
+      await updateNewChatWithNewMessages(loggedInUser, newExtractedData[file_id], file_id)
 
     } catch (error) {
       console.error("Error runing AI:", error)
@@ -460,7 +460,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
 
   }
 
-  const updateNewChatWithNewMessages = async (loggedInUser: string, data: ExtractedData) => {
+  const updateNewChatWithNewMessages = async (loggedInUser: string, data: ExtractedData, file_id: string) => {
     // After generating summary, headline, and CEO quote
     console.log("Creating new chat with generated content")
     try {
@@ -506,6 +506,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         userid: loggedInUser,
         messages: newChatContent,
         chat_type: "Press Release",
+        file_id: file_id,
         chatName: data.name,
       })
 

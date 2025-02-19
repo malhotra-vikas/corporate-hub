@@ -22,7 +22,7 @@ export default function HomePage() {
     return <div className="flex h-screen items-center justify-center">Loading...</div>
   }
 
-  
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-4rem)]">
       <section className="bg-gradient-to-b from-primary to-primary-dark text-white space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
@@ -42,7 +42,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
           <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">Features</h2>
           <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-              Save countless hours to focus on what matters most.
+            Save countless hours to focus on what matters most.
           </p>
         </div>
         <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
@@ -52,7 +52,7 @@ export default function HomePage() {
               <CardDescription>DRaft press release in seconds</CardDescription>
             </CardHeader>
             <CardContent>
-              <img src="press-release_5395863.png" alt="Press Releases" className="h-12 w-12 mx-auto" />
+              <img src="press-releases.png" alt="Press Releases" className="h-16 w-16 object-contain mx-auto" />
             </CardContent>
           </Card>
           <Card>
@@ -61,7 +61,7 @@ export default function HomePage() {
               <CardDescription>Generate earnings press releases and scripts</CardDescription>
             </CardHeader>
             <CardContent>
-              <img src="earnings.png" alt="Earnings" className="h-12 w-12 mx-auto" />
+              <img src="earning.png" alt="Earnings" className="h-16 w-16 object-contain mx-auto" />
             </CardContent>
           </Card>
           <Card>
@@ -70,7 +70,7 @@ export default function HomePage() {
               <CardDescription>Reach new investors and receive analytics on messaging</CardDescription>
             </CardHeader>
             <CardContent>
-              <img src="/icons/git-branch.svg" alt="Version Control" className="h-12 w-12 mx-auto" />
+              <img src="prisim.png" alt="Version Control" className="h-16 w-16 object-contain mx-auto" />
             </CardContent>
           </Card>
           <Card>
@@ -79,23 +79,25 @@ export default function HomePage() {
               <CardDescription>A.I. Powered news tailored to you</CardDescription>
             </CardHeader>
             <CardContent>
-              <img src="news.png" alt="News" className="h-12 w-12 mx-auto" />
+              <img src="news-comps.png" alt="News" className="h-16 w-16 object-contain mx-auto"/>
             </CardContent>
-          </Card>          <Card>
+          </Card>          
+          <Card>
             <CardHeader>
               <CardTitle>A.I. Suggested Social Media Posts</CardTitle>
               <CardDescription> Create and publish social media posts</CardDescription>
             </CardHeader>
             <CardContent>
-              <img src="/icons/git-branch.svg" alt="Version Control" className="h-12 w-12 mx-auto" />
+              <img src="social-media.png" alt="Version Control" className="h-16 w-16 object-contain mx-auto" />
             </CardContent>
-          </Card>          <Card>
+          </Card>          
+          <Card>
             <CardHeader>
               <CardTitle>Your Own L.L.M.</CardTitle>
               <CardDescription>Your own Large Language Model trained on your company’s documents and preferences</CardDescription>
             </CardHeader>
             <CardContent>
-              <img src="ai-llm.png" alt="AI" className="h-12 w-12 mx-auto" />
+              <img src="llm.png" alt="AI" className="h-16 w-16 object-contain mx-auto" />
             </CardContent>
           </Card>
         </div>

@@ -1,13 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Loader2, Upload, ChevronLeft, ChevronRight } from "lucide-react"
+import { Loader2, Upload, ChevronLeft, ChevronRight, Loader, FileText, UploadIcon } from "lucide-react"
 import { AIExtractedDetails } from "./ai-extracted-details"
 import type { ExtractedData } from "./ai-extracted-details"
 
@@ -83,6 +83,9 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [isDataFetched, setIsDataFetched] = useState(false) // Added state variable
 
   const { user, loading } = useAuth()
+
+  const [panelWidth, setPanelWidth] = useState(60); // Default: 60% AI Details, 40% Chat
+  const isResizing = useRef(false);
 
   const handleVaultSelection = async () => {
     setIsLoading(true)
@@ -245,7 +248,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
         console.log("aiResponse is ", aiResponse);
 
-        return `${aiResponse}`        
+        return `${aiResponse}`
       } else if (intent === "Summary") {
         console.log("Summary needs to be updated");
 
@@ -259,7 +262,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         aiResponse = "summary" + "--:--" + aiResponse
 
         console.log("aiResponse is ", aiResponse);
-        return `${aiResponse}`    
+        return `${aiResponse}`
 
       } else if (intent === "Headline") {
         let prompt = `Update the Headline based on user's message: ${userMessage}. 
@@ -273,8 +276,8 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
         console.log("aiResponse is ", aiResponse);
 
-        return `${aiResponse}`    
-                
+        return `${aiResponse}`
+
       } else if (intent === "Key-Highlights") {
         let prompt = `Update the Key-Highlights based on user's message: ${userMessage}. 
         The earlier Key-Highlights was ${data.keyHighlights}. 
@@ -286,8 +289,8 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         aiResponse = "keyHighlights" + "--:--" + aiResponse
 
         console.log("aiResponse is ", aiResponse);
-        return `${aiResponse}`    
-                
+        return `${aiResponse}`
+
       }
 
     } catch (error) {
@@ -298,7 +301,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
 
 
-    
+
   }
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -403,7 +406,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       return;
     }
 
-      // ✅ Find the first available documentId
+    // ✅ Find the first available documentId
     const firstDocumentId = Object.keys(extractedData)[0];
 
     setExtractedData((prevData) => ({
@@ -532,9 +535,8 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       <div className="flex">
         {/* Past Sessions Panel */}
         <div
-          className={`transition-all duration-300 ease-in-out ${
-            isPastSessionsCollapsed ? "w-10" : "w-1/4"
-          } border-r border-gray-200`}
+          className={`transition-all duration-300 ease-in-out ${isPastSessionsCollapsed ? "w-10" : "w-1/4"
+            } border-r border-gray-200`}
         >
           <div className="flex items-center justify-between p-2 bg-gray-50">
             <h3 className={`text-lg font-semibold text-[#1B2559] ${isPastSessionsCollapsed ? "hidden" : "block"}`}>
@@ -551,17 +553,17 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
             </Button>
           </div>
           <div className={isPastSessionsCollapsed ? "hidden" : "block h-[calc(100%-3rem)] overflow-hidden"}>
-          <PastChatSessions onSelectSession={(selectedSessionId) => console.log("Selected session:", selectedSessionId)} />
+            <PastChatSessions onSelectSession={(selectedSessionId) => console.log("Selected session:", selectedSessionId)} />
           </div>
         </div>
-        
+
         {/* AI Document Builder Panel */}
         <Card className="w-full mx-auto">
           <CardHeader>
             <CardTitle className="text-2xl font-bold">AI Press Release Builder</CardTitle>
             <CardDescription>Upload, select, or paste your documents for analysis</CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <Tabs
               value={activeTab}
@@ -581,7 +583,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                   <Input id="file-upload" type="file" multiple onChange={handleFileUpload} className="cursor-pointer" />
                 </div>
               </TabsContent>
-  
+
               <TabsContent value="paste" className="space-y-4">
                 <div className="grid w-full items-center gap-1.5">
                   <Label htmlFor="paste-doc-name" className="text-lg font-semibold">
@@ -612,11 +614,11 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                   </Button>
                 </div>
               </TabsContent>
-  
+
               <TabsContent value="vault" className="space-y-4">
-                <Button 
-                  onClick={handleVaultSelection} 
-                  disabled={isLoading} 
+                <Button
+                  onClick={handleVaultSelection}
+                  disabled={isLoading}
                   className="w-full bg-[#1B2559] text-white hover:bg-[#0196FD] transition-colors"
                 >
                   {isLoading ? (
@@ -656,7 +658,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                 )}
               </TabsContent>
             </Tabs>
-  
+
             {selectedDocuments.length > 0 && (
               <Button onClick={handleContinue} className="mt-4 w-full bg-primary text-white">
                 Continue with {selectedDocuments.length} selected document{selectedDocuments.length > 1 ? "s" : ""}
@@ -667,7 +669,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       </div>
     )
   }
-  
+
 
   const generatePDF = async () => {
     setIsLoading(true)
@@ -723,75 +725,113 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     setIsLoading(false)
   }
 
+
+
+  const handleDragResize = (event) => {
+    isResizing.current = true;
+
+    document.addEventListener("mousemove", handleResize);
+    document.addEventListener("mouseup", stopResize);
+  }
+
+  // Dynamically Adjust Width on Mouse Move
+  const handleResize = (event) => {
+    if (isResizing.current) {
+      const newWidth = (event.clientX / window.innerWidth) * 100;
+      if (newWidth > 30 && newWidth < 70) {
+        // Restrict width between 30% and 70%
+        setPanelWidth(newWidth);
+      }
+    }
+  };
+
+  // Stop Resizing on Mouse Release
+  const stopResize = () => {
+    isResizing.current = false;
+    document.removeEventListener("mousemove", handleResize);
+    document.removeEventListener("mouseup", stopResize);
+  };
+
   return (
     <div className="w-full p-4">
       <Card className="h-screen bg-white shadow-lg">
         <CardHeader className="pb-2">
-          <CardTitle 
-            className="text-2xl text-[#1B2559]"
-          >
-            AI Document Analysis
-          </CardTitle>
+          {/* Flex Container for Title & Button */}
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-2xl text-[#1B2559]">AI Document Analysis</CardTitle>
+
+            {isDataFetched && (
+              <Button onClick={generatePDF} className={`ml-auto flex items-center gap-2 px-4 py-2 rounded-md ${isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary-dark"}`}>
+                {isLoading ? (
+                  <>
+                    <Loader className="h-4 w-4 animate-spin" />
+                    <span>Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-5 w-5" />
+                    <span>Generate PDF</span>
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+
+          {/* Description below the title & button */}
           <CardDescription>Review AI-extracted details and refine with chat assistance</CardDescription>
         </CardHeader>
-        <CardContent className="h-[calc(100%-4rem)] p-0">
+
+        <CardContent className="h-[calc(100%-4rem)] p-0 border border-gray-300 rounded-md">
           <div className="flex h-full">
 
-            {/* Main Content Area */}
-            <div className={`flex flex-1 transition-all duration-300 ease-in-out`}>
-              {/* AI Extracted Details */}
-              <div
-                className={`flex-grow overflow-hidden p-4 ${isPastSessionsCollapsed && isChatInterfaceCollapsed ? "w-full" : "w-1/2"}`}
-              >
-                <h3 className="text-lg font-semibold mb-2 text-[#1B2559]">AI Extracted Details</h3>
+            {/* AI Extracted Details Section */}
+            <div
+              className={`flex-grow overflow-hidden p-4 transition-all duration-300 ease-in-out ${isPastSessionsCollapsed && isChatInterfaceCollapsed ? "w-full" : "w-3/5"
+                }`}
+            >
+              <h3 className="text-xl font-semibold mb-2 text-[#1B2559] flex items-center">
+                AI Extracted Details
+              </h3>
 
-                {isDataFetched && (
-                  <Button onClick={generatePDF} className={`mt-2 ${isLoading ? "bg-gray-400" : "bg-primary"}`}>
-                    {isLoading ? <span>Generating...</span> : <span>Generate PDF</span>}
-                  </Button>
-                )}
-                <AIExtractedDetails
-                  documents={selectedDocuments}
-                  onUpdateExtractedData={handleUpdateExtractedData}
-                  isLoading={isExtractingData}
-                  company={companyUser}
-                  updateParentExtractedData={updateParentExtractedData}
-                  onMessagesGenerated={handleMessagesGenerated}
-                  returnExtractedData={extractedData} // Pass the extracted data
-                />
+              <AIExtractedDetails
+                documents={selectedDocuments}
+                onUpdateExtractedData={handleUpdateExtractedData}
+                isLoading={isExtractingData}
+                company={companyUser}
+                updateParentExtractedData={updateParentExtractedData}
+                onMessagesGenerated={handleMessagesGenerated}
+                returnExtractedData={extractedData}
+              />
+
+            </div>
+
+            {/* Resizable Divider */}
+            <div className="w-2 bg-gray-300 cursor-ew-resize" onMouseDown={handleDragResize}></div>
+
+            {/* Chat Interface Panel */}
+            <div
+              className={`transition-all duration-300 ease-in-out ${isChatInterfaceCollapsed ? "w-12" : "w-2/5"
+                } bg-gray-50 border-l border-gray-200 flex flex-col`}
+            >
+              <div className="flex items-center justify-between p-2 bg-gray-50 border-b">
+                <h3 className={`text-xl font-semibold text-[#1B2559] ${isChatInterfaceCollapsed ? "hidden" : "block"}`}>
+                  Chat Assistance
+                </h3>
+                <Button variant="ghost" size="icon" onClick={toggleChatInterface} className="h-8 w-8 text-primary">
+                  {isChatInterfaceCollapsed ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+                </Button>
               </div>
 
-              {/* Chat Interface Panel */}
-              <div
-                className={`transition-all duration-300 ease-in-out ${
-                  isChatInterfaceCollapsed ? "w-10" : "w-1/2"
-                } bg-gray-50 border-l border-gray-200`}
-              >
-                <div className="flex items-center justify-between p-2 bg-gray-50">
-                  <h3 className={`text-lg font-semibold text-[#1B2559] ${isChatInterfaceCollapsed ? "hidden" : "block"}`}>
-                    Chat Assistance
-                  </h3>
-                  <Button variant="ghost" size="icon" onClick={toggleChatInterface} className="h-8 w-8 text-primary">
-                    {isChatInterfaceCollapsed ? (
-                      <ChevronLeft className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                {!isChatInterfaceCollapsed && 
-                  <ChatInterface onSendMessage={handleSendMessage} 
-                    chatId={chatData.chatId}
-                    onUpdateField={handleUpdateField}
-                  />
-                }
-              </div>
+              {!isChatInterfaceCollapsed && (
+                <ChatInterface onSendMessage={handleSendMessage} chatId={chatData.chatId} onUpdateField={handleUpdateField} />
+              )}
             </div>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
+
 }
 
 export default AIDocBuilder

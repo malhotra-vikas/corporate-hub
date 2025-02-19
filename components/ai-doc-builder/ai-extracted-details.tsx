@@ -96,19 +96,19 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   console.log("In AIExtractedDetails - documents ", documents)
   console.log("In AIExtractedDetails - company ", company)
 
-  
+
   useEffect(() => {
-    
+
     setExtractedData((prevData) => {
       if (!prevData) {
         console.warn("prevData is undefined, initializing an empty object.");
         return { ...returnExtractedData };
       }
-  
+
       const updatedData = { ...prevData };
 
       console.log("Data to be updated ", returnExtractedData)
-  
+
       Object.keys(returnExtractedData).forEach((key) => {
         console.log("lookup Key ", key)
 
@@ -119,7 +119,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
 
       console.log("Updated Data to be painted ", updatedData)
 
-  
+
       return updatedData;
     });
   }, [returnExtractedData]);
@@ -132,7 +132,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         const chatApi = new ChatApi();
         const response = await chatApi.getChatById({ id: chatSessionId });
         console.log(" Datqa for past chat ", response.data)
-        
+
         setExtractedData(response.data);
       } catch (error) {
         console.error("Error fetching extracted data:", error);
@@ -179,16 +179,16 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
             console.log("Fetched text from 8-K link:", response); // Log first 500 chars for debugging
 
             const extractedText = await response.data;
-          
-                      
+
+
             console.log("Fetched text from 8-K link:", extractedText.slice(0, 500)); // Log first 500 chars for debugging
-        
+
             // Run AI processing on extracted text
             await runAi(extractedText, relevantDoc.file._id, company._id);
           } catch (error) {
             console.error("Error fetching 8-K text:", error);
           }
-        
+
         } else {
           console.log("Converting PDF to text");
           const pdfToTextResponse = await vaultApi.getFileData({
@@ -197,12 +197,12 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
             fileId: relevantDoc.file._id,
           });
           const extractedText = pdfToTextResponse.data;
-  
-  
+
+
           console.log("In AIExtractedDetails - cumulativeExtractedText ", pdfToTextResponse)
-  
+
           await runAi(pdfToTextResponse.data, relevantDoc.file._id, company._id)
-  
+
         }
 
       }
@@ -338,7 +338,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         ],
         headlinePrompt,
       )
-  
+
       const ceoQuoteResponse = await openAiApi.completion(
         [
           { role: "system", content: system_prompt },
@@ -346,7 +346,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         ],
         ceoQuotePrompt,
       )
-  
+
       const subHeadlineResponse = await openAiApi.completion(
         [
           { role: "system", content: system_prompt },
@@ -354,7 +354,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         ],
         subHeadlinePrompt,
       )
-  
+
       const keyHighlightsResponse = await openAiApi.completion(
         [
           { role: "system", content: system_prompt },
@@ -362,16 +362,16 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         ],
         keyHighlightsPrompt,
       )
-  
+
       const generatedSummary = summaryResponse?.data.choices[0].message.content
       const generatedHeadline = headlineResponse?.data.choices[0].message.content
       const generatedCeoQuote = ceoQuoteResponse?.data.choices[0].message.content
-  
+
       let generatedSubHeadlinesJson = subHeadlineResponse?.data.choices[0].message.content
       let formattedSubHeadlines = "";
       let formattedkeyhighlights = "";
-  
-  
+
+
       // Ensure the response is in the correct JSON format and handle parsing
       try {
         generatedSubHeadlinesJson = cleanJsonString(generatedSubHeadlinesJson)
@@ -386,15 +386,15 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         formattedSubHeadlines = Object.entries(generatedSubHeadlinesJson)
           .map(([key, value]) => `${value}`)
           .join("\n");  // Join each pair with a newline character
-  
+
       } catch (error) {
         console.error("Error parsing SubHeadlines JSON:", error)
         formattedSubHeadlines = "" // Assign an empty object if parsing fails
       }
-  
+
       // Parse the JSON response for key highlights
       let generatedKeyHighlightsJson = keyHighlightsResponse?.data.choices[0].message.content
-  
+
       // Ensure the response is in the correct JSON format and handle parsing
       try {
         generatedKeyHighlightsJson = JSON.parse(generatedKeyHighlightsJson)
@@ -402,12 +402,12 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         formattedkeyhighlights = Object.entries(generatedKeyHighlightsJson)
           .map(([key, value]) => `${key}:${value}`)
           .join("\n");  // Join each pair with a newline character
-  
+
       } catch (error) {
         console.error("Error parsing key highlights JSON:", error)
         formattedkeyhighlights = "" // Assign an empty object if parsing fails
       }
-  
+
       const chatNameResponse = await openAiApi.completion(
         [
           { role: "system", content: system_prompt },
@@ -415,9 +415,9 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         ],
         namePrompt,
       )
-  
+
       const generatedChatName = chatNameResponse?.data.choices[0].message.content
-  
+
       console.log("Received responses from OpenAI APIs", {
         chatName: generatedChatName,
         summary: generatedSummary,
@@ -426,7 +426,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
         subHeadline: formattedSubHeadlines,
         keyHighlights: formattedkeyhighlights,
       })
-  
+
       const newExtractedData = {
         [file_id]: {
           name: generatedChatName,
@@ -438,7 +438,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
           extractedText: cumulativeExtractedText
         },
       }
-  
+
       // Add a 5-second delay before removing the loader
       await delay(3000)
 
@@ -448,10 +448,10 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
 
       // Persist the extracted data in Vault
       await updateVaultWithInitialExtractedData(file_id, newExtractedData[file_id])
-  
+
       // Persist the extracted data in Chat DB and Chat Window
       await updateNewChatWithNewMessages(loggedInUser, newExtractedData[file_id])
-  
+
     } catch (error) {
       console.error("Error runing AI:", error)
     } finally {
@@ -461,71 +461,71 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   }
 
   const updateNewChatWithNewMessages = async (loggedInUser: string, data: ExtractedData) => {
-        // After generating summary, headline, and CEO quote
-        console.log("Creating new chat with generated content")
-        try {
-          const newChatContent = [
-            {
-              message: "Generated Headline: " + data.headline,
-              direction: "incoming",
-              sender: "bot",
-            },
-            {
-              message:
-                `Generated Sub Headline:: \n` + data.subHeadline,
-              direction: "incoming",
-              sender: "bot",
-            },
-            {
-              message: "Generated Summary: " + data.summary,
-              direction: "incoming",
-              sender: "bot",
-            },
-            {
-              message:
-                `Generated Key Highlights: \n` + data.keyHighlights,
-              direction: "incoming",
-              sender: "bot",
-            },
-            {
-              message: "Generated CEO Quote: " + data.ceoQuote,
-              direction: "incoming",
-              sender: "bot",
-            },
-          ]
+    // After generating summary, headline, and CEO quote
+    console.log("Creating new chat with generated content")
+    try {
+      const newChatContent = [
+        {
+          message: "Generated Headline: " + data.headline,
+          direction: "incoming",
+          sender: "bot",
+        },
+        {
+          message:
+            `Generated Sub Headline:: \n` + data.subHeadline,
+          direction: "incoming",
+          sender: "bot",
+        },
+        {
+          message: "Generated Summary: " + data.summary,
+          direction: "incoming",
+          sender: "bot",
+        },
+        {
+          message:
+            `Generated Key Highlights: \n` + data.keyHighlights,
+          direction: "incoming",
+          sender: "bot",
+        },
+        {
+          message: "Generated CEO Quote: " + data.ceoQuote,
+          direction: "incoming",
+          sender: "bot",
+        },
+      ]
 
-          const messages: Message[] = newChatContent.map((content) => ({
-            role: "assistant",
-            content: content.message,
-          }))
-    
-          console.log("Creating new chat name as ", data.name)
+      const messages: Message[] = newChatContent.map((content) => ({
+        role: "assistant",
+        content: content.message,
+      }))
+
+      console.log("Creating new chat name as ", data.name)
 
 
-          const newChatResponse = await chatApi.newChat({
-            userid: loggedInUser,
-            messages: newChatContent,
-            chat_type: "Press Release",
-            chatName: data.name,
-          })
+      const newChatResponse = await chatApi.newChat({
+        userid: loggedInUser,
+        messages: newChatContent,
+        chat_type: "Press Release",
+        chatName: data.name,
+      })
 
-          let chatId = ''
-          if (newChatResponse) {
-            chatId = newChatResponse.data._id
+      let chatId = ''
+      if (newChatResponse) {
+        chatId = newChatResponse.data._id
 
-            console.log("Newe chat id is ", chatId)
-            setCurrentChatId(chatId)
-          }
-        
-          onMessagesGenerated(messages, chatId)
+        console.log("Newe chat id is ", chatId)
+        setCurrentChatId(chatId)
+      }
 
-          // Update messages state with new chat content
-          setMessages((prevMessages) => [...prevMessages, ...newChatContent])
-        } catch (error) {
-          console.error("Failed to create new chat:", error)
-          toast.error("Failed to create new chat. Please try again.")
-        }
-    
+      onMessagesGenerated(messages, chatId)
+
+      // Update messages state with new chat content
+      setMessages((prevMessages) => [...prevMessages, ...newChatContent])
+    } catch (error) {
+      console.error("Failed to create new chat:", error)
+      toast.error("Failed to create new chat. Please try again.")
+    }
+
 
   }
 
@@ -569,14 +569,14 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       if (!mappedField) {
         throw new Error("Field mapping not found");
       }
-  
+
       const updateData = [
         {
           _id: fileId,
           [mappedField]: value
         },
       ];
-      console.log(`Updating vault entry ${updateData}` )
+      console.log(`Updating vault entry ${updateData}`)
 
       await vaultApi.updateFiles(updateData);
 
@@ -597,7 +597,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
       [fileId]: updatedData,
     }))
 
-    console.log(`New value for field ${field} is ${value}` )
+    console.log(`New value for field ${field} is ${value}`)
     // Persist the changes
     await updateExtractedData(fileId, field, value)
 
@@ -699,10 +699,13 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
   return (
     <ScrollArea className="h-[calc(100vh-10rem)]">
       {documents.map((doc, index) => (
-        <Card key={index} className="mb-4 bg-white shadow-sm">
+        <Card
+          key={index}
+          className="mb-4 bg-white shadow-sm border border-gray-300 rounded-md"
+        >
           <CardHeader className="p-4 pb-2">
             <CardTitle className="text-base flex justify-between items-center">
-
+              {/* Optional: Add Title Here */}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 space-y-4">

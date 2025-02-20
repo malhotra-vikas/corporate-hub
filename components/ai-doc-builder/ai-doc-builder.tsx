@@ -61,8 +61,10 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
   const [documentContent, setDocumentContent] = useState<string>("") // Store pasted content
   const [documentName, setDocumentName] = useState<string>("") // Store pasted content
   let [selectedSessionId, setSelectedSessionId] = useState<string>("") // Store pasted content
+  let [unclearIntentQuestion] = useState<string>("") // Store unclearIntentQuestion
 
   const searchParams = useSearchParams();
+
   const chatSessionId = searchParams.get("chatSessionId");
 
   const [extractedData, setExtractedData] = useState<{
@@ -227,7 +229,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
   async function assessIntent(userMessage: string) {
     const interactionTypePrompt =
-      "Is the user asking a follow-up question about the 'CEO Quote', 'Summary', 'Headline' or 'Key-Highlights'  of the press release? If yes, identify which one. Just just the identified type ";
+      "Is the user asking a follow-up question about the 'CEO Quote', 'Summary', 'Headline' or 'Key-Highlights'  of the press release? If yes, identify which one. Just just the identified type. If you are unable to identify or unsure, return 'unsure' ";
 
     const system_prompt =
       "You are a high-quality IR/PR professional specializing in crafting impactful press releases for companies across various industries.";
@@ -279,8 +281,24 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       const dynamicKey = Object.keys(extractedData)[0] // Get the first key dynamically
       const data = extractedData[dynamicKey] // Access data for that key
 
+      if (intent === 'unsure') {
+
+        unclearIntentQuestion = userMessage
+
+        console.log("Stored unclearIntentQuestion as ", unclearIntentQuestion)
+
+        let unsureResponse = `Which section did you wanted to updated for ${userMessage}. You can choose from CEO Quote, Summary, Headline, KeyHighlights or SubHeadline`
+        return `${unsureResponse}`
+      }
+
       if (intent === "CEO Quote") {
         console.log("CEO Quote needs to be updated");
+
+        if (unclearIntentQuestion) {
+          userMessage = unclearIntentQuestion
+
+          unclearIntentQuestion = ""
+        }
 
         let prompt = `Update the CEO Quote based on user's message: ${userMessage}. 
         The earlier CEO Quote was ${data.ceoQuote}. 
@@ -299,6 +317,12 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       } else if (intent === "Summary") {
         console.log("Summary needs to be updated");
 
+        if (unclearIntentQuestion) {
+          userMessage = unclearIntentQuestion
+          
+          unclearIntentQuestion = ""
+        }
+
         let prompt = `Update the Summary based on user's message: ${userMessage}. 
         The earlier Summary was ${data.summary}.
         The extracted text for the news is ${data.extractedText}
@@ -312,6 +336,12 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         return `${aiResponse}`
 
       } else if (intent === "Headline") {
+        if (unclearIntentQuestion) {
+          userMessage = unclearIntentQuestion
+          
+          unclearIntentQuestion = ""
+        }
+
         let prompt = `Update the Headline based on user's message: ${userMessage}. 
         The earlier Headline was ${data.headline}. 
         The extracted text for the news is ${data.extractedText}
@@ -326,6 +356,12 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         return `${aiResponse}`
 
       } else if (intent === "Key-Highlights") {
+        if (unclearIntentQuestion) {
+          userMessage = unclearIntentQuestion
+          
+          unclearIntentQuestion = ""
+        }
+        
         let prompt = `Update the Key-Highlights based on user's message: ${userMessage}. 
         The earlier Key-Highlights was ${data.keyHighlights}. 
         The extracted text for the news is ${data.extractedText}

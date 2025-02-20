@@ -191,6 +191,8 @@ export default class HubApi extends BaseApi {
 
         const interestTickers = companyUser.interestTickers
         const companyIndustry = companyUser.companyIndustry
+        const companyName = companyUser.companyName
+
 
         console.log("companyIndustry befoore building news is ", companyIndustry)
 
@@ -198,9 +200,15 @@ export default class HubApi extends BaseApi {
         const competitors = await serpApi.getCompanyCompetitorDataViaFinancialModeling(interestTickers)
 
         console.log("competitors are ", competitors.data);
+        const competitorNames = competitors.data.map((comp: { name: string }) => comp.name).join("::");
 
-        const compNews = await serpApi.getCompanyCompetitorNewsViaFinancialModeling(interestTickers)
+
+        const compNews = await serpApi.getCompanyCompetitorNews(competitorNames)
         console.log("compNews are ", compNews.data);
+
+        const trackerNews = await serpApi.getCompanyTrackerNews(companyName, companyTicker)
+        console.log("trackerNews are ", trackerNews.data);
+
 
         const trendNews = await serpApi.getTrendingNews()
         console.log("trendNews are ", trendNews.data);
@@ -210,11 +218,13 @@ export default class HubApi extends BaseApi {
 
 
         // Build competitors from the given data
-        const companyNews = await this.buildNews(compNews.data);
+        const companyNews = await this.buildNews(trackerNews.data);
+        const compititionNews = await this.buildNews(compNews.data);
         const trendingNews = await this.buildNews(trendNews.data);
         const industryNews = await this.buildNews(indNews.data);
 
         const earnings = await earningsApi.getEarningsForInterestsTickers(interestTickers)
+        
 
         const hubData = {
             company: companyDetails.data,
@@ -223,6 +233,7 @@ export default class HubApi extends BaseApi {
             companyNews: companyNews,
             trendingNews: trendingNews,
             industryNews: industryNews,
+            compititionNews: compititionNews
         }
 
         return hubData;

@@ -466,13 +466,39 @@ export default function HubPage() {
                         <CardTitle>News Hub</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <Tabs defaultValue="company-news">
+                        <Tabs defaultValue="comp-news">
                             <TabsList>
                                 {/* Tabs for switching between Company News and Trending News */}
-                                <TabsTrigger value="company-news">Comps News</TabsTrigger>
+                                <TabsTrigger value="comp-news">Comps News</TabsTrigger>
+                                <TabsTrigger value="company-news">{companyTicker} News</TabsTrigger>
                                 <TabsTrigger value="trending-news">Trending News</TabsTrigger>
                                 <TabsTrigger value="industry-news">Industry News</TabsTrigger>
                             </TabsList>
+
+                            {/* Tab content for Comp News */}
+                            <TabsContent value="comp-news">
+                                <div className="space-y-4">
+                                    {hubData.compititionNews.map((item, index) => {
+                                        // Format time using `date-fns`
+                                        const formattedTime = formatDistanceToNow(parseISO(item.time), { addSuffix: true });
+
+                                        return (
+                                            <div key={index} className="flex items-start gap-4">
+                                                <div className="flex-1">
+                                                    <div className="text-sm text-gray-500">
+                                                        {item.source} • {formattedTime}
+                                                    </div>
+                                                    <div className="font-medium">
+                                                        <a href={item.link} target="_blank" rel="noopener noreferrer">
+                                                            {item.title}
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </TabsContent>
 
                             {/* Tab content for Company News */}
                             <TabsContent value="company-news">

@@ -45,6 +45,20 @@ export default class SerpApi extends BaseApi {
 
   }
 
+  async getCompanyTrackerNews(companyName: string, companyTicker: string) {
+    // Construct the query string using the comma-separated tickers
+    const queryString = `companyTicker=${companyTicker}&companyName=${companyName}`;
+
+    console.log("IN getCompanyIndustryNews queryString is ", queryString)
+
+    const news = await SerpApi.get(
+      `${this.baseUrl}getCompanyTrackerNews?${queryString}`,
+    );
+
+    console.log("IN getCompanyTrackerNews news is ", news)
+    return news;
+}
+
 
   async getCompanyIndustryNews(companyIndustry: string) {
 
@@ -63,20 +77,18 @@ export default class SerpApi extends BaseApi {
 
   }
 
-  async getCompanyCompetitorNewsViaFinancialModeling(interestTickers: any) {
-    // Convert the array of tickers into a comma-separated string
-    const tickersString = interestTickers.join(',');
+  async getCompanyCompetitorNews(competitorNames: any) {
 
     // Construct the query string using the comma-separated tickers
-    const queryString = `tickers=${tickersString}`;
+    const queryString = `tickers=${competitorNames}`;
 
-    console.log("IN getCompanyCompetitorNewsViaFinancialModeling queryString is ", queryString)
+    console.log("IN getCompanyCompetitorNews queryString is ", queryString)
 
     const news = await SerpApi.get(
-      `${this.baseUrl}getCompanyCompetitorNewsViaFinancialModeling?${queryString}`,
+      `${this.baseUrl}getCompanyCompetitorNews?${queryString}`,
     );
 
-    console.log("IN getCompanyCompetitorNewsViaFinancialModeling news is ", news)
+    console.log("IN getCompanyCompetitorNews news is ", news)
     return news;
 
   }

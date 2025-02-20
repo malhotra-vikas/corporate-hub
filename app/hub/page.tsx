@@ -2,7 +2,17 @@
 
 import { useAuth } from "@/lib/auth-context"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CalendarIcon, ArrowUpIcon, ArrowDownIcon, Plus, X, TrendingUpIcon, TrendingDownIcon, ChevronRight, DollarSign, TrendingUp, Calendar } from "lucide-react"
+import {
+    CalendarIcon,
+    ArrowUpIcon,
+    ArrowDownIcon,
+    Plus,
+    X,
+    TrendingUpIcon,
+    TrendingDownIcon,
+    ChevronRight,
+    Newspaper,
+} from "lucide-react"
 import { useEffect, useState } from "react"
 import HubApi from "@/lib/api/hub"
 import UserApi from "@/lib/api/user.api"
@@ -12,22 +22,17 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { EarningsEvent, HubData } from "@/lib/types"
+import type { EarningsEvent, HubData } from "@/lib/types"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { formatDistanceToNow, parseISO } from "date-fns";
 
-import { CreateUserDto } from "@/dto/createUser.dto"
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from "@/components/ui/tabs"
+import type { CreateUserDto } from "@/dto/createUser.dto"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion"
 import EarningsApi from "@/lib/api/earnings.api"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
+import { NewsSection } from "@/components/news-section"
 
 async function fetchHubData(companyTicker: string, companyExchange: string, companyUser: any): Promise<HubData> {
     const hubApi = new HubApi()
@@ -86,7 +91,7 @@ export default function HubPage() {
 
             const updateUser: CreateUserDto = {
                 email: user?.email,
-                interestTickers: updatedTickers
+                interestTickers: updatedTickers,
             }
             await userApi.updateUserByEmail(updateUser)
 
@@ -109,14 +114,13 @@ export default function HubPage() {
             }))
             setCurrentTickers(updatedTickers)
 
-
             if (!user?.email) {
                 throw "no user found"
             }
 
             const updateUser: CreateUserDto = {
                 email: user?.email,
-                interestTickers: updatedTickers
+                interestTickers: updatedTickers,
             }
             await userApi.updateUserByEmail(updateUser)
             toast.success(`Removed ${symbol} from competitors`)
@@ -174,7 +178,7 @@ export default function HubPage() {
         if (user) {
             loadHubData()
         }
-    }, []) // Added loadHubData to dependencies
+    }, [user]) // Added loadHubData to dependencies
 
     if (loading || isLoading) {
         return <div className="container mx-auto p-6">Loading...</div>
@@ -189,7 +193,6 @@ export default function HubPage() {
     }
 
     const isVerified = user?.is_verified || false
-
 
     interface EarningsHubProps {
         earningsCalendar: EarningsEvent[]
@@ -211,30 +214,30 @@ export default function HubPage() {
         const month = date.toLocaleString("default", { month: "short" }).toUpperCase()
         const day = date.getDate()
         // Get the year as a 2-digit string (e.g., 21 for 2021)
-        const year = date.getFullYear().toString().slice(-2); // Gets last 2 digits of the year
+        const year = date.getFullYear().toString().slice(-2) // Gets last 2 digits of the year
 
         return {
             month,
             day: day.toString(),
-            year
+            year,
         }
     }
 
     function formatEps(eps: string) {
-        if (!eps) return "-";
-        const epsNumber = parseFloat(eps)
-        if (isNaN(epsNumber)) return "-";  // Return "-" if it's not a valid number
+        if (!eps) return "-"
+        const epsNumber = Number.parseFloat(eps)
+        if (isNaN(epsNumber)) return "-" // Return "-" if it's not a valid number
 
         return epsNumber
     }
 
     function formatRevenue(revenue: string) {
-        if (!revenue) return "-";
-        const revenueNumber = parseFloat(revenue)
-        if (isNaN(revenueNumber)) return "-";  // Return "-" if it's not a valid number
+        if (!revenue) return "-"
+        const revenueNumber = Number.parseFloat(revenue)
+        if (isNaN(revenueNumber)) return "-" // Return "-" if it's not a valid number
 
-        const revenueInMillions = revenueNumber / 1000000;  // Convert revenue to millions
-        return revenueInMillions.toFixed(2) + "M";  // Round to 2 decimal places and append "M"
+        const revenueInMillions = revenueNumber / 1000000 // Convert revenue to millions
+        return revenueInMillions.toFixed(2) + "M" // Round to 2 decimal places and append "M"
     }
 
     function EarningsEventCard({ event }: { event: EarningsEvent }) {
@@ -316,7 +319,10 @@ export default function HubPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 pointer-events-auto">
                     <div className="bg-white p-6 rounded-lg shadow-lg">
                         <h2 className="text-xl font-bold mb-4">Account Not Verified</h2>
-                        <p>Your account is not verified. Please check your email for instructions or Aiirhub contact support to gain full access.</p>
+                        <p>
+                            Your account is not verified. Please check your email for instructions or Aiirhub contact support to gain
+                            full access.
+                        </p>
                     </div>
                 </div>
             )}
@@ -350,7 +356,9 @@ export default function HubPage() {
                                         <span className={`text-sm font-medium ${comp.change >= 0 ? "text-green-600" : "text-red-600"}`}>
                                             {comp.change >= 0 ? "+" : ""}${Math.abs(comp.change).toFixed(2)}
                                         </span>
-                                        <div className={`flex items-center ${comp.changesPercentage >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                        <div
+                                            className={`flex items-center ${comp.changesPercentage >= 0 ? "text-green-600" : "text-red-600"}`}
+                                        >
                                             {comp.changesPercentage >= 0 ? (
                                                 <ArrowUpIcon className="h-4 w-4 mr-1" />
                                             ) : (
@@ -427,7 +435,7 @@ export default function HubPage() {
                                                     <div className="flex flex-col items-start">
                                                         <div className="flex items-center gap-2">
                                                             <span className="font-bold text-primary">{symbol}</span>
-                                            <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 chevron" />
+                                                            <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 chevron" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -458,128 +466,37 @@ export default function HubPage() {
                         </ScrollArea>
                     </CardContent>
                 </Card>
-                {/*
 
                 {/* News Hub Section */}
-                <Card className="md:col-span-2 border-[#1B2559] border">
-                    <CardHeader>
-                        <CardTitle>News Hub</CardTitle>
+                <Card className="md:col-span-2">
+                    <CardHeader className="border-b pb-4">
+                        <CardTitle className="flex items-center gap-2">
+                            <Newspaper className="h-5 w-5" />
+                            News Hub
+                        </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <Tabs defaultValue="comp-news">
-                            <TabsList>
-                                {/* Tabs for switching between Company News and Trending News */}
-                                <TabsTrigger value="comp-news">Comps News</TabsTrigger>
+                    <CardContent className="p-4">
+                        <Tabs defaultValue="comp-news" className="w-full">
+                            <TabsList className="flex h-auto flex-wrap gap-2 border-b pb-2">
+                                <TabsTrigger value="comp-news">Competition News</TabsTrigger>
                                 <TabsTrigger value="company-news">{companyTicker} News</TabsTrigger>
                                 <TabsTrigger value="trending-news">Trending News</TabsTrigger>
                                 <TabsTrigger value="industry-news">Industry News</TabsTrigger>
                             </TabsList>
 
-                            {/* Tab content for Comp News */}
-                            <TabsContent value="comp-news">
-                                <div className="space-y-4">
-                                    {hubData.compititionNews.map((item, index) => {
-                                        // Format time using `date-fns`
-                                        const formattedTime = formatDistanceToNow(parseISO(item.time), { addSuffix: true });
-
-                                        return (
-                                            <div key={index} className="flex items-start gap-4">
-                                                <div className="flex-1">
-                                                    <div className="text-sm text-gray-500">
-                                                        {item.source} • {formattedTime}
-                                                    </div>
-                                                    <div className="font-medium">
-                                                        <a href={item.link} target="_blank" rel="noopener noreferrer">
-                                                            {item.title}
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </TabsContent>
-
-                            {/* Tab content for Company News */}
-                            <TabsContent value="company-news">
-                                <div className="space-y-4">
-                                    {hubData.companyNews.map((item, index) => {
-                                        // Format time using `date-fns`
-                                        const formattedTime = formatDistanceToNow(parseISO(item.time), { addSuffix: true });
-
-                                        return (
-                                            <div key={index} className="flex items-start gap-4">
-                                                <div className="flex-1">
-                                                    <div className="text-sm text-gray-500">
-                                                        {item.source} • {formattedTime}
-                                                    </div>
-                                                    <div className="font-medium">
-                                                        <a href={item.link} target="_blank" rel="noopener noreferrer">
-                                                            {item.title}
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </TabsContent>
-
-
-                            {/* Tab content for Trending News */}
-                            <TabsContent value="trending-news">
-                                <div className="space-y-4">
-                                    {hubData.trendingNews.map((item, index) => {
-                                        // Format time using `date-fns`
-                                        const formattedTime = formatDistanceToNow(parseISO(item.time), { addSuffix: true });
-
-                                        return (
-                                            <div key={index} className="flex items-start gap-4">
-                                                <div className="flex-1">
-                                                    <div className="text-sm text-gray-500">
-                                                        {item.source} • {formattedTime}
-                                                    </div>
-                                                    <div className="font-medium">
-                                                        <a href={item.link} target="_blank" rel="noopener noreferrer">
-                                                            {item.title}
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </TabsContent>
-
-                            {/* Tab content for Industry News */}
-                            <TabsContent value="industry-news">
-                                <div className="space-y-4">
-                                    {hubData.industryNews.map((item, index) => {
-                                        // Format time using `date-fns`
-                                        const formattedTime = formatDistanceToNow(parseISO(item.time), { addSuffix: true });
-
-                                        return (
-                                            <div key={index} className="flex items-start gap-4">
-                                                <div className="flex-1">
-                                                    <div className="text-sm text-gray-500">
-                                                        {item.source} • {formattedTime}
-                                                    </div>
-                                                    <div className="font-medium">
-                                                        <a href={item.link} target="_blank" rel="noopener noreferrer">
-                                                            {item.title}
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </TabsContent>
-
+                            {[
+                                { key: "comp-news", data: hubData.compititionNews },
+                                { key: "company-news", data: hubData.companyNews },
+                                { key: "trending-news", data: hubData.trendingNews },
+                                { key: "industry-news", data: hubData.industryNews },
+                            ].map(({ key, data }) => (
+                                <TabsContent key={key} value={key} className="pt-4">
+                                    <NewsSection data={data} isLoading={isLoading} />
+                                </TabsContent>
+                            ))}
                         </Tabs>
                     </CardContent>
                 </Card>
-
             </div>
         </div>
     )

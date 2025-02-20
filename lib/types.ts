@@ -78,6 +78,11 @@ export interface NewsItem {
   image: string
 }
 
+export interface NewsSectionProps {
+  data: NewsItem[]
+  isLoading?: boolean
+}
+
 export interface HubData {
   competitors: Competitor[]
   earningsCalendar: EarningsEvent[]

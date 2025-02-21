@@ -11,6 +11,7 @@ import { Loader2, Upload, ChevronLeft, ChevronRight, Loader, FileText, UploadIco
 import { AIExtractedDetails } from "./ai-extracted-details"
 import type { ExtractedData } from "./ai-extracted-details"
 import { useSearchParams } from "next/navigation";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { ChatInterface } from "./chat-interface"
 import { PastChatSessions } from "./past-chat-sessions"
@@ -111,7 +112,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
       console.log("Past chat is ", chatResponse.data)
 
-      const fileResponse = await vaultApi.getFileByFileId({file_id: chatResponse.data.file_id})
+      const fileResponse = await vaultApi.getFileByFileId({ file_id: chatResponse.data.file_id })
       console.log("Past File for this chat is ", fileResponse.data)
 
       const newExtractedData = {
@@ -319,7 +320,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
         if (unclearIntentQuestion) {
           userMessage = unclearIntentQuestion
-          
+
           unclearIntentQuestion = ""
         }
 
@@ -338,7 +339,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       } else if (intent === "Headline") {
         if (unclearIntentQuestion) {
           userMessage = unclearIntentQuestion
-          
+
           unclearIntentQuestion = ""
         }
 
@@ -358,10 +359,10 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       } else if (intent === "Key-Highlights") {
         if (unclearIntentQuestion) {
           userMessage = unclearIntentQuestion
-          
+
           unclearIntentQuestion = ""
         }
-        
+
         let prompt = `Update the Key-Highlights based on user's message: ${userMessage}. 
         The earlier Key-Highlights was ${data.keyHighlights}. 
         The extracted text for the news is ${data.extractedText}
@@ -502,13 +503,9 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
   }
 
-  const handleVaultFileSelection = (file: File, isSelected: boolean) => {
-    if (isSelected) {
-      setSelectedDocuments([...selectedDocuments, { file, type: file.category as DocumentType }])
-    } else {
-      setSelectedDocuments(selectedDocuments.filter((doc) => doc.file.id !== file.id))
-    }
-  }
+  const handleVaultFileSelection = (file: File) => {
+    setSelectedDocuments([{ file, type: file.category as DocumentType }]);
+  };
 
   const uploadFile = async (userId: string, file: File, category: string) => {
     const formData = new FormData()
@@ -717,28 +714,29 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                   )}
                 </Button>
                 {vaultFiles.length > 0 && (
-                  <div className="space-y-2 max-h-[40rem] overflow-y-auto">
+                  <RadioGroup
+                    className="space-y-2 max-h-[40rem] overflow-y-auto border p-2"
+                    onValueChange={(value) => handleVaultFileSelection(vaultFiles.find(file => file._id === value))}
+                  >
                     {vaultFiles.map((file) => (
                       <Card key={file._id} className="bg-gray-50">
-                        <CardContent className="flex items-center justify-between p-4">
-                          <div className="flex items-center space-x-4">
-                            <Checkbox
-                              id={file._id}
-                              onCheckedChange={(checked) => handleVaultFileSelection(file, checked as boolean)}
-                            />
-                            <Label
-                              htmlFor={file._id}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {file.originalName}
-                            </Label>
-                          </div>
-                          <span className="text-sm text-muted-foreground">{file.uploadedDate}</span>
+                        <CardContent className="p-0">
+                          <label
+                            htmlFor={file._id}
+                            className="flex items-center justify-between p-4 cursor-pointer w-full"
+                          >
+                            <div className="flex items-center space-x-4">
+                              <RadioGroupItem id={file._id} value={file._id} />
+                              <span className="text-sm font-medium">{file.originalName}</span>
+                            </div>
+                            <span className="text-sm text-muted-foreground">{file.uploadedDate}</span>
+                          </label>
                         </CardContent>
                       </Card>
                     ))}
-                  </div>
+                  </RadioGroup>
                 )}
+
               </TabsContent>
             </Tabs>
 

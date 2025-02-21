@@ -18,11 +18,6 @@ export function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
     setSearch(value)
   }, [value])
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    onChange(search)
-  }
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
     setSearch(newValue)
@@ -30,9 +25,9 @@ export function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
   }
 
   return (
-    <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center space-x-2">
+    <div className="flex w-full max-w-sm items-center space-x-2">
       <Input type="search" placeholder={placeholder} value={search} onChange={handleInputChange} />
-    </form>
+    </div>
   )
 }
 

@@ -82,8 +82,8 @@ export const PastChatSessions: React.FC<PastChatSessionsProps> = ({ onSelectSess
         <ScrollArea className="h-[calc(100vh-16rem)]">
             {sessions.map((session) => (
                 <Card
-                    key={session.id}
-                    className={`mb-4 cursor-pointer transition-colors ${selectedSession === session.id ? "bg-secondary" : "bg-white"
+                    key={session._id}
+                    className={`mb-4 cursor-pointer transition-colors ${selectedSession === session._id ? "bg-secondary" : "bg-white"
                         }`}
                     onClick={() => handleSelectSession(session._id)}
                 >

@@ -245,7 +245,6 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
     const interactionType =
       interactionTypeResponse?.data.choices[0].message.content;
-    console.log("interactionType is ", interactionType);
 
     return interactionType;
   }
@@ -276,7 +275,9 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     setIsLoading(true);
 
     try {
+
       const intent = await assessIntent(userMessage);
+      console.log(`Caught user's intent as ${intent} for message ${userMessage}`);
 
       console.log("Old extracted data is ", extractedData)
       const dynamicKey = Object.keys(extractedData)[0] // Get the first key dynamically
@@ -288,7 +289,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
         console.log("Stored unclearIntentQuestion as ", unclearIntentQuestion)
 
-        let unsureResponse = `Which section did you wanted to updated for ${userMessage}. You can choose from CEO Quote, Summary, Headline, KeyHighlights or SubHeadline`
+        let unsureResponse = `It is unclear where you want me to make this change. Did you mean to change CEO Quote, Summary, Headline, KeyHighlights or SubHeadline for your command: "${userMessage}"?`
         return `${unsureResponse}`
       }
 

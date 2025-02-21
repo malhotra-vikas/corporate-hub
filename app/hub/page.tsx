@@ -10,7 +10,6 @@ import {
     X,
     TrendingUpIcon,
     TrendingDownIcon,
-    ChevronRight,
     Newspaper,
 } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -23,16 +22,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { EarningsEvent, HubData } from "@/lib/types"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 import type { CreateUserDto } from "@/dto/createUser.dto"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion"
 import EarningsApi from "@/lib/api/earnings.api"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
 import { NewsSection } from "@/components/news-section"
+import { EarningsCalendar } from "@/components/earnings-calendar"
 
 async function fetchHubData(companyTicker: string, companyExchange: string, companyUser: any): Promise<HubData> {
     const hubApi = new HubApi()
@@ -418,52 +415,9 @@ export default function HubPage() {
                             <CalendarIcon className="h-5 w-5 text-primary" />
                             Earnings Hub
                         </CardTitle>
-                        <p className="text-sm text-muted-foreground">Based on your Peer stocks</p>
                     </CardHeader>
                     <CardContent>
-                        <ScrollArea className="h-[600px] pr-4">
-                            <Accordion type="single" collapsible className="w-full space-y-2">
-                                {Object.entries(groupedEarnings).map(([symbol, events], index) => (
-                                    <AccordionItem
-                                        key={index}
-                                        value={`item-${index}`}
-                                        className="border rounded-lg overflow-hidden bg-card transition-colors"
-                                    >
-                                        <AccordionTrigger className="hover:no-underline px-4 py-3 [&[data-state=open]>div>div>.chevron]:rotate-90">
-                                            <div className="flex items-center justify-between w-full">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex flex-col items-start">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="font-bold text-primary">{symbol}</span>
-                                                            <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 chevron" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Badge
-                                                        variant="secondary"
-                                                        className={cn(
-                                                            "font-medium",
-                                                            events.length > 5 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
-                                                        )}
-                                                    >
-                                                        {events.length} {events.length === 1 ? "event" : "events"}
-                                                    </Badge>
-                                                    <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 chevron" />
-                                                </div>
-                                            </div>
-                                        </AccordionTrigger>
-                                        <AccordionContent>
-                                            <div className="px-4 pb-4 pt-1">
-                                                {events.map((event, eventIndex) => (
-                                                    <EarningsEventCard key={eventIndex} event={event} />
-                                                ))}
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                ))}
-                            </Accordion>
-                        </ScrollArea>
+                        <EarningsCalendar events={hubData.earningsCalendar} isLoading={isLoading} />
                     </CardContent>
                 </Card>
 

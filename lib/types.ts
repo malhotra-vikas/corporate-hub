@@ -70,6 +70,11 @@ export interface EarningsEvent {
   fiscalDateEnding: string
 }
 
+export interface EarningsCalendarProps {
+    events: EarningsEvent[]
+    isLoading?: boolean
+}
+
 export interface NewsItem {
   link: string | undefined
   source: string

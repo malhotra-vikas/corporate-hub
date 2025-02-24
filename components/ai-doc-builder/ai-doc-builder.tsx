@@ -230,7 +230,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
   async function assessIntent(userMessage: string) {
     const interactionTypePrompt =
-      "Is the user asking a follow-up question about the 'CEO Quote', 'Summary', 'Headline' or 'Key-Highlights'  of the press release? If yes, identify which one. Just just the identified type. If you are unable to identify or unsure, return 'unsure' ";
+      "Is the user asking a follow-up question about the 'CEO Quote', 'Summary', 'Headline', Sub-Headline or 'Key-Highlights'  of the press release? If yes, identify which one. Just just the identified type in Lower Case. If you are unable to identify or unsure, return 'unsure' ";
 
     const system_prompt =
       "You are a high-quality IR/PR professional specializing in crafting impactful press releases for companies across various industries.";
@@ -276,7 +276,9 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
     try {
 
-      const intent = await assessIntent(userMessage);
+      let intent = await assessIntent(userMessage);
+      intent = intent.toLowerCase();
+
       console.log(`Caught user's intent as ${intent} for message ${userMessage}`);
 
       console.log("Old extracted data is ", extractedData)
@@ -289,11 +291,11 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
         console.log("Stored unclearIntentQuestion as ", unclearIntentQuestion)
 
-        let unsureResponse = `It is unclear where you want me to make this change. Did you mean to change CEO Quote, Summary, Headline, KeyHighlights or SubHeadline for your command: "${userMessage}"?`
+        let unsureResponse = `It is best to apply a change to one section at a time. Would you like me to change the headline, subheadline, summary, key highlights or quote?`
         return `${unsureResponse}`
       }
 
-      if (intent === "CEO Quote") {
+      if ((intent === "ceo quote") || (intent === "quote") || (intent === "ceoquote") || (intent === "ceo-quote")) {
         console.log("CEO Quote needs to be updated");
 
         if (unclearIntentQuestion) {
@@ -316,7 +318,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         console.log("aiResponse is ", aiResponse);
 
         return `${aiResponse}`
-      } else if (intent === "Summary") {
+      } else if (intent === "summary") {
         console.log("Summary needs to be updated");
 
         if (unclearIntentQuestion) {
@@ -337,7 +339,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         console.log("aiResponse is ", aiResponse);
         return `${aiResponse}`
 
-      } else if (intent === "Headline") {
+      } else if (intent === "headline") {
         if (unclearIntentQuestion) {
           userMessage = unclearIntentQuestion
 
@@ -357,7 +359,27 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
         return `${aiResponse}`
 
-      } else if (intent === "Key-Highlights") {
+      } else if ((intent === "subheadline") || (intent === "sub headline") || (intent === "sub-headline")) {
+        if (unclearIntentQuestion) {
+          userMessage = unclearIntentQuestion
+
+          unclearIntentQuestion = ""
+        }
+
+        let prompt = `Update the SubHeadline based on user's message: ${userMessage}. 
+        The earlier SubHeadline was ${data.subHeadline}. 
+        The extracted text for the news is ${data.extractedText}
+        Return only the subheadline and nothing else. Do not add any formatting.
+        `;
+
+        let aiResponse = await processMessage(prompt, userMessage);
+        aiResponse = "subheadline" + "--:--" + aiResponse
+
+        console.log("aiResponse is ", aiResponse);
+
+        return `${aiResponse}`
+
+      } else if ((intent === "key-highlights") || (intent === "key highlights") || (intent === "keyhighlights")) {
         if (unclearIntentQuestion) {
           userMessage = unclearIntentQuestion
 
@@ -494,13 +516,21 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     // ✅ Find the first available documentId
     const firstDocumentId = Object.keys(extractedData)[0];
 
-    setExtractedData((prevData) => ({
-      ...prevData,
-      [firstDocumentId]: {
-        ...(prevData[firstDocumentId] || {}), // ✅ Ensure document exists
-        [field]: value, // ✅ Update only the specified field
-      },
-    }));
+    console.log("Before update firstDocumentId is ",  firstDocumentId)
+    console.log("📜 Existing extractedData before update:", JSON.stringify(extractedData, null, 2));
+
+    setExtractedData((prevData) => {
+      const updatedData = {
+          ...prevData,
+          [firstDocumentId]: {
+              ...(prevData?.[firstDocumentId] || {}), // ✅ Ensure document exists
+              [field]: value, // ✅ Update only the specified field
+          },
+      };
+
+      console.log("✅ Updated extractedData:", JSON.stringify(updatedData, null, 2)); // Log final state
+      return updatedData;
+  });
 
   }
 

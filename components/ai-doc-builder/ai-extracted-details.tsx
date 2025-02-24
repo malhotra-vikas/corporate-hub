@@ -148,68 +148,39 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
 
 
   useEffect(() => {
+    let isMounted = true;
     const fetchData = async () => {
-      setLoggedinUser(company._id)
-
-      if (initialIsLoading) {
-        let cumulativeExtractedText = ""
-        let file_id = ""
-
-        console.log("In AIExtractedDetails - documents ", documents)
-
-        const relevantDoc = documents[0]
-
-        console.log("In AIExtractedDetails - relevantDoc file id ", relevantDoc.file._id)
-        console.log("In AIExtractedDetails - relevantDoc user id ", relevantDoc.file.user_id)
-        console.log("In AIExtractedDetails - relevantDoc file type  is ", relevantDoc.file.docType)
-
+      setLoggedinUser(company._id);
+  
+      if (!initialIsLoading || !documents.length || !isMounted) return;
+  
+      let relevantDoc = documents[0];
+      console.log("Processing document:", relevantDoc);
+  
+      try {
         if (relevantDoc.file.docType === 'Paste-News') {
-          const extractedText = relevantDoc.file.extractedText
-
-          console.log("Paste-News Extracted Text is  ", extractedText)
-
-          await runAi(extractedText, relevantDoc.file._id, company._id);
-
+          await runAi(relevantDoc.file.extractedText, relevantDoc.file._id, company._id);
         } else if (relevantDoc.file.docType === '8-K') {
-          const extractedTextLink = relevantDoc.file.filePath
-          console.log("8K Text link is  ", extractedTextLink)
-
-          try {
-            const response = await vaultApi.fetchSecText(extractedTextLink)
-            console.log("Fetched text from 8-K link:", response); // Log first 500 chars for debugging
-
-            const extractedText = await response.data;
-
-
-            console.log("Fetched text from 8-K link:", extractedText.slice(0, 500)); // Log first 500 chars for debugging
-
-            // Run AI processing on extracted text
-            await runAi(extractedText, relevantDoc.file._id, company._id);
-          } catch (error) {
-            console.error("Error fetching 8-K text:", error);
-          }
-
+          const response = await vaultApi.fetchSecText(relevantDoc.file.filePath);
+          if (isMounted) await runAi(response.data, relevantDoc.file._id, company._id);
         } else {
-          console.log("Converting PDF to text");
           const pdfToTextResponse = await vaultApi.getFileData({
             user_id: relevantDoc.file.user_id,
             docType: "pdf",
             fileId: relevantDoc.file._id,
           });
-          const extractedText = pdfToTextResponse.data;
-
-
-          console.log("In AIExtractedDetails - cumulativeExtractedText ", pdfToTextResponse)
-
-          await runAi(pdfToTextResponse.data, relevantDoc.file._id, company._id)
-
+          if (isMounted) await runAi(pdfToTextResponse.data, relevantDoc.file._id, company._id);
         }
-
+      } catch (error) {
+        console.error("Error processing document:", error);
       }
-    }
-
-    fetchData()
-  }, [initialIsLoading, company._id, documents])
+    };
+  
+    fetchData();
+    return () => { isMounted = false }; // Cleanup function
+  
+  }, [initialIsLoading, company._id, documents]);
+  
 
   const runAi = async (cumulativeExtractedText: string, file_id: string, loggedInUser: string) => {
     setIsLoading(true)

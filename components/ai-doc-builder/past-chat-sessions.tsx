@@ -196,7 +196,7 @@ export const PastChatSessions: React.FC<PastChatSessionsProps> = ({ onSelectSess
                                         <CardContent className="p-4 flex justify-between items-center">
                                             {/* Left: Icon & Title */}
                                             <div className="flex items-center space-x-3 overflow-hidden w-full">
-                                                <Newspaper className="h-5 w-5 text-[#2563EB] flex-shrink-0" /> {/* 🔵 Keeps icon fixed */}
+                                                <Newspaper className="h-5 w-5 text-[#2563EB] flex-shrink-0" />
                                                 <h3 className="font-medium text-[#1B2559] w-full overflow-hidden break-words line-clamp-2">
                                                     {session.chatName}
                                                 </h3>

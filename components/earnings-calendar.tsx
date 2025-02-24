@@ -22,7 +22,7 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
             return acc
         }, [] as EarningsEvent[])
         // Sort by date
-        .sort((a, b) => new Date(a.fiscalDateEnding).getTime() - new Date(b.fiscalDateEnding).getTime())
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
     console.log("YYY Events ", sortedEvents)
 

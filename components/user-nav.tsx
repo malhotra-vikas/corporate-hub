@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import UserApi from "@/lib/api/user.api"
 import { Badge } from "@/components/ui/badge"
+import { ChevronDown } from "lucide-react"
 
 export function UserNav() {
     const router = useRouter()
@@ -39,19 +40,22 @@ export function UserNav() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-auto rounded-lg px-2">
-                    <Avatar className="flex items-center justify-center h-8 w-auto">
-                        <Badge
-                            variant="beat"
-                            className="flex items-center gap-1 px-3 py-1 bg-[#81C3F1] text-black min-w-max rounded-md"
-                        >
-                            {user.companyTicker ? user.companyTicker.toUpperCase() : "USER"}
-                        </Badge>
-                    </Avatar>
+                <Button
+                    variant="ghost"
+                    className="relative flex items-center justify-between w-[180px] h-10 rounded-md px-3 bg-gray-100 hover:bg-gray-200 transition bg-[#81C3F1] text-black min-w-max rounded-md"
+                >
+                    {/* User Badge inside a flex container for alignment */}
+                    <div className="flex items-center gap-2">
+                        {user.companyTicker ? user.companyTicker.toUpperCase() : "USER"}
+                    </div>
+
+                    {/* Dropdown Indicator */}
+                    <ChevronDown className="h-4 w-4 text-gray-600" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
+
                     <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{user.displayName}</p>
                         <p className="text-xs leading-none text-muted-foreground">{user.email}</p>

@@ -75,41 +75,8 @@ export function MainNav() {
                             </>
                         ) : (
                             <>
-                                <NavigationMenuItem>
-                                    <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
-                                    <NavigationMenuContent>
-                                        <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr] bg-white rounded-md shadow-md">
-                                            <ListItem href="/features" title="Document Management">
-                                                Secure storage and organization of corporate documents
-                                            </ListItem>
-                                            <ListItem href="/features" title="Collaboration">
-                                                Real-time collaboration and version control
-                                            </ListItem>
-                                            <ListItem href="/features" title="Security">
-                                                Enterprise-grade security and compliance
-                                            </ListItem>
-                                        </ul>
-                                    </NavigationMenuContent>
-                                </NavigationMenuItem>
-                                <NavigationMenuItem>
-                                    <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
-                                    <NavigationMenuContent>
-                                        <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-white rounded-md shadow-md">
-                                            <ListItem href="/hub" title="IR Hub">
-                                                Access market data and investor relations tools
-                                            </ListItem>
-                                            <ListItem href="/pricing" title="Pricing">
-                                                Flexible plans for businesses of all sizes
-                                            </ListItem>
-                                            <ListItem href="/testimonials" title="Case Studies">
-                                                See how other companies use AiirHub
-                                            </ListItem>
-                                            <ListItem href="/documentation" title="Documentation">
-                                                Detailed guides and API documentation
-                                            </ListItem>
-                                        </ul>
-                                    </NavigationMenuContent>
-                                </NavigationMenuItem>
+                            {/* 
+
                                 <NavigationMenuItem>
                                     <Link href="/pricing" legacyBehavior passHref>
                                         <NavigationMenuLink className="px-4 py-2 text-sm font-medium hover:text-[#0196FD] transition-colors">
@@ -117,6 +84,7 @@ export function MainNav() {
                                         </NavigationMenuLink>
                                     </Link>
                                 </NavigationMenuItem>
+                            */}                                
                             </>
                         )}
                     </NavigationMenuList>

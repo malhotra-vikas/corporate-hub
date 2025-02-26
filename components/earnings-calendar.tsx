@@ -24,8 +24,6 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
         // Sort by date
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
-    console.log("YYY Events ", sortedEvents)
-
     const CalendarItem = ({ event }: { event: EarningsEvent }) => {
         const date = parseISO(event.date)
         console.log("EVENT Date is  ", date)
@@ -44,7 +42,7 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
                     <h3 className="text-sm font-medium">{event.symbol}</h3>
                     <p className="text-sm font-medium">{fullDate}</p>
                 </div>
-                <CalendarPlus className="h-6 w-6" />
+                <CalendarPlus className="h-6 w-6 text-[#0196FD]" />
             </div>
         )
     }

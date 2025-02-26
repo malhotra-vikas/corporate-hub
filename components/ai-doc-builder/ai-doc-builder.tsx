@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Loader2, Upload, ChevronLeft, ChevronRight, Loader, FileText, UploadIcon } from "lucide-react"
+import { Loader2, Upload, ChevronLeft, ChevronRight, Loader, FileText, UploadIcon, RefreshCw } from "lucide-react"
 import { AIExtractedDetails } from "./ai-extracted-details"
 import type { ExtractedData } from "./ai-extracted-details"
 import { useSearchParams } from "next/navigation";
@@ -68,7 +68,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
 
   const chatSessionId = searchParams.get("chatSessionId");
 
-  const [extractedData, setExtractedData] = useState<{
+  let [extractedData, setExtractedData] = useState<{
     [key: string]: {
       name: string
       headline: string
@@ -104,6 +104,12 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     }
   }, [chatSessionId]);
 
+  useEffect(() => {
+    if (Object.keys(extractedData).length > 0) {
+      setIsDocumentSelected(true);
+    }
+  }, [extractedData]);
+
   const fetchPastSessionData = async (chatSessionId: string) => {
     setIsLoading(true);
     try {
@@ -115,7 +121,12 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       const fileResponse = await vaultApi.getFileByFileId({ file_id: chatResponse.data.file_id })
       console.log("Past File for this chat is ", fileResponse.data)
 
-      const newExtractedData = {
+      // Fetch company user details
+      const companyUserData = await userApi.getClientByEmail(user?.email || "");
+      if (!companyUserData?._id) throw new Error("Company user not found");
+      setCompanyUser(companyUserData); // ✅ Set company user state before rendering AIExtractedDetails
+
+      extractedData = {
         [chatResponse.data.file_id]: {
           name: chatResponse.data.chatName,
           headline: fileResponse.data.extractedTextHeadline,
@@ -127,8 +138,26 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         }
       }
 
-      //setExtractedData(newExtractedData);
+      console.log("Setting newExtractedData as extracted data for ", extractedData)
 
+      // Update the state with fetched data
+      setExtractedData(extractedData)
+
+      // ✅ Set selected documents with fetched file
+      setSelectedDocuments([
+        {
+          file: {
+            _id: fileResponse.data._id,
+            originalName: fileResponse.data.originalName,
+            extractedText: fileResponse.data.extractedText,
+            docType: fileResponse.data.docType,
+          },
+          type: fileResponse.data.docType || "other",
+        },
+      ]);
+
+      setIsDocumentSelected(true) // Show the AI analysis view
+      setIsDataFetched(true)
 
     } catch (error) {
       console.error("Error fetching chat session:", error);
@@ -136,6 +165,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       setIsLoading(false);
     }
   };
+
 
   const handleVaultSelection = async () => {
     setIsLoading(true)
@@ -516,21 +546,21 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     // ✅ Find the first available documentId
     const firstDocumentId = Object.keys(extractedData)[0];
 
-    console.log("Before update firstDocumentId is ",  firstDocumentId)
+    console.log("Before update firstDocumentId is ", firstDocumentId)
     console.log("📜 Existing extractedData before update:", JSON.stringify(extractedData, null, 2));
 
     setExtractedData((prevData) => {
       const updatedData = {
-          ...prevData,
-          [firstDocumentId]: {
-              ...(prevData?.[firstDocumentId] || {}), // ✅ Ensure document exists
-              [field]: value, // ✅ Update only the specified field
-          },
+        ...prevData,
+        [firstDocumentId]: {
+          ...(prevData?.[firstDocumentId] || {}), // ✅ Ensure document exists
+          [field]: value, // ✅ Update only the specified field
+        },
       };
 
       console.log("✅ Updated extractedData:", JSON.stringify(updatedData, null, 2)); // Log final state
       return updatedData;
-  });
+    });
 
   }
 
@@ -624,6 +654,12 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     setIsChatInterfaceCollapsed(!isChatInterfaceCollapsed)
   }
 
+  const handleSelectSession = async (sessionId: string) => {
+    setSelectedSessionId(sessionId)
+    await fetchPastSessionData(sessionId)
+    setIsDocumentSelected(true) // Show the AI analysis view
+  }
+
   const handleUpdateExtractedData = (fileName: string, field: string, value: string) => {
     setExtractedData((prev) => ({
       ...prev,
@@ -664,14 +700,14 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
             </Button>
           </div>
           <div className={isPastSessionsCollapsed ? "hidden" : "block h-[calc(100%-3rem)] overflow-hidden"}>
-            <PastChatSessions onSelectSession={(selectedSessionId) => console.log("Selected session:", selectedSessionId)} />
+            <PastChatSessions onSelectSession={(selectedSessionId) => handleSelectSession(selectedSessionId)} />
           </div>
         </div>
 
         {/* AI Document Builder Panel */}
         <Card className="w-full mx-auto">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">AI Press Release Builder</CardTitle>
+            <CardTitle className="text-2xl font-bold text-[#1B2559]">Press Release Builder</CardTitle>
             <CardDescription>Upload, select, or paste your documents for analysis</CardDescription>
           </CardHeader>
 
@@ -686,6 +722,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                 <TabsTrigger value="vault">Select from Vault</TabsTrigger>
                 <TabsTrigger value="paste">Paste Text</TabsTrigger>
               </TabsList>
+
               <TabsContent value="upload" className="space-y-4">
                 <div className="grid w-full items-center gap-1.5">
                   <Label htmlFor="file-upload" className="text-lg font-semibold">
@@ -727,23 +764,6 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
               </TabsContent>
 
               <TabsContent value="vault" className="space-y-4">
-                <Button
-                  onClick={handleVaultSelection}
-                  disabled={isLoading}
-                  className="w-full bg-[#1B2559] text-white hover:bg-[#0196FD] transition-colors"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading Vault Documents
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Refresh Vault Documents
-                    </>
-                  )}
-                </Button>
                 {vaultFiles.length > 0 && (
                   <RadioGroup
                     className="space-y-2 max-h-[40rem] overflow-y-auto border p-2"
@@ -760,24 +780,55 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                               <RadioGroupItem id={file._id} value={file._id} />
                               <span className="text-sm font-medium">{file.originalName}</span>
                             </div>
-                            <span className="text-sm text-muted-foreground">{file.uploadedDate}</span>
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(file.uploadedDate).toISOString().split("T")[0]}
+                            </span>
                           </label>
                         </CardContent>
                       </Card>
                     ))}
                   </RadioGroup>
                 )}
+                {/* Buttons side by side and centered */}
+                <div className="flex justify-center gap-4 mt-4">
+                  <Button
+                    variant="default"
+                    onClick={handleVaultSelection}
+                    disabled={isLoading}
+                    className="w-30 bg-[#1B2559] text-white hover:bg-[#0196FD] transition-colors"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading Vault
+                      </>
+                    ) : (
+                      <>
+                        Refresh
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    variant="default"
+                    onClick={handleContinue}
+                    disabled={selectedDocuments.length === 0} // ✅ Disables until a file is selected
+                    className={`w-30 text-white transition-colors ${selectedDocuments.length > 0
+                      ? "bg-[#1B2559] hover:bg-[#0196FD]"
+                      : "bg-gray-300 cursor-not-allowed"
+                      }`}
+                  >
+                    Continue
+                  </Button>
+                </div>
 
               </TabsContent>
             </Tabs>
 
-            {selectedDocuments.length > 0 && (
-              <Button onClick={handleContinue} className="mt-4 w-full bg-primary text-white">
-                Continue with {selectedDocuments.length} selected document{selectedDocuments.length > 1 ? "s" : ""}
-              </Button>
-            )}
           </CardContent>
         </Card>
+
+
       </div>
     )
   }
@@ -797,6 +848,11 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
     const data = extractedData[dynamicKey] // Access data for that key
 
     console.log("data os ", data)
+    const fileName = data.name
+    let cleanedName = data.name.replace(/^"(.*)"$/, '$1');
+    cleanedName = cleanedName + ".pdf"
+
+    console.log("File Name is ", cleanedName)
 
     // Generate PDF
     const pdfContent = (
@@ -828,7 +884,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
       const url = URL.createObjectURL(blob)
       const link = document.createElement("a")
       link.href = url
-      link.download = "press_release.pdf"
+      link.download = cleanedName
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -870,10 +926,16 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
         <CardHeader className="pb-2">
           {/* Flex Container for Title & Button */}
           <div className="flex justify-between items-center">
-            <CardTitle className="text-2xl text-[#1B2559]">AI Document Analysis</CardTitle>
+            <CardTitle className="text-2xl text-[#1B2559]">Document Analysis</CardTitle>
 
             {isDataFetched && (
-              <Button onClick={generatePDF} className={`ml-auto flex items-center gap-2 px-4 py-2 rounded-md ${isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary-dark"}`}>
+              <Button
+                onClick={generatePDF}
+                className={`ml-auto flex items-center gap-2 px-4 py-2 rounded-md text-white transition-colors ${isLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-[#0196FD] hover:bg-[#81C3F1]"
+                  }`}
+              >
                 {isLoading ? (
                   <>
                     <Loader className="h-4 w-4 animate-spin" />
@@ -902,7 +964,7 @@ const AIDocBuilder = ({ defaultType = "other" }: AIDocBuilderProps) => {
                 }`}
             >
               <h3 className="text-xl font-semibold mb-2 text-[#1B2559] flex items-center">
-                AI Extracted Details
+                Current Draft
               </h3>
 
               <AIExtractedDetails

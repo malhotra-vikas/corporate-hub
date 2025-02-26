@@ -118,17 +118,18 @@ export const PastChatSessions: React.FC<PastChatSessionsProps> = ({ onSelectSess
 
     const handleSelectSession = (sessionId: string) => {
         setSelectedSession(sessionId);
-        onSelectSession(sessionId);
         router.push(`/ai-doc-builder/press-release?chatSessionId=${sessionId}`);
+        onSelectSession(sessionId);
+
     };
 
     // State to track which sections are expanded/collapsed
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
         today: true,
-        thisWeek: false,
-        lastWeek: false,
-        thisMonth: false,
-        rest: false,
+        thisWeek: true,
+        lastWeek: true,
+        thisMonth: true,
+        rest: true,
     });
 
 

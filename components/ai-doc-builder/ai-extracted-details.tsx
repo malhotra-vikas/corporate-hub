@@ -98,31 +98,15 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
 
 
   useEffect(() => {
-
-    setExtractedData((prevData) => {
-      if (!prevData) {
-        console.warn("prevData is undefined, initializing an empty object.");
-        return { ...returnExtractedData };
-      }
-
-      const updatedData = { ...prevData };
-
-      console.log("Data to be updated ", returnExtractedData)
-
-      Object.keys(returnExtractedData).forEach((key) => {
-        console.log("lookup Key ", key)
-
-        if (key in updatedData) {
-          updatedData[key] = returnExtractedData[key]; // ✅ Update only matching keys
-        }
+    if (returnExtractedData && Object.keys(returnExtractedData).length > 0) {
+      setExtractedData((prevData) => {
+        const updatedData = { ...prevData, ...returnExtractedData }; // Properly merging data
+        console.log("Updated Extracted Data: ", updatedData);
+        return updatedData;
       });
-
-      console.log("Updated Data to be painted ", updatedData)
-
-
-      return updatedData;
-    });
-  }, [returnExtractedData]);
+    }
+  }, [JSON.stringify(returnExtractedData)]); // ✅ Convert object to JSON string to force re-render
+  
 
 
   useEffect(() => {
@@ -681,7 +665,7 @@ export const AIExtractedDetails: React.FC<AIExtractedDetailsProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 space-y-4">
-            {renderEditableField(doc.file._id, "name", false, "Press Release Name")}
+            {renderEditableField(doc.file._id, "name", false, "Press Release (Internal) Name")}
             {renderEditableField(doc.file._id, "headline", true, "Headline")}
             {renderEditableField(doc.file._id, "subHeadline", true, "Sub Headline")}
             {renderEditableField(doc.file._id, "summary", true, "Summary")}

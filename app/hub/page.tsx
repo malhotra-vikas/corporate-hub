@@ -325,14 +325,14 @@ export default function HubPage() {
             )}
 
             <header className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-blue-900">Welcome {companyName}</h1>
+                <h1 className="text-3xl font-bold text-[#1B2559]">Welcome {companyName}</h1>
             </header>
 
             <div className="grid md:grid-cols-2 gap-6">
                 {/* Competitors Section */}
                 <Card className="border-[#1B2559] border">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Competitors / Peers</CardTitle>
+                    <CardHeader className="flex flex-row items-center justify-between text-[#1B2559]">
+                        <CardTitle>Comps and Peers</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                         <div className="rounded-md border border-input">
@@ -411,8 +411,7 @@ export default function HubPage() {
                 {/* Earnings Hub Section */}
                 <Card className="border-[#1B2559] border">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <CalendarIcon className="h-5 w-5 text-primary" />
+                        <CardTitle className="flex items-center gap-2 text-[#1B2559]">
                             Earnings Hub
                         </CardTitle>
                     </CardHeader>
@@ -422,16 +421,15 @@ export default function HubPage() {
                 </Card>
 
                 {/* News Hub Section */}
-                <Card className="md:col-span-2">
+                <Card className="border-[#1B2559] border md:col-span-2">
                     <CardHeader className="border-b pb-4">
-                        <CardTitle className="flex items-center gap-2">
-                            <Newspaper className="h-5 w-5" />
+                        <CardTitle className="flex items-center gap-2 text-[#1B2559]">
                             News Hub
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4">
                         <Tabs defaultValue="comp-news" className="w-full">
-                            <TabsList className="flex h-auto flex-wrap gap-2 border-b pb-2">
+                            <TabsList className="flex h-auto flex-wrap gap-2 border-b pb-2 items-center justify-center">
                                 <TabsTrigger value="comp-news">Competition News</TabsTrigger>
                                 <TabsTrigger value="company-news">{companyTicker} News</TabsTrigger>
                                 <TabsTrigger value="trending-news">Trending News</TabsTrigger>

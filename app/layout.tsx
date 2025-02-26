@@ -18,10 +18,10 @@ const inter = Inter({
 
 export const metadata = {
   title: {
-    default: "AiirHub - Secure Document Management",
-    template: "%s | AiirHub",
+    default: "AIIRHUB: A.I. Hub for Public Companies",
+    template: "%s | AIIRHUB",
   },
-  description: "Professional corporate document management platform",
+  description: "A.I. Hub for Public Companies",
   keywords: ["document management", "corporate", "secure", "professional"],
 }
 

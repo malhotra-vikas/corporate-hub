@@ -51,7 +51,7 @@ export default function ResetPasswordPage() {
                                 required
                             />
                         </div>
-                        <Button type="submit" className="w-full bg-[#cdf683] text-black hover:bg-[#b8e15e]" disabled={isLoading}>
+                        <Button type="submit" className="w-full text-black" disabled={isLoading}>
                             {isLoading ? "Sending..." : "Reset Password"}
                         </Button>
                     </form>

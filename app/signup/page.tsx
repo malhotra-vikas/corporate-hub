@@ -272,7 +272,7 @@ export default function SignUp() {
                         </div>
                         <Button
                             type="submit"
-                            className="w-full bg-[#0196FD] text-black hover:bg-[#b8e15e]"
+                            className="w-full text-black"
                             disabled={isLoading || !companyDetails}
                         >
                             Sign Up

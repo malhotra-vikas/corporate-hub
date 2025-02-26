@@ -80,7 +80,7 @@ export default function SignIn() {
                                 required
                             />
                         </div>
-                        <Button type="submit" className="w-full bg-[#cdf683] text-black hover:bg-[#b8e15e]">
+                        <Button type="submit" className="w-full text-black">
                             Sign In
                         </Button>
                     </form>

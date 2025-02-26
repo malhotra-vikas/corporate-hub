@@ -57,7 +57,7 @@ const VerifyPage = () => {
       <Card className="w-full max-w-md">
         <CardHeader>
           <div className="flex justify-center items-center mb-6">
-            <Image src="/airhub-logo.png" alt="AirHub logo" width={128} height={128} />
+            <Image src="/airhub-logo-current.png" alt="AirHub logo" width={128} height={128} />
           </div>
           <CardTitle className="text-2xl font-bold text-center">Email Verification</CardTitle>
           <CardDescription className="text-center">We're verifying your email address...</CardDescription>

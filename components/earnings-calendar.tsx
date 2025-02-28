@@ -6,9 +6,19 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
 import { EarningsCalendarProps, EarningsEvent } from "@/lib/types"
+import UserApi from "@/lib/api/user.api"
+import { toast } from "react-toastify"
+import { useAuth } from "@/lib/auth-context"
 
 
 export function EarningsCalendar({ events, isLoading = false }: EarningsCalendarProps) {
+    const { user, loading } = useAuth()
+
+    if (!user?.email) {
+        throw "no user found"
+    }
+
+    const userApi = new UserApi()
 
     console.log("XXX Events ", events)
     const sortedEvents = [...events]
@@ -24,6 +34,8 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
         // Sort by date
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
+    console.log("YYY Events ", sortedEvents)
+
     const CalendarItem = ({ event }: { event: EarningsEvent }) => {
         const date = parseISO(event.date)
         console.log("EVENT Date is  ", date)
@@ -31,7 +43,19 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
         const month = format(date, "MMM")
         const day = format(date, "d")
         const fullDate = event.time ? format(date, "MMM d, yyyy, h:mm a") : format(date, "MMM d, yyyy")
+        console.log("EVENT Full Date is  ", fullDate)
 
+        const sendInvite = async () => {
+            try {
+
+                await userApi.sendEarningCalenderInvite({ email: user?.email || "", symbol: event.symbol, date: date })
+    
+                toast.info("Calendar invite sent!");
+            } catch (error) {
+                console.error(error);
+            }
+        };
+    
         return (
             <div className="flex items-center gap-4 p-3 border-b last:border-0 group transition-colors">
                 <div className="flex-shrink-0 w-14 h-14 bg-blue-50 rounded-lg flex flex-col items-center justify-center text-blue-600">
@@ -42,7 +66,7 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
                     <h3 className="text-sm font-medium">{event.symbol}</h3>
                     <p className="text-sm font-medium">{fullDate}</p>
                 </div>
-                <CalendarPlus className="h-6 w-6 text-[#0196FD]" />
+                <CalendarPlus className="h-6 w-6 text-[#0196FD]" onClick={sendInvite} />
             </div>
         )
     }

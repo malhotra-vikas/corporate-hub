@@ -2,6 +2,7 @@ import { CreateUserDto } from "@/dto/createUser.dto";
 import BaseApi from "./_baseApi";
 import { LoginDto } from "@/dto/login.dto";
 import { VerifyUserDto } from "@/dto/verifyUser.dto";
+import { date } from "yup";
 
 export default class UserApi extends BaseApi {
 
@@ -10,6 +11,20 @@ export default class UserApi extends BaseApi {
   constructor() {
     super();
   }
+
+
+  async sendEarningCalenderInvite(dto: { email: string; symbol: string; date: Date; }) {
+
+    console.log("Date being sent to backend is ", dto.date.toISOString()); // ✅ Converts to ISO format (UTC)
+
+    const data = await UserApi.post(`${this.baseUrl}sendEarningCalenderInvite`, {
+      ...dto,
+      date: dto.date.toISOString() // ✅ Convert Date to ISO String before sending
+  });
+
+    return data;
+  }
+
 
   async login(dto: LoginDto) {
     const data = await UserApi.post(`${this.baseUrl}login`, dto);

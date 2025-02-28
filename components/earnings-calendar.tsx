@@ -1,7 +1,9 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { format, parseISO } from "date-fns"
-import { CalendarPlus } from "lucide-react"
+import { CalendarPlus, CheckCircle } from "lucide-react"
+import Cookies from "js-cookie"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -9,7 +11,6 @@ import { EarningsCalendarProps, EarningsEvent } from "@/lib/types"
 import UserApi from "@/lib/api/user.api"
 import { toast } from "react-toastify"
 import { useAuth } from "@/lib/auth-context"
-
 
 export function EarningsCalendar({ events, isLoading = false }: EarningsCalendarProps) {
     const { user, loading } = useAuth()
@@ -20,9 +21,24 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
 
     const userApi = new UserApi()
 
+    // ✅ State to track sent invites
+    const [sentInvites, setSentInvites] = useState<{ [symbol: string]: boolean }>({})
+
+    // ✅ Load sent invites from cookies on component mount
+    useEffect(() => {
+        const storedInvites = Cookies.get("sentInvites")
+        if (storedInvites) {
+            setSentInvites(JSON.parse(storedInvites))
+        }
+    }, [])
+
+    // ✅ Save sent invites to cookies whenever they change
+    useEffect(() => {
+        Cookies.set("sentInvites", JSON.stringify(sentInvites), { expires: 7 }) // Save for 7 days
+    }, [sentInvites])
+
     console.log("XXX Events ", events)
     const sortedEvents = [...events]
-        // Group by symbol and get most recent date
         .reduce((acc, event) => {
             const existingEvent = acc.find((e) => e.symbol === event.symbol)
             if (!existingEvent || new Date(event.fiscalDateEnding) > new Date(existingEvent.fiscalDateEnding)) {
@@ -31,7 +47,6 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
             }
             return acc
         }, [] as EarningsEvent[])
-        // Sort by date
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
     console.log("YYY Events ", sortedEvents)
@@ -47,15 +62,18 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
 
         const sendInvite = async () => {
             try {
-
                 await userApi.sendEarningCalenderInvite({ email: user?.email || "", symbol: event.symbol, date: date })
-    
-                toast.info("Calendar invite sent!");
+
+                // ✅ Update state and store in cookies
+                setSentInvites((prev) => ({ ...prev, [event.symbol]: true }))
+
+                toast.success("Calendar invite sent!");
             } catch (error) {
                 console.error(error);
+                toast.error("Failed to send invite.");
             }
-        };
-    
+        }
+
         return (
             <div className="flex items-center gap-4 p-3 border-b last:border-0 group transition-colors">
                 <div className="flex-shrink-0 w-14 h-14 bg-blue-50 rounded-lg flex flex-col items-center justify-center text-blue-600">
@@ -66,7 +84,11 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
                     <h3 className="text-sm font-medium">{event.symbol}</h3>
                     <p className="text-sm font-medium">{fullDate}</p>
                 </div>
-                <CalendarPlus className="h-6 w-6 text-[#0196FD]" onClick={sendInvite} />
+                {sentInvites[event.symbol] ? (
+                    <CheckCircle className="h-6 w-6 text-green-500" /> // ✅ Show green checkmark when sent
+                ) : (
+                    <CalendarPlus className="h-6 w-6 text-[#0196FD] cursor-pointer" onClick={sendInvite} />
+                )}
             </div>
         )
     }
@@ -112,4 +134,3 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
         </ScrollArea>
     )
 }
-

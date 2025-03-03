@@ -22,19 +22,26 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
     const userApi = new UserApi()
 
     // ✅ State to track sent invites
-    const [sentInvites, setSentInvites] = useState<{ [symbol: string]: boolean }>({})
+    let [sentInvites, setSentInvites] = useState<{ [symbol: string]: boolean }>({})
 
     // ✅ Load sent invites from cookies on component mount
     useEffect(() => {
         const storedInvites = Cookies.get("sentInvites")
+
+        console.log("storedInvites are ", storedInvites)
         if (storedInvites) {
+            sentInvites = JSON.parse(storedInvites)
+
+            console.log("sentInvites are ", sentInvites)
+
             setSentInvites(JSON.parse(storedInvites))
         }
+
     }, [])
 
     // ✅ Save sent invites to cookies whenever they change
     useEffect(() => {
-        Cookies.set("sentInvites", JSON.stringify(sentInvites), { expires: 7 }) // Save for 7 days
+        Cookies.set("sentInvites", JSON.stringify(sentInvites), { expires: 365 }) // Save for 7 days
     }, [sentInvites])
 
     console.log("XXX Events ", events)

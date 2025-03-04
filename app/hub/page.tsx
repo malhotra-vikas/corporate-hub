@@ -11,6 +11,8 @@ import {
     TrendingUpIcon,
     TrendingDownIcon,
     Newspaper,
+    Twitter,
+    Linkedin,
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import HubApi from "@/lib/api/hub"
@@ -30,6 +32,10 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { NewsSection } from "@/components/news-section"
 import { EarningsCalendar } from "@/components/earnings-calendar"
+import TwitterApi from "@/lib/api/twitter.api"
+import { TwitterDto } from "@/dto/twitter.dto"
+import { useRouter } from "next/navigation"
+import { CheckCircle } from "lucide-react"
 
 async function fetchHubData(companyTicker: string, companyExchange: string, companyUser: any): Promise<HubData> {
     const hubApi = new HubApi()
@@ -65,11 +71,18 @@ export default function HubPage() {
     const [newTickerSymbol, setNewTickerSymbol] = useState("")
     const [isAddingTicker, setIsAddingTicker] = useState(false)
     const [currentTickers, setCurrentTickers] = useState<string[]>([])
+    const [isTwitterConnected, setIsTwitterConnected] = useState(false)
+    const [isLinkedInConnected, setIsLinkedInConnected] = useState(false)
+
+    const [refresh, setRefresh] = useState(0);
 
     const userApi = new UserApi()
     const earningsApi = new EarningsApi()
 
     const hubApi = new HubApi()
+
+    const twitterApi = new TwitterApi()
+    const router = useRouter()
 
     const handleAddTicker = async () => {
         if (!newTickerSymbol) return
@@ -101,6 +114,14 @@ export default function HubPage() {
             toast.error("Failed to add competitor")
         }
     }
+    const handleConnect = async () => {
+        window.location.href = `http://localhost:5020/api/twitter/auth?token=${user?._id}`;
+    }
+
+    const handleLinkedInConnect = async () => {
+        //window.location.href = `http://localhost:5020/api/twitter/auth?token=${user?._id}`;
+        toast.error("Not Yet Implemented")
+    }
 
     const handleDeleteTicker = async (symbol: string) => {
         try {
@@ -125,6 +146,31 @@ export default function HubPage() {
             toast.error("Failed to remove competitor")
         }
     }
+
+
+    // Function to check if user is connected to Twitter
+    const checkTwitterConnection = async () => {
+        if (!user?._id) return;
+
+        console.log("🔍 Checking Twitter connection for user:", user._id);
+
+        try {
+            const response = await twitterApi.getTwitterAccountByUserId(user._id);
+            console.log("✅ Twitter API response:", response);
+
+            if (response?.connected && response?.account?.username) {
+                console.log("✅ Twitter is connected");
+                setIsTwitterConnected(true);
+            } else {
+                console.log("❌ Twitter is NOT connected");
+                setIsTwitterConnected(false);
+            }
+        } catch (error) {
+            console.error("❌ Error checking Twitter connection:", error);
+            setIsTwitterConnected(false);
+        }
+    };
+
 
     const loadHubData = async () => {
         const companyUser = await userApi.getClientByEmail(user?.email || "")
@@ -172,8 +218,23 @@ export default function HubPage() {
     }
 
     useEffect(() => {
+        console.log("🔄 Refresh triggered, isTwitterConnected:", isTwitterConnected);
+    }, [refresh]);
+
+    useEffect(() => {
         if (user) {
             loadHubData()
+        }
+    }, [user]) // Added loadHubData to dependencies
+
+    useEffect(() => {
+        console.log("🔥 isTwitterConnected updated to:", isTwitterConnected);
+    }, [isTwitterConnected]); // ✅ Logs when `isTwitterConnected` changes
+
+    useEffect(() => {
+        if (user && user._id) {
+            console.log("🟢 Running checkTwitterConnection...");
+            checkTwitterConnection()
         }
     }, [user]) // Added loadHubData to dependencies
 
@@ -425,7 +486,38 @@ export default function HubPage() {
                     <CardHeader className="border-b pb-4">
                         <CardTitle className="flex items-center gap-2 text-[#1B2559]">
                             News Hub
+                            {isTwitterConnected ? (
+                                <div className="flex items-center gap-1 text-green-600 text-xs font-medium">
+                                    <CheckCircle className="w-4 h-4" />
+                                    <span>Twitter Connected</span>
+                                </div>
+                            ) : (
+                                <Button
+                                    onClick={handleConnect}
+                                    disabled={loading}
+                                    className="flex items-center space-x-2"
+                                >
+                                    <Twitter className="w-5 h-5" />
+                                    <span>{loading ? "Connecting..." : "Connect Twitter"}</span>
+                                </Button>
+                            )}
+                            {isLinkedInConnected ? (
+                                <div className="flex items-center gap-1 text-green-600 text-xs font-medium">
+                                    <CheckCircle className="w-4 h-4" />
+                                    <span>LinkedIn Connected</span>
+                                </div>
+                            ) : (
+                                <Button
+                                    onClick={handleLinkedInConnect}
+                                    disabled={loading}
+                                    className="flex items-center space-x-2"
+                                >
+                                    <Linkedin className="w-5 h-5" />
+                                    <span>{loading ? "Connecting..." : "Connect LinkedIn"}</span>
+                                </Button>
+                            )}                            
                         </CardTitle>
+
                     </CardHeader>
                     <CardContent className="p-4">
                         <Tabs defaultValue="comp-news" className="w-full">
@@ -457,4 +549,5 @@ export default function HubPage() {
 function setToastError(message: string) {
     toast.error(message)
 }
+
 

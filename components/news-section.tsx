@@ -50,22 +50,19 @@ export function NewsSection({ data, isLoading = false, isTwitterConnected = fals
 
         const handleGeneratePost = async () => {
             if (selectedAccounts.length === 0) {
-                alert("Please select at least one social media account.")
+                toast.info("Please select at least one social media account.")
                 return
             }
 
-            // Simulate API call
-            const response = await fetch("/api/generate-post", {
-                method: "POST",
-                body: JSON.stringify({ newsTitle: item.title, accounts: selectedAccounts }),
-            })
+            // Mock up a post using the news title and a sample AI-generated summary
+            const mockPost = `🚀 ${item.title}\n\n🔗 Read more: ${item.link}\n\n#BreakingNews #AIgenerated`
 
-            const data = await response.json()
-            setGeneratedPost(data.post)
+            setGeneratedPost(mockPost)
+
         }
 
         const handleApprovePost = () => {
-            alert("Post approved and published!")
+            toast.info("Post approved and published!")
             setIsModalOpen(false)
         }
 

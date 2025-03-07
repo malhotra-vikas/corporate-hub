@@ -115,7 +115,10 @@ export default function HubPage() {
         }
     }
     const handleConnect = async () => {
-        window.location.href = `http://localhost:5020/api/twitter/auth?token=${user?._id}`;
+
+        const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/twitter/auth?token=${user?._id}`;
+
+        window.location.href = url;
     }
 
     const handleLinkedInConnect = async () => {

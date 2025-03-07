@@ -7,11 +7,11 @@ import { formatDistanceToNow, parseISO } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { NewsItem, NewsSectionProps } from "@/lib/types"
-
+import { toast } from "react-toastify"
 
 const ITEMS_PER_PAGE = 10
 
-export function NewsSection({ data, isLoading = false }: NewsSectionProps) {
+export function NewsSection({ data, isLoading = false, isTwitterConnected = false, isLinkedInConnected = false }: NewsSectionProps) {
     const [currentPage, setCurrentPage] = useState(1)
 
     const NewsItemSkeleton = () => (
@@ -28,6 +28,14 @@ export function NewsSection({ data, isLoading = false }: NewsSectionProps) {
     const NewsItem = ({ item }: { item: NewsItem }) => {
         const formattedTime = formatDistanceToNow(parseISO(item.time), { addSuffix: true })
 
+        const socialImage = "airhub.png"
+
+        const handleImageClick = () => {
+            toast.info("Work in progress")
+            console.log("Image clicked!");
+            // You can also navigate, open a modal, or perform any action here
+        };
+
         return (
             <div className="group p-4 border-b last:border-b-0 transition-colors hover:bg-muted/50">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1.5">
@@ -35,14 +43,25 @@ export function NewsSection({ data, isLoading = false }: NewsSectionProps) {
                     <span>•</span>
                     <time dateTime={item.time}>{formattedTime}</time>
                 </div>
-                <a
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block font-medium text-primary group-hover:text-primary/80 transition-colors"
-                >
-                    {item.title}
-                </a>
+                {/* Ensure Link & Image are side by side */}
+                <div className="flex items-center justify-between gap-4">
+                    <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block font-medium text-primary group-hover:text-primary/80 transition-colors flex-1"
+                    >
+                        {item.title}
+                    </a>
+                    {isTwitterConnected && (
+                        <img
+                            src={`/${socialImage}`} // Ensure proper reference to the public folder
+                            alt="Generate Social Media Post"
+                            className="w-16 h-16 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={handleImageClick} // Fix onClick
+                        />
+                    )}
+                </div>
             </div>
         )
     }

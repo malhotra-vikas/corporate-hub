@@ -86,6 +86,8 @@ export interface NewsItem {
 export interface NewsSectionProps {
   data: NewsItem[]
   isLoading?: boolean
+  isTwitterConnected?: boolean
+  isLinkedConnected?: boolean
 }
 
 export interface HubData {

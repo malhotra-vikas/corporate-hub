@@ -538,7 +538,7 @@ export default function HubPage() {
                                 { key: "industry-news", data: hubData.industryNews },
                             ].map(({ key, data }) => (
                                 <TabsContent key={key} value={key} className="pt-4">
-                                    <NewsSection data={data} isLoading={isLoading} />
+                                    <NewsSection data={data} isLoading={isLoading} isTwitterConnected={isTwitterConnected} isLinkedConnected={isLinkedInConnected}/>
                                 </TabsContent>
                             ))}
                         </Tabs>

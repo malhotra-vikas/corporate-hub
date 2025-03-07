@@ -34,7 +34,8 @@ export function NewsSection({ data, isLoading = false, isTwitterConnected = fals
 
         const [isModalOpen, setIsModalOpen] = useState(false)
         const [selectedAccounts, setSelectedAccounts] = useState<string[]>([])
-        const [generatedPost, setGeneratedPost] = useState<string | null>(null)
+        const [generatedPosts, setGeneratedPosts] = useState<{ platform: string, post: string }[]>([])
+        const [currentPostIndex, setCurrentPostIndex] = useState(0)
 
         // Mock social media accounts
         const socialAccounts = [
@@ -54,16 +55,24 @@ export function NewsSection({ data, isLoading = false, isTwitterConnected = fals
                 return
             }
 
-            // Mock up a post using the news title and a sample AI-generated summary
-            const mockPost = `🚀 ${item.title}\n\n🔗 Read more: ${item.link}\n\n#BreakingNews #AIgenerated`
+            // Mock up posts for each selected platform
+            const posts = selectedAccounts.map((platform) => ({
+                platform,
+                post: `📢 ${platform.toUpperCase()} Post:\n🚀 ${item.title}\n🔗 Read more: ${item.link}\n\n#BreakingNews #AIgenerated`
+            }))
 
-            setGeneratedPost(mockPost)
-
+            setGeneratedPosts(posts)
+            setCurrentPostIndex(0) // Reset to first post
         }
 
         const handleApprovePost = () => {
-            toast.info("Post approved and published!")
-            setIsModalOpen(false)
+            toast.info(`Post approved and published on ${generatedPosts[currentPostIndex].platform}!`)
+
+            if (currentPostIndex < generatedPosts.length - 1) {
+                setCurrentPostIndex(currentPostIndex + 1) // Move to next post
+            } else {
+                setIsModalOpen(false) // Close modal after the last post
+            }
         }
 
 
@@ -114,10 +123,10 @@ export function NewsSection({ data, isLoading = false, isTwitterConnected = fals
                             ))}
                         </div>
 
-                        {generatedPost ? (
+                        {generatedPosts.length > 0 ? (
                             <div className="mt-4 p-4 border rounded-md bg-gray-100 text-sm">
-                                <strong>Generated Post:</strong>
-                                <p>{generatedPost}</p>
+                                <strong>Post for {generatedPosts[currentPostIndex].platform}:</strong>
+                                <p className="mt-2">{generatedPosts[currentPostIndex].post}</p>
                             </div>
                         ) : (
                             <div className="flex justify-end gap-2 mt-4">
@@ -131,13 +140,15 @@ export function NewsSection({ data, isLoading = false, isTwitterConnected = fals
                         )}
 
                         <DialogFooter className="flex justify-end gap-2">
-                            {generatedPost && (
+                            {generatedPosts.length > 0 && (
                                 <>
                                     <Button variant="outline" onClick={() => setIsModalOpen(false)}>
                                         Cancel
                                     </Button>
                                     <Button variant="primary" onClick={handleApprovePost}>
-                                        Approve & Post
+                                        {currentPostIndex < generatedPosts.length - 1
+                                            ? "Approve Post & Next"
+                                            : "Approve Post"}
                                     </Button>
                                 </>
                             )}

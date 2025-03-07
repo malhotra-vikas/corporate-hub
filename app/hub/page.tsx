@@ -522,7 +522,7 @@ export default function HubPage() {
                     <CardContent className="p-4">
                         <Tabs defaultValue="comp-news" className="w-full">
                             <TabsList className="flex h-auto flex-wrap gap-2 border-b pb-2 items-center justify-center">
-                                <TabsTrigger value="comp-news">Competition News</TabsTrigger>
+                                <TabsTrigger value="comp-news">Comp News</TabsTrigger>
                                 <TabsTrigger value="company-news">{companyTicker} News</TabsTrigger>
                                 <TabsTrigger value="trending-news">Trending News</TabsTrigger>
                                 <TabsTrigger value="industry-news">Industry News</TabsTrigger>

@@ -1,7 +1,7 @@
 "use client"
 
 import { Newspaper } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { formatDistanceToNow, parseISO } from "date-fns"
 
 import { Button } from "@/components/ui/button"
@@ -88,24 +88,30 @@ export function NewsSection({ data, isLoading = false, isTwitterConnected = fals
 
             toast.info(`Publishing post on ${platform}...`);
 
-            // Call the respective API to publish the post
-            if (platform === "Twitter") {
-                console.log("Publishing on Twitter:", post);
+            try {
 
-                await twitterApi.publishPost(post, user?._id);
-            } else if (platform === "LinkedIn") {
-                // Placeholder API call for LinkedIn (implement if needed)
-                console.log("Publishing on LinkedIn:", post);
-                // await linkedInApi.publishPost(post);
-            }
+                // Call the respective API to publish the post
+                if (platform === "Twitter") {
+                    console.log("Publishing on Twitter:", post);
 
-            toast.info(`Post approved and published on  ${platform}!`)
+                    await twitterApi.publishPost(post, user?._id);
+                } else if (platform === "LinkedIn") {
+                    // Placeholder API call for LinkedIn (implement if needed)
+                    console.log("Publishing on LinkedIn:", post);
+                    // await linkedInApi.publishPost(post);
+                }
 
-            if (currentPostIndex < generatedPosts.length - 1) {
-                setCurrentPostIndex(currentPostIndex + 1) // Move to next post
-            } else {
-                setIsModalOpen(false) // Close modal after the last post
-            }
+                toast.info(`Post approved and published on  ${platform}!`)
+
+                if (currentPostIndex < generatedPosts.length - 1) {
+                    setCurrentPostIndex(currentPostIndex + 1) // Move to next post
+                } else {
+                    setIsModalOpen(false) // Close modal after the last post
+                }
+            } catch (error) {
+                console.error("Error publishing post:", error);
+                toast.error("Failed to publish post.");
+            } 
         }
 
         async function generateSocialMediaPost(platform: string, itemTitle: string, itemLink: string) {

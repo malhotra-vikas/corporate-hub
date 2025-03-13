@@ -11,9 +11,17 @@ import { toast } from "react-toastify"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 
+import TwitterApi from "@/lib/api/twitter.api"
+import OpenAiApi from "@/lib/api/openApi.api"
+import { useAuth } from "@/lib/auth-context"
+import UserApi from "@/lib/api/user.api"
+
 const ITEMS_PER_PAGE = 10
+const userApi = new UserApi()
 
 export function NewsSection({ data, isLoading = false, isTwitterConnected = false, isLinkedInConnected = false }: NewsSectionProps) {
+    const { user, loading } = useAuth()
+    
     const [currentPage, setCurrentPage] = useState(1)
 
     const NewsItemSkeleton = () => (
@@ -30,17 +38,20 @@ export function NewsSection({ data, isLoading = false, isTwitterConnected = fals
     const NewsItem = ({ item }: { item: NewsItem }) => {
         const formattedTime = formatDistanceToNow(parseISO(item.time), { addSuffix: true })
 
-        const socialImage = "airhub.png"
+        const socialImage = "generate-post.png"
 
         const [isModalOpen, setIsModalOpen] = useState(false)
         const [selectedAccounts, setSelectedAccounts] = useState<string[]>([])
         const [generatedPosts, setGeneratedPosts] = useState<{ platform: string, post: string }[]>([])
         const [currentPostIndex, setCurrentPostIndex] = useState(0)
 
+        const openAiApi = new OpenAiApi();
+        const twitterApi = new TwitterApi();
+
         // Mock social media accounts
         const socialAccounts = [
-            { id: "twitter", name: "Twitter" },
-            { id: "linkedin", name: "LinkedIn" },
+            { id: "Twitter", name: "Twitter" },
+            { id: "LinkedIn", name: "LinkedIn" },
         ]
 
         const toggleAccountSelection = (id: string) => {
@@ -55,24 +66,65 @@ export function NewsSection({ data, isLoading = false, isTwitterConnected = fals
                 return
             }
 
-            // Mock up posts for each selected platform
-            const posts = selectedAccounts.map((platform) => ({
-                platform,
-                post: `📢 ${platform.toUpperCase()} Post:\n🚀 ${item.title}\n🔗 Read more: ${item.link}\n\n#BreakingNews #AIgenerated`
-            }))
+            try {
+                // Generate posts asynchronously
+                const posts = await Promise.all(
+                    selectedAccounts.map(async (platform) => {
+                        const post = await generateSocialMediaPost(platform, item.title, item.link);
+                        return { platform, post };
+                    })
+                );
 
-            setGeneratedPosts(posts)
-            setCurrentPostIndex(0) // Reset to first post
+                setGeneratedPosts(posts);
+                setCurrentPostIndex(0); // Reset to first post
+            } catch (error) {
+                toast.error("Error generating posts. Please try again.");
+            }
         }
 
-        const handleApprovePost = () => {
-            toast.info(`Post approved and published on ${generatedPosts[currentPostIndex].platform}!`)
+
+        const handleApprovePost = async () => {
+            const { platform, post } = generatedPosts[currentPostIndex];
+
+            toast.info(`Publishing post on ${platform}...`);
+
+            // Call the respective API to publish the post
+            if (platform === "Twitter") {
+                console.log("Publishing on Twitter:", post);
+
+                await twitterApi.publishPost(post, user?._id);
+            } else if (platform === "LinkedIn") {
+                // Placeholder API call for LinkedIn (implement if needed)
+                console.log("Publishing on LinkedIn:", post);
+                // await linkedInApi.publishPost(post);
+            }
+
+            toast.info(`Post approved and published on  ${platform}!`)
 
             if (currentPostIndex < generatedPosts.length - 1) {
                 setCurrentPostIndex(currentPostIndex + 1) // Move to next post
             } else {
                 setIsModalOpen(false) // Close modal after the last post
             }
+        }
+
+        async function generateSocialMediaPost(platform: string, itemTitle: string, itemLink: string) {
+
+            const system_prompt = "You are an AI that crafts engaging social media posts based on news headlines and news links.";
+            const userMessage = `Generate a catchy social media post for ${platform} based on this news link: ${itemLink}. Include a call to action and the link: ${itemLink}`;
+
+            const response = await openAiApi.completion(
+                [
+                    { role: "system", content: system_prompt },
+                    { role: "user", content: userMessage },
+                ],
+                userMessage,
+            );
+
+            const socialMediaPost =
+                response?.data.choices[0].message.content;
+
+            return socialMediaPost;
         }
 
 
@@ -96,7 +148,7 @@ export function NewsSection({ data, isLoading = false, isTwitterConnected = fals
                         <img
                             src={`/${socialImage}`}
                             alt="Generate Social Media Post"
-                            className="w-16 h-16 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+                            className="w-auto h-auto max-w-[130px] max-h-[50px] object-contain rounded cursor-pointer hover:opacity-80 transition-opacity"
                             onClick={() => setIsModalOpen(true)}
                         />
                     )}
@@ -124,11 +176,17 @@ export function NewsSection({ data, isLoading = false, isTwitterConnected = fals
                         </div>
 
                         {generatedPosts.length > 0 ? (
-                            <div className="mt-4 p-4 border rounded-md bg-gray-100 text-sm">
-                                <strong>Post for {generatedPosts[currentPostIndex].platform}:</strong>
-                                <p className="mt-2">{generatedPosts[currentPostIndex].post}</p>
-                            </div>
-                        ) : (
+                            <>
+                                {/* Platform Title Outside */}
+                                <strong className="block mb-2">
+                                    Post for {generatedPosts[currentPostIndex].platform}:
+                                </strong>
+
+                                {/* Post Content */}
+                                <div className="mt-4 p-4 border rounded-md bg-gray-100 text-sm">
+                                    <p className="mt-2">{generatedPosts[currentPostIndex].post}</p>
+                                </div>
+                            </>) : (
                             <div className="flex justify-end gap-2 mt-4">
                                 <Button variant="outline" onClick={() => setIsModalOpen(false)}>
                                     Cancel

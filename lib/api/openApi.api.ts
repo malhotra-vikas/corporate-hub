@@ -8,12 +8,16 @@ export default class OpenAiApi extends BaseApi {
     super();
   }
 
-  async completion(messages: any[], instruction: string) {
+  async completion(messages: any[], instruction: string, model: string = MODEL_DEFAULT) {
     try {
+      const gptModel: string = model || MODEL_DEFAULT; // Ensure `string` type
+
+      console.log("Model being used is ", gptModel)
+
       const data = await OpenAiApi.post(
         "https://api.openai.com/v1/chat/completions",
         {
-          model: MODEL_DEFAULT,
+          model: gptModel,
           top_p: 0.88,
           temperature: 0.7,
           max_completion_tokens: 10000,

@@ -41,7 +41,7 @@ export function MainNav() {
                 <div className="container flex h-16 items-center">
                     {/* Logo */}
                     <Link href="/" className="flex items-center space-x-2">
-                        <img src="/airhub-logo.png" alt="AiirHub" className="h-12 w-auto" />
+                        <img src="/airhub-logo-current.png" alt="AiirHub" className="h-12 w-auto" />
                         <span className="font-bold text-xl">{themeConfig.name}</span>
                     </Link>
 

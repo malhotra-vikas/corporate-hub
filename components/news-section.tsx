@@ -50,8 +50,8 @@ export function NewsSection({ data, isLoading = false, isTwitterConnected = fals
 
         // Mock social media accounts
         const socialAccounts = [
-            { id: "Twitter", name: "Twitter" },
-            { id: "LinkedIn", name: "LinkedIn" },
+            { id: "Twitter", name: "Twitter" }
+            //{ id: "LinkedIn", name: "LinkedIn" },
         ]
 
         const toggleAccountSelection = (id: string) => {

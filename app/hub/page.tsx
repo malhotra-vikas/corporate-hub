@@ -504,6 +504,7 @@ export default function HubPage() {
                                     <span>{loading ? "Connecting..." : "Connect Twitter"}</span>
                                 </Button>
                             )}
+{/*
                             {isLinkedInConnected ? (
                                 <div className="flex items-center gap-1 text-green-600 text-xs font-medium">
                                     <CheckCircle className="w-4 h-4" />
@@ -518,7 +519,8 @@ export default function HubPage() {
                                     <Linkedin className="w-5 h-5" />
                                     <span>{loading ? "Connecting..." : "Connect LinkedIn"}</span>
                                 </Button>
-                            )}                            
+                            )}  
+ Hide for now */}                                
                         </CardTitle>
 
                     </CardHeader>
@@ -538,7 +540,7 @@ export default function HubPage() {
                                 { key: "industry-news", data: hubData.industryNews },
                             ].map(({ key, data }) => (
                                 <TabsContent key={key} value={key} className="pt-4">
-                                    <NewsSection data={data} isLoading={isLoading} isTwitterConnected={isTwitterConnected} isLinkedConnected={isLinkedInConnected}/>
+                                    <NewsSection data={data} isLoading={isLoading} isTwitterConnected={isTwitterConnected} isLinkedInConnected={isLinkedInConnected} />
                                 </TabsContent>
                             ))}
                         </Tabs>

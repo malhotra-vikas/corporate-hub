@@ -1,10 +1,8 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { getFiles, uploadFile as apiUploadFile, deleteFiles as apiDeleteFiles } from "@/lib/api/vault"
-import type { File } from "@/lib/types"
-
-export { getFiles }
+import { uploadFile as apiUploadFile, deleteFiles as apiDeleteFiles } from "@/lib/api/vault"
+import { File } from "@/lib/types"
 
 export async function uploadFile(formData: FormData) {
   const file = formData.get("file")

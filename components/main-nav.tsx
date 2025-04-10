@@ -86,6 +86,19 @@ export function MainNav() {
                                             </NavigationMenuLink>
                                         </Link>
                                     </NavigationMenuItem>
+                                    <NavigationMenuItem>
+                                        <Link href="/iframegpt" legacyBehavior passHref>
+                                            <NavigationMenuLink
+                                                className={cn(
+                                                    "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-[#0196FD] focus:text-white hover:bg-[#0196FD] hover:text-white h-10 py-2 px-4 group",
+                                                    pathname === "/iframegpt" ? "bg-[#0196FD]" : "bg-transparent"
+                                                )}
+                                            >
+                                                AIIRGPT
+                                            </NavigationMenuLink>
+                                        </Link>
+                                    </NavigationMenuItem>                                    
+
                                 </>
                             ) : (
                                 <>

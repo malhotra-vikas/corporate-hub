@@ -6,6 +6,7 @@ import { auth } from "@/lib/firebase"
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
 import UserApi from "@/lib/api/user.api"
 import VaultApi from "@/lib/api/vault.api"
+import Cookies from 'js-cookie';
 
 type UserRole = "admin" | "companyUser"
 
@@ -91,9 +92,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setUser(localUser)
 
                 console.log("My User Data from getUsr ", localUser)
+                // Store the fireBaseUid in localStorage or cookies
+
+                localStorage.setItem('uuid', firebaseUser.uid); // Storing in localStorage
+                // Store in cookies (expires in 7 days)
+                
 
             } else {
                 setUser(null)
+                localStorage.removeItem('uuid'); // Remove from localStorage on sign-out
+                Cookies.remove('uuid')
             }
             setLoading(false)
         })
@@ -135,17 +143,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const token = await auth.currentUser?.getIdToken()
             setUser((prevUser) => (prevUser ? { ...prevUser, token } : null))
 
-            //const companyFilings = await fetchCompanyPastDocuments(loginResponse.data.user_info.companyTicker)
-
-            // Send 10K docs
-            //await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past10KDocuments, loginResponse.data.user_info._id)
-
-            // Send 10Q docs
-            //await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past10QDocuments, loginResponse.data.user_info._id)
-            // Send 8K docs
-            //await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.past8KDocuments, loginResponse.data.user_info._id)
-            // Send S1 docs
-            //await vaultApi.uploadComppanyHistoricDocuments(companyFilings?.pastS1Documents, loginResponse.data.user_info._id)
+            localStorage.setItem('uuid', localUser._id); // Storing in localStorage            
+            
 
         } catch (error) {
             console.error("Error signing in:", error)
@@ -216,6 +215,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(localUser)
             const token = await auth.currentUser?.getIdToken()
             setUser((prevUser) => (prevUser ? { ...prevUser, token } : null))
+
+            localStorage.setItem('uuid', localUser._id); // Storing in localStorage
+
         } catch (error) {
             console.error("Error signing up:", error)
             if (error instanceof Error) {
@@ -234,11 +236,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await auth.signOut()
         setUser(null)
         localStorage.removeItem('userData');  // Optionally clear any persistent session data
+        localStorage.removeItem('uuid'); // Cleanig in localStorage
+
+
+
         console.log("User signed out successfully");
     }
 
     const getToken = async () => {
-        if (user && user.token) {
+        if (user?.token) {
             return user.token
         }
         const token = await auth.currentUser?.getIdToken()
@@ -254,67 +260,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 }
 
 export const useAuth = () => useContext(AuthContext)
-
-
-
-/*
-function getLastTwoYearsRange() {
-    // Get the current year
-    const currentYear = new Date().getFullYear();
-
-    // Get the current date
-    const currentDate = new Date();
-
-    // Start date: January 1st, two years ago
-    const startDate = new Date(currentDate.getFullYear() - 2, 0, 1); // January 1st of two years ago
-
-    // End date: Today
-    const endDate = currentDate;
-
-    // Format the dates to "YYYY-MM-DD"
-    const formatDate = (date) => date.toISOString().split('T')[0];
-
-    // Return the formatted string
-    return `[${formatDate(startDate)} TO ${formatDate(endDate)}]`;
-}
-
-
-async function fetchCompanyPastDocuments(ticker: string) {
-    try {
-
-        const DOCUMENT_8_K = "8-K"
-        const DOCUMENT_10_Q = "10-Q"
-        const DOCUMENT_10_K = "10-K"
-        const DOCUMENT_S1 = "S1"
-
-        const vaultApi = new VaultApi()
-        const duration = getLastTwoYearsRange()
-        const past10KDocs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_10_K, duration })
-        const past10QDocs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_10_Q, duration })
-        const past8KDocs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_8_K, duration })
-        const pastS1Docs = await vaultApi.fetchCompanyPastDocuments({ ticker: ticker, fileType: DOCUMENT_S1, duration })
-
-
-        const past10KDocuments = past10KDocs?.data || null
-        const past8KDocuments = past8KDocs?.data || null
-        const pastS1Documents = pastS1Docs?.data || null
-        const past10QDocuments = past10QDocs?.data || null
-
-        console.log(" duration is ", duration)
-        console.log(" past10KDocs is ", past10KDocuments)
-        console.log(" past10QDocs is ", past10QDocuments)
-        console.log(" past8KDocs is ", past8KDocuments)
-        console.log(" pastS1Docs is ", pastS1Documents)
-
-        return {
-            past10KDocuments: past10KDocuments,
-            past8KDocuments: past8KDocuments,
-            pastS1Documents: pastS1Documents,
-            past10QDocuments: past10QDocuments
-        }
-
-    } catch (error) {
-        console.error("Error fetching company details:", error)
-    }
-}
-*/

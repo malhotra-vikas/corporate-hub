@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app"
-import { getAuth } from "firebase/auth"
+import { browserLocalPersistence, getAuth, setPersistence } from "firebase/auth"
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,11 +14,21 @@ console.log("Firebase confifgs ", firebaseConfig)
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
 
-console.log("Firebase app ", app)
+console.log("Firebase app initialized ", app);
 
 const auth = getAuth(app)
 
-console.log("Firebase auth ", auth)
+console.log("Firebase auth instance ", auth);
+
+// Set persistence to LOCAL so that the authentication session is saved across tabs/subdomains
+setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+        // Firebase auth persistence successfully set
+        console.log("Firebase auth persistence set to LOCAL");
+    })
+    .catch((error) => {
+        console.error("Error setting Firebase auth persistence: ", error);
+    });
 
 export { auth }
 

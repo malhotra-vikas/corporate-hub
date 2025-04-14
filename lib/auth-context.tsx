@@ -57,9 +57,19 @@ const AuthContext = createContext<AuthContextType>({
     getToken: async () => null,
 })
 
+
 const setCookie = (name: string, value: string, days: number) => {
-    Cookies.set(name, value, { expires: days, path: '', secure: true, sameSite: 'Lax' });
+    const isLocalhost = window.location.hostname.includes('localhost');
+
+    Cookies.set(name, value, {
+        expires: days,
+        path: '/',
+        domain: isLocalhost ? 'localhost' : '.aiirhub.com', // Use 'localhost' for local testing
+        secure: true,
+        sameSite: 'Lax',
+    });
 };
+
 
 
 const getCookie = (name: string) => {

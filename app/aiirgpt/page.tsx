@@ -47,6 +47,8 @@ const ChatPage: React.FC = () => {
 
     useEffect(() => {
         if (user && !loading) {
+            console.log('User object before calling IFrame:', user);  // Log the entire user object
+
             const iframe = document.getElementById('chatIframe') as HTMLIFrameElement;
             const firebaseToken = Cookies.get("firebase_uuid");
             const userId = user?._id;

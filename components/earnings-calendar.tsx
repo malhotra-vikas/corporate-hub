@@ -15,6 +15,8 @@ import { useAuth } from "@/lib/auth-context"
 export function EarningsCalendar({ events, isLoading = false }: EarningsCalendarProps) {
     const { user, loading } = useAuth()
 
+    console.log("In Earnings User is - ", user)
+
     if (!user?.email) {
         throw "no user found"
     }
@@ -44,7 +46,7 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
         Cookies.set("sentInvites", JSON.stringify(sentInvites), { expires: 365 }) // Save for 7 days
     }, [sentInvites])
 
-    console.log("XXX Events ", events)
+    //console.log("XXX Events ", events)
     const sortedEvents = [...events]
         .reduce((acc, event) => {
             const existingEvent = acc.find((e) => e.symbol === event.symbol)
@@ -56,7 +58,7 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
         }, [] as EarningsEvent[])
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
-    console.log("YYY Events ", sortedEvents)
+    //console.log("YYY Events ", sortedEvents)
 
     const CalendarItem = ({ event }: { event: EarningsEvent }) => {
         const date = parseISO(event.date)

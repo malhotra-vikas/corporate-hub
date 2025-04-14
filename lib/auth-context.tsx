@@ -66,7 +66,7 @@ const setCookie = (name: string, value: string, days: number) => {
         path: '/',
         domain: isLocalhost ? 'localhost' : '.aiirhub.com', // Use 'localhost' for local testing
         secure: true,
-        sameSite: 'Lax',
+        sameSite: 'None',
     });
 };
 

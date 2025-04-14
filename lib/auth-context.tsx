@@ -57,6 +57,15 @@ const AuthContext = createContext<AuthContextType>({
     getToken: async () => null,
 })
 
+const setCookie = (name: string, value: string, days: number) => {
+    Cookies.set(name, value, { expires: days, path: '', secure: true, sameSite: 'Lax' });
+};
+
+
+const getCookie = (name: string) => {
+    return Cookies.get(name)
+}; 
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
@@ -88,20 +97,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     role: userData.role || "companyUser",
                     _id: userData._id,
                     token: token,
+                    aiirgptUserId: userData.aiirgptUserId
                 }
                 setUser(localUser)
 
-                console.log("My User Data from getUsr ", localUser)
+                //console.log("My User Data from getUsr ", localUser)
                 // Store the fireBaseUid in localStorage or cookies
 
-                localStorage.setItem('uuid', firebaseUser.uid); // Storing in localStorage
-                // Store in cookies (expires in 7 days)
-                
+                localStorage.setItem('firebase_uuid', firebaseUser.uid); // Storing in localStorage
+                localStorage.setItem('localuser_uuid', userData.aiirgptUserId); // Storing in localStorage
+
+                setCookie('firebase_uuid', firebaseUser.uid, 7); // Store for 7 days
+                setCookie('localuser_uuid', userData.aiirgptUserId, 7); // Store for 7 days
+                setCookie('firebase_full_token', token, 7); // Store for 7 days
+
+                console.log("Auth Changed - Stored cookies for localuser_uuid ", getCookie("localuser_uuid"))
+                console.log("Auth Changed - Logged in user - localuser_uuid ", userData.aiirgptUserId)
 
             } else {
                 setUser(null)
+                localStorage.removeItem('firebase_uuid'); // Remove from localStorage on sign-out
+                localStorage.removeItem('localuser_uuid'); // Remove from localStorage on sign-out
+
+                Cookies.remove("firebase_uuid")
+                Cookies.remove("localuser_uuid")
+
                 localStorage.removeItem('uuid'); // Remove from localStorage on sign-out
                 Cookies.remove('uuid')
+
             }
             setLoading(false)
         })
@@ -137,13 +160,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 is_verified: loginResponse.data.user_info.is_verified,
                 role: loginResponse.data.role || "companyUser",
                 _id: loginResponse.data._id,
+                aiirgptUserId: loginResponse.data.aiirgptUserId
             }
 
             setUser(localUser)
             const token = await auth.currentUser?.getIdToken()
             setUser((prevUser) => (prevUser ? { ...prevUser, token } : null))
 
-            localStorage.setItem('uuid', localUser._id); // Storing in localStorage            
+            localStorage.setItem('firebase_uuid', firebaseUser.uid!); // Storing in localStorage
+            localStorage.setItem('localuser_uuid', loginResponse.data.user_info.aiirgptUserId); // Storing in localStorage
+
+            setCookie('firebase_uuid', firebaseUser.uid!, 7); // Store for 7 days
+            setCookie('localuser_uuid', loginResponse.data.user_info.aiirgptUserId, 7); // Store for 7 days
+            setCookie('firebase_full_token', token, 7); // Store for 7 days
+
+            //localStorage.setItem('fbuuid', firebaseUser.uid); // Storing in localStorage
+            localStorage.setItem('uuid', localUser._id); // Storing in localStorage
+            console.log("Logged in user - localuser_uuid ", loginResponse.data.user_info.aiirgptUserId)
             
 
         } catch (error) {
@@ -210,13 +243,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 photoURL: createUserResponse.data.photoURL,
                 role: createUserResponse.data.role || "companyUser",
                 _id: createUserResponse.data._id,
+                aiirgptUserId: createUserResponse.data.aiirgptUserId
             }
 
             setUser(localUser)
             const token = await auth.currentUser?.getIdToken()
             setUser((prevUser) => (prevUser ? { ...prevUser, token } : null))
 
+            localStorage.setItem('firebase_uuid', firebaseUser.uid!); // Storing in localStorage
+            localStorage.setItem('localuser_uuid', createUserResponse.data.aiirgptUserId); // Storing in localStorage
+
+            setCookie('firebase_uuid', firebaseUser.uid!, 7); // Store for 7 days
+            setCookie('localuser_uuid', createUserResponse.data.aiirgptUserId, 7); // Store for 7 days
+
+            //localStorage.setItem('fbuuid', firebaseUser.uid); // Storing in localStorage
             localStorage.setItem('uuid', localUser._id); // Storing in localStorage
+
+            console.log("SignUp user - localuser_uuid ", createUserResponse.data.aiirgptUserId)
 
         } catch (error) {
             console.error("Error signing up:", error)
@@ -237,8 +280,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null)
         localStorage.removeItem('userData');  // Optionally clear any persistent session data
         localStorage.removeItem('uuid'); // Cleanig in localStorage
+        //localStorage.removeItem('fbuuid'); // Cleanig in localStorage
 
+        localStorage.removeItem('firebase_uuid'); // Remove from localStorage on sign-out
+        localStorage.removeItem('localuser_uuid'); // Remove from localStorage on sign-out
 
+        Cookies.remove("firebase_uuid")
+        Cookies.remove("localuser_uuid")
 
         console.log("User signed out successfully");
     }

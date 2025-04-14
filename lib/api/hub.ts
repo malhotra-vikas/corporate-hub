@@ -42,7 +42,7 @@ export default class HubApi extends BaseApi {
     }  
   
     async buildNews(newsData: any) {
-        console.log("newsData is ", newsData);
+        //console.log("newsData is ", newsData);
 
         if (!newsData || !Array.isArray(newsData)) {
             console.error("Error: newsData is undefined or not an array", newsData);
@@ -204,17 +204,17 @@ export default class HubApi extends BaseApi {
 
 
         const compNews = await serpApi.getCompanyCompetitorNews(competitorNames)
-        console.log("compNews are ", compNews.data);
+        //console.log("compNews are ", compNews.data);
 
         const trackerNews = await serpApi.getCompanyTrackerNews(companyName, companyTicker)
-        console.log("trackerNews are ", trackerNews.data);
+        //console.log("trackerNews are ", trackerNews.data);
 
 
         const trendNews = await serpApi.getTrendingNews()
-        console.log("trendNews are ", trendNews.data);
+        //console.log("trendNews are ", trendNews.data);
 
         const indNews = await serpApi.getCompanyIndustryNews(companyIndustry)
-        console.log("indNews are ", indNews.data);
+        //console.log("indNews are ", indNews.data);
 
 
         // Build competitors from the given data

@@ -3,6 +3,7 @@ import BaseApi from "./_baseApi";
 
 export default class AiirGPTApi extends BaseApi {
   getHistory(body: any): (key?: import("swr").Arguments) => boolean {
+    console.log("Callig History")
     throw new Error('Method not implemented.');
   }
   baseUrl: string = "aiirgpt/";

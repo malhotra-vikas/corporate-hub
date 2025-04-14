@@ -14,11 +14,11 @@ export const Overview = () => {
       transition={{ delay: 0.5 }}
     >
       <div className="rounded-xl p-6 flex flex-col gap-8 leading-relaxed text-center max-w-xl">
-        <p className="flex flex-row justify-center gap-4 items-center">
-          <VercelIcon size={32} />
-          <span>+</span>
-          <MessageIcon size={32} />
-        </p>
+      <img 
+            src="/favicon.ico" 
+            alt="Favicon" 
+            className="w-8 h-8"  // Adjust the size as needed
+          />
       </div>
     </motion.div>
   );

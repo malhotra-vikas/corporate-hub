@@ -86,14 +86,14 @@ export default class BaseApi {
   static async post(url: string, body: any, config?: AxiosRequestConfig) {
     BaseApi.setInterceptor();
     const finalConfig = await BaseApi.mergeRequestConfig(config); // ✅ Await here
-    console.log("POST - calling backend at ", url);
+    //console.log("POST - calling backend at ", url);
     return axios.post(url, body, finalConfig);
   }
 
   static async get(url: string, config?: AxiosRequestConfig) {
     BaseApi.setInterceptor();
     const finalConfig = await BaseApi.mergeRequestConfig(config); // ✅ Await here
-    console.log("GET - calling backend at ", url);
+    //console.log("GET - calling backend at ", url);
 
     return axios.get(url, finalConfig);
   }
@@ -101,7 +101,7 @@ export default class BaseApi {
   static async patch(url: string, body: any, config?: AxiosRequestConfig) {
     BaseApi.setInterceptor();
     const finalConfig = await BaseApi.mergeRequestConfig(config); // ✅ Await here
-    console.log("PATCH - calling backend at ", url);
+    //console.log("PATCH - calling backend at ", url);
 
     return axios.patch(url, body, finalConfig);
   }
@@ -109,7 +109,7 @@ export default class BaseApi {
   static async put(url: string, body: any, config?: AxiosRequestConfig) {
     BaseApi.setInterceptor();
     const finalConfig = await BaseApi.mergeRequestConfig(config); // ✅ Await here
-    console.log("PUT - calling backend at ", url);
+    //console.log("PUT - calling backend at ", url);
 
     return axios.put(url, body, finalConfig);
   }
@@ -118,7 +118,7 @@ export default class BaseApi {
     BaseApi.setInterceptor();
     const finalConfig = await BaseApi.mergeRequestConfig(config); // ✅ Await here
     if (body) finalConfig.data = body;
-    console.log("DELETE - calling backend at ", url);
+    //console.log("DELETE - calling backend at ", url);
 
     return axios.delete(url, finalConfig);
   }

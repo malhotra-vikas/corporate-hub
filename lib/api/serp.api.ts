@@ -65,13 +65,13 @@ export default class SerpApi extends BaseApi {
     // Construct the query string using the comma-separated tickers
     const queryString = `companyIndustry=${companyIndustry}`;
 
-    console.log("IN getCompanyIndustryNews queryString is ", queryString)
+    //console.log("IN getCompanyIndustryNews queryString is ", queryString)
 
     const news = await SerpApi.get(
       `${this.baseUrl}getCompanyIndustryNews?${queryString}`,
     );
 
-    console.log("IN getCompanyIndustryNews news is ", news)
+    //console.log("IN getCompanyIndustryNews news is ", news)
     return news;
 
 

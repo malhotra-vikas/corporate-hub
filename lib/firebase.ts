@@ -10,15 +10,15 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-console.log("Firebase confifgs ", firebaseConfig)
+console.log("Firebase confifgs loaded")
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
 
-console.log("Firebase app initialized ", app);
+console.log("Firebase app initialized ");
 
 const auth = getAuth(app)
 
-console.log("Firebase auth instance ", auth);
+console.log("Firebase auth instance created ");
 
 // Set persistence to LOCAL so that the authentication session is saved across tabs/subdomains
 setPersistence(auth, browserLocalPersistence)

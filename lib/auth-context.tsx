@@ -121,6 +121,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setCookie('localuser_uuid', userData.aiirgptUserId, 7); // Store for 7 days
                 setCookie('firebase_full_token', token, 7); // Store for 7 days
 
+                Cookies.remove("chat-model")
+
                 console.log("Auth Changed - Stored cookies for localuser_uuid ", getCookie("localuser_uuid"))
                 console.log("Auth Changed - Logged in user - localuser_uuid ", userData.aiirgptUserId)
 
@@ -131,6 +133,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                 Cookies.remove("firebase_uuid")
                 Cookies.remove("localuser_uuid")
+
+                Cookies.remove("chat-model")
+
 
                 localStorage.removeItem('uuid'); // Remove from localStorage on sign-out
                 Cookies.remove('uuid')
@@ -183,6 +188,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setCookie('firebase_uuid', firebaseUser.uid!, 7); // Store for 7 days
             setCookie('localuser_uuid', loginResponse.data.user_info.aiirgptUserId, 7); // Store for 7 days
             setCookie('firebase_full_token', token, 7); // Store for 7 days
+
+            Cookies.remove("chat-model")
 
             //localStorage.setItem('fbuuid', firebaseUser.uid); // Storing in localStorage
             localStorage.setItem('uuid', localUser._id); // Storing in localStorage
@@ -266,6 +273,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setCookie('firebase_uuid', firebaseUser.uid!, 7); // Store for 7 days
             setCookie('localuser_uuid', createUserResponse.data.aiirgptUserId, 7); // Store for 7 days
 
+            Cookies.remove("chat-model")
+
             //localStorage.setItem('fbuuid', firebaseUser.uid); // Storing in localStorage
             localStorage.setItem('uuid', localUser._id); // Storing in localStorage
 
@@ -297,6 +306,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         Cookies.remove("firebase_uuid")
         Cookies.remove("localuser_uuid")
+
+        Cookies.remove("chat-model")
 
         console.log("User signed out successfully");
     }

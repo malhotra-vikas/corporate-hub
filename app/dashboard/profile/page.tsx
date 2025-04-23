@@ -10,6 +10,7 @@ import { RichTextEditor } from "@/components/rich-text-editor"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { FileUpload } from "@/components/file-upload"
 import { useAuth } from "@/lib/auth-context"
+import { TrashIcon } from "@radix-ui/react-icons"
 
 // Add this import for the API calls
 import UserApi from "@/lib/api/user.api"
@@ -33,7 +34,8 @@ export default function ProfilePage() {
   })
 
   const userApi = new UserApi()
-  
+  const [memories, setMemories] = useState<string[]>([])
+
   const [isLoading, setIsLoading] = useState(true)
   const { user } = useAuth()
 
@@ -45,11 +47,16 @@ export default function ProfilePage() {
       if (user) {
         try {
           companyUser = await userApi.getClientByEmail(user.email)
-          
+
           setProfile((prevProfile) => ({
             ...prevProfile,
             ...companyUser
           }))
+          const memResult = await userApi.getUserMemories(user.aiirgptUserId)
+
+          console.log("User Memories are ", memResult.data.userMemories)
+          setMemories(memResult.data.userMemories || [])
+
         } catch (error) {
           console.error("Error fetching profile:", error)
           toast.error("Failed to load profile data")
@@ -62,6 +69,16 @@ export default function ProfilePage() {
     loadProfile()
   }, [user])
 
+  function cleanMemoryText(value: string): string {
+    try {
+      const parsed = JSON.parse(value);
+      return typeof parsed === 'string' ? parsed : value;
+    } catch {
+      // If not JSON, strip 'New memory:' if present
+      return value.replace(/^New memory( could be)?:\s*/i, '').replace(/^"|"$/g, '');
+    }
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setProfile((prev) => ({ ...prev, [name]: value }))
@@ -71,6 +88,26 @@ export default function ProfilePage() {
     setProfile((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleDeleteMemory = async (memoryId: string) => {
+
+    console.log("memoryId being ased to delete ", memoryId)
+    try {
+      if (user) {
+        console.log("Deleting memoryId:", memoryId);
+
+        await userApi.deleteMemory(memoryId)
+        setMemories((prev) => {
+          console.log("Existing IDs:", prev.map((m) => m.id));
+          return prev.filter((m) => m.id !== memoryId);
+        });
+
+        toast.success("Memory deleted")
+      }
+    } catch (err) {
+      console.error("Error deleting memory", err)
+      toast.error("Failed to delete memory")
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -220,6 +257,38 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>AIIRGPT Memories</CardTitle>
+          <CardDescription>AIIRGPT memories for this user. These are used to personalize AIIRGPT's responses.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {memories.length === 0 ? (
+            <p className="text-muted-foreground">No memories found.</p>
+          ) : (
+            <ul className="space-y-2">
+              {memories.map((memory) => (
+
+                <li
+                  key={memory.id}
+                  className="flex items-center justify-between border rounded-md p-2"
+                >
+                  <span className="truncate">{cleanMemoryText(memory.memory)}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteMemory(memory.id)}
+                  >
+                    <TrashIcon className="h-4 w-4 text-red-500" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardFooter>

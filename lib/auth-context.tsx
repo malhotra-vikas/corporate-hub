@@ -37,6 +37,7 @@ interface User {
     is_verified: boolean,
     role: UserRole
     token?: string
+    aiirgptUserId?: string
 }
 
 interface AuthContextType {

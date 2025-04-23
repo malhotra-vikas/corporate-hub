@@ -12,6 +12,29 @@ export default class UserApi extends BaseApi {
     super();
   }
 
+  async getUserMemories(gptid: string) {
+    //const url = `${this.baseUrl}memories`
+    //const res = await fetch(`${url}?gptid=${encodeURIComponent(gptid)}`)
+
+    const data = await UserApi.get(`${this.baseUrl}memories/${gptid}`);
+    return data;
+  }
+
+  // For deletion
+  async deleteMemory(memoryId: string): Promise<void> {
+
+    console.log("memoryId being deleted in userAPI ", memoryId)
+
+    try {
+      const data = await UserApi.delete(
+        `${this.baseUrl}deleteMemory`,
+        { id: memoryId },
+      );
+    } catch (error) {
+      console.log("memoryId being deleted ERROR ", error)
+
+    }
+  }
 
   async sendEarningCalenderInvite(dto: { email: string; symbol: string; date: Date; }) {
 
@@ -20,7 +43,7 @@ export default class UserApi extends BaseApi {
     const data = await UserApi.post(`${this.baseUrl}sendEarningCalenderInvite`, {
       ...dto,
       date: dto.date.toISOString() // ✅ Convert Date to ISO String before sending
-  });
+    });
 
     return data;
   }
@@ -90,7 +113,7 @@ export default class UserApi extends BaseApi {
   async updateUserByEmail(payload: CreateUserDto) {
     const data = await UserApi.post(`${this.baseUrl}update-user-by-email`, payload);
     return data;
-  }  
+  }
 
   async updateAdminInstruction(payload: {
     user_id: string;

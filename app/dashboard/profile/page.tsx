@@ -101,7 +101,7 @@ export default function ProfilePage() {
           return prev.filter((m) => m.id !== memoryId);
         });
 
-        toast.success("Memory deleted")
+        toast.success("Memories Updated")
       }
     } catch (err) {
       console.error("Error deleting memory", err)

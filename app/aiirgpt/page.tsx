@@ -17,6 +17,14 @@ const sendAuthInfoToIframe = async (iframe: HTMLIFrameElement, firebaseToken: st
             ? 'http://localhost:3000' // For development on localhost (match iframe port)
             : 'https://aiirhub.com'; // In production, send to the production domain
 
+
+        /*        
+                const targetOrigin = window.location.hostname === 'localhost'
+                    ? 'http://localhost:3000' // For development on localhost (match iframe port)
+                    : 'https://aiirgpt.aiirhub.com'; // In production, send to the production domain
+                const iframeOrigin = new URL(iframe.src).origin; // Get the iframe's origin (e.g., https://aiirgpt.aiirhub.com)
+        */
+
         console.log('Sending firebaseToken message to iframe:', firebaseToken); // Log the token being sent
         console.log('Sending useridtoken message to iframe:', userId); // Log the token being sent
 
@@ -29,6 +37,7 @@ const sendAuthInfoToIframe = async (iframe: HTMLIFrameElement, firebaseToken: st
         //setCookie('useridtoken', userId, 7); // Store for 7 days
 
         iframe.contentWindow.postMessage({ type: 'auth', firebaseToken }, targetOrigin); // Send to correct target origin
+        //iframe.contentWindow.postMessage({ type: 'auth', firebaseToken, userId }, targetOrigin); // Send to correct target origin
     } else {
         console.error('Iframe not loaded or iframe.contentWindow is null');
     }
@@ -68,6 +77,7 @@ const ChatPage: React.FC = () => {
                 id="chatIframe"
                 src={aiirGptUrl}
                 title="AiirGPT"
+                allow="clipboard-write"
                 style={{
                     position: 'absolute',
                     top: 0,

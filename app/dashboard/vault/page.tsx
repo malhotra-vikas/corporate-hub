@@ -268,7 +268,7 @@ export default function VaultPage() {
                     </div>
                   </TableCell>
                   <TableCell>{file.docType}</TableCell>
-                  <TableCell>{file.createdAt ? new Date(file.createdAt).toLocaleDateString() : "N/A"}</TableCell>
+                  <TableCell>{file.uploadedDate ? new Date(file.uploadedDate).toLocaleDateString() : "N/A"}</TableCell>
                   <TableCell>
                     <form onSubmit={handleDeleteFiles}>
                       <input type="hidden" name="fileIds" value={file._id} />

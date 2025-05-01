@@ -59,7 +59,7 @@ export default function ProfilePage() {
 
         } catch (error) {
           console.error("Error fetching profile:", error)
-          toast.error("Failed to load profile data")
+          //toast.error("Failed to load profile data")
         } finally {
           setIsLoading(false)
         }

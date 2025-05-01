@@ -39,16 +39,33 @@ export default function VaultPage() {
 
   const filteredFiles = useMemo(() => {
     console.log("Filtering files with search:", search)
-    const filtered = files.filter(
+
+    let filtered = files.filter(
       (file) =>
         (file.originalName && file.originalName.toLowerCase().includes(search.toLowerCase())) ||
         (file.docType && file.docType.toLowerCase().includes(search.toLowerCase())) ||
         (file.mimetype && file.mimetype.toLowerCase().includes(search.toLowerCase())) ||
         (file.uploadedDate && file.uploadedDate.toLowerCase().includes(search.toLowerCase()))
-      )
+    )
+
+    // Apply sorting
+    filtered = filtered.sort((a, b) => {
+      const valA = (a as any)[sort]
+      const valB = (b as any)[sort]
+
+      if (!valA || !valB) return 0
+
+      const aVal = typeof valA === "string" ? valA.toLowerCase() : valA
+      const bVal = typeof valB === "string" ? valB.toLowerCase() : valB
+
+      if (aVal < bVal) return order === "asc" ? -1 : 1
+      if (aVal > bVal) return order === "asc" ? 1 : -1
+      return 0
+    })
+
     console.log("Filtered files count:", filtered.length)
     return filtered
-  }, [files, search])
+  }, [files, search, sort, order])
 
   const paginatedFiles = useMemo(() => {
     return filteredFiles.slice((page - 1) * 10, page * 10)
@@ -117,7 +134,7 @@ export default function VaultPage() {
       files = files.sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )
-      
+
       console.log("Loaded files count:", files.length)
 
       setFiles(files)
@@ -179,6 +196,11 @@ export default function VaultPage() {
     return <div>Loading...</div>
   }
 
+  const renderSortIcon = (column: string) => {
+    if (sort !== column) return null
+    return <span className="ml-1">{order === "asc" ? "▲" : "▼"}</span>
+  }
+
   return (
     <div className="space-y-6">
       <header className="text-center mb-8">
@@ -214,18 +236,18 @@ export default function VaultPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>
-                  <Link href="#" onClick={() => toggleSort("name")} className="flex items-center">
-                    File Name
+                  <Link href="#" onClick={() => toggleSort("originalName")} className="flex items-center">
+                    File Name {renderSortIcon("originalName")}
                   </Link>
                 </TableHead>
                 <TableHead>
-                  <Link href="#" onClick={() => toggleSort("size")} className="flex items-center">
-                    Document Type
+                  <Link href="#" onClick={() => toggleSort("docType")} className="flex items-center">
+                    Document Type {renderSortIcon("docType")}
                   </Link>
                 </TableHead>
                 <TableHead>
-                  <Link href="#" onClick={() => toggleSort("uploadDate")} className="flex items-center">
-                    Uploaded
+                  <Link href="#" onClick={() => toggleSort("uploadedDate")} className="flex items-center">
+                    Uploaded {renderSortIcon("uploadedDate")}
                   </Link>
                 </TableHead>
                 <TableHead>Actions</TableHead>

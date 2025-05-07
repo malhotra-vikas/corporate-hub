@@ -46,16 +46,21 @@ export default function ProfilePage() {
     const loadProfile = async () => {
       if (user) {
         try {
-          companyUser = await userApi.getClientByEmail(user.email)
+          companyUser = await userApi.getClientByEmail(user.email!)
 
           setProfile((prevProfile) => ({
             ...prevProfile,
             ...companyUser
           }))
-          const memResult = await userApi.getUserMemories(user.aiirgptUserId)
+          const memResult = await userApi.getUserMemories(user.aiirgptUserId!)
 
-          console.log("User Memories are ", memResult.data.userMemories)
-          setMemories(memResult.data.userMemories || [])
+          const sortedMemories = [...(memResult.data.userMemories || [])].sort(
+            (a, b) => new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime()
+          );
+  
+  
+          console.log("User Memories are ", sortedMemories)
+          setMemories(sortedMemories || [])
 
         } catch (error) {
           console.error("Error fetching profile:", error)

@@ -87,6 +87,11 @@ export default function HubPage() {
     const companyTickerRef = useRef<string>("");
     const companyExchangeRef = useRef<string>("");
 
+    const [loadingCompany, setLoadingCompany] = useState(false)
+    const [loadingCompetitors, setLoadingCompetitors] = useState(false)
+    const [loadingNews, setLoadingNews] = useState(false)
+    const [loadingEarnings, setLoadingEarnings] = useState(false)
+
     const userApi = new UserApi()
     const earningsApi = new EarningsApi()
 
@@ -252,6 +257,30 @@ export default function HubPage() {
         localStorage.removeItem(key)
     }
 
+    const refreshSection = async (key: string, ttl: number, field: keyof typeof hubData) => {
+        const cached = localStorage.getItem(key)
+        const expired = !cached || Date.now() - JSON.parse(cached).timestamp > ttl
+        if (!expired) return
+
+        const ticker = companyTickerRef.current
+        const exchange = companyExchangeRef.current
+        if (!ticker || !exchange) return
+
+        const userInfo = await userApi.getClientByEmail(user?.email || "")
+        const latest = await fetchHubData(ticker, exchange, userInfo)
+
+        const newValue = latest[field]
+        localStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), data: newValue }))
+        setHubData(prev => prev ? { ...prev, [field]: newValue } : null)
+        console.log(`🔄 Refreshed ${field} from server.`)
+
+        if (field === "company") setLoadingCompany(false)
+        if (field === "competitors") setLoadingCompetitors(false)
+        if (field === "companyNews") setLoadingNews(false)
+        if (field === "earningsCalendar") setLoadingEarnings(false)
+
+    }
+
     useEffect(() => {
         if (!user?.email || !user._id) return
 
@@ -300,10 +329,10 @@ export default function HubPage() {
                 const competitorsKey = `competitors-${companyTicker}`
                 const newsKey = `news-${companyTicker}`
 
-                const cachedEarnings = getCached(earningsKey, EARNINGS_CACHE_TTL) // 24h
-                const cachedCompany = getCached(companyKey, COMPANY_CACHE_TTL) // 10s
-                const cachedCompetitors = getCached(competitorsKey, COMPETITORS_CACHE_TTL) // 10s
-                const cachedNews = getCached(newsKey, NEWS_CACHE_TTL) // 3min
+                const cachedEarnings = getCached(earningsKey, EARNINGS_CACHE_TTL)
+                const cachedCompany = getCached(companyKey, COMPANY_CACHE_TTL)
+                const cachedCompetitors = getCached(competitorsKey, COMPETITORS_CACHE_TTL)
+                const cachedNews = getCached(newsKey, NEWS_CACHE_TTL)
 
                 let hubDetails = await fetchHubData(companyTicker, companyExchange, companyUser)
 
@@ -314,29 +343,10 @@ export default function HubPage() {
 
                 setHubData(hubDetails)
 
-                if (cachedEarnings.expired) {
-                    console.log("🔁 Refreshing earnings cache...")
-                    setCached(earningsKey, hubDetails.earningsCalendar)
-                    setHubData(prev => prev ? { ...prev, earningsCalendar: hubDetails.earningsCalendar } : null)
-                }
-                if (cachedCompany.expired) {
-                    console.log("🔁 Refreshing company cache...")
-                    setCached(companyKey, hubDetails.company)
-                    setHubData(prev => prev ? { ...prev, company: hubDetails.company } : null)
-                }
-                if (cachedCompetitors.expired) {
-                    console.log("🔁 Refreshing competitors cache...")
-                    const filteredComps = interestTickers.length > 0
-                        ? hubDetails.competitors.filter(comp => interestTickers.includes(comp.symbol))
-                        : hubDetails.competitors
-                    setCached(competitorsKey, filteredComps)
-                    setHubData(prev => prev ? { ...prev, competitors: filteredComps } : null)
-                }
-                if (cachedNews.expired) {
-                    console.log("🔁 Refreshing news cache...")
-                    setCached(newsKey, hubDetails.companyNews)
-                    setHubData(prev => prev ? { ...prev, companyNews: hubDetails.companyNews } : null)
-                }
+                if (cachedEarnings.expired) setCached(earningsKey, hubDetails.earningsCalendar)
+                if (cachedCompany.expired) setCached(companyKey, hubDetails.company)
+                if (cachedCompetitors.expired) setCached(competitorsKey, hubDetails.competitors)
+                if (cachedNews.expired) setCached(newsKey, hubDetails.companyNews)
             } catch (err) {
                 console.error(err)
                 setError("Failed to load hub data. Please try again later.")
@@ -348,27 +358,14 @@ export default function HubPage() {
         loadAllData()
 
         const interval = setInterval(() => {
-            const companyTicker = companyTickerRef.current
-            const companyExchange = companyExchangeRef.current
+            setLoadingCompany(true)
+            setLoadingCompetitors(true)
+            setLoadingNews(true)
+            refreshSection(`company-${companyTickerRef.current}`, COMPANY_CACHE_TTL, "company")
+            refreshSection(`competitors-${companyTickerRef.current}`, COMPETITORS_CACHE_TTL, "competitors")
+            refreshSection(`news-${companyTickerRef.current}`, NEWS_CACHE_TTL, "companyNews")
+            refreshSection(`earnings-${companyTickerRef.current}`, EARNINGS_CACHE_TTL, "earningsCalendar")
 
-            if (!companyTicker || !companyExchange) return
-
-            const checkTTL = (key: string, ttl: number) => {
-                const cached = localStorage.getItem(key)
-                if (!cached) return true
-                const { timestamp } = JSON.parse(cached)
-                return Date.now() - timestamp > ttl
-            }
-
-            const shouldRefresh =
-                checkTTL(`company-${companyTicker}`, COMPANY_CACHE_TTL) ||
-                checkTTL(`competitors-${companyTicker}`, COMPETITORS_CACHE_TTL) ||
-                checkTTL(`news-${companyTicker}`, NEWS_CACHE_TTL)
-
-            if (shouldRefresh) {
-                console.log("🔄 Auto-refreshing expired cache...")
-                loadAllData()
-            }
         }, REFRESH_INTERVAL)
 
         return () => clearInterval(interval)

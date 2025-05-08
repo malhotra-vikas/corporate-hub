@@ -14,7 +14,7 @@ import {
     Twitter,
     Linkedin,
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useRef, useEffect, useState } from "react"
 import HubApi from "@/lib/api/hub"
 import UserApi from "@/lib/api/user.api"
 import { toast } from "react-toastify"
@@ -84,6 +84,9 @@ export default function HubPage() {
 
     const [refresh, setRefresh] = useState(0);
 
+    const companyTickerRef = useRef<string>("");
+    const companyExchangeRef = useRef<string>("");
+
     const userApi = new UserApi()
     const earningsApi = new EarningsApi()
 
@@ -91,6 +94,12 @@ export default function HubPage() {
 
     const twitterApi = new TwitterApi()
     const router = useRouter()
+
+    const EARNINGS_CACHE_TTL = Number(process.env.EARNINGS_CACHE_TTL || 1000 * 60 * 60 * 24)
+    const COMPANY_CACHE_TTL = Number(process.env.COMPANY_CACHE_TTL || 10000)
+    const COMPETITORS_CACHE_TTL = Number(process.env.COMPETITORS_CACHE_TTL || 10000)
+    const NEWS_CACHE_TTL = Number(process.env.NEWS_CACHE_TTL || 1000 * 60 * 3)
+    const REFRESH_INTERVAL = Number(process.env.REFRESH_INTERVAL || 5000)
 
     const handleAddTicker = async () => {
         if (!newTickerSymbol) return
@@ -117,6 +126,9 @@ export default function HubPage() {
 
             setNewTickerSymbol("")
             setIsAddingTicker(false)
+
+            invalidateCompetitorCache(companyTicker)
+            invalidateEarningsCache(companyTicker)
             toast.success(`Added ${newTickerSymbol} to competitors`)
         } catch (error) {
             toast.error("Failed to add competitor")
@@ -152,6 +164,9 @@ export default function HubPage() {
                 interestTickers: updatedTickers,
             }
             await userApi.updateUserByEmail(updateUser)
+            invalidateCompetitorCache(companyTicker)
+            invalidateEarningsCache(companyTicker)
+
             toast.success(`Removed ${symbol} from competitors`)
         } catch (error) {
             toast.error("Failed to remove competitor")
@@ -181,32 +196,6 @@ export default function HubPage() {
             setIsTwitterConnected(false);
         }
     };
-
-    function getCachedEarnings(companyTicker: string) {
-        const key = `earnings-${companyTicker}`;
-        const cached = localStorage.getItem(key);
-        if (!cached) return null;
-
-        const parsed = JSON.parse(cached);
-        const now = Date.now();
-
-        // Optional: expire after 24 hours
-        if (now - parsed.timestamp > 1000 * 60 * 60 * 24) {
-            localStorage.removeItem(key);
-            return null;
-        }
-
-        return parsed.data;
-    }
-
-    function setCachedEarnings(companyTicker: string, data: EarningsEvent[]) {
-        const key = `earnings-${companyTicker}`;
-        localStorage.setItem(key, JSON.stringify({
-            timestamp: Date.now(),
-            data,
-        }));
-    }
-
 
     const loadHubData = async () => {
         const companyUser = await userApi.getClientByEmail(user?.email || "")
@@ -253,103 +242,138 @@ export default function HubPage() {
         }
     }
 
+    const invalidateCompetitorCache = (ticker: string) => {
+        const key = `competitors-${ticker}`
+        localStorage.removeItem(key)
+    }
 
+    const invalidateEarningsCache = (ticker: string) => {
+        const key = `earnings-${ticker}`
+        localStorage.removeItem(key)
+    }
 
-    // ✅ Optimize page-level data fetch with caching
     useEffect(() => {
-        if (!user?.email || !user._id) return;
+        if (!user?.email || !user._id) return
 
         const getCached = (key: string, ttlMs: number) => {
-            const cached = localStorage.getItem(key);
-            if (!cached) return null;
-            const parsed = JSON.parse(cached);
-            if (Date.now() - parsed.timestamp > ttlMs) return null;
-            return parsed.data;
-        };
+            const cached = localStorage.getItem(key)
+            if (!cached) return { data: null, expired: true }
+            const parsed = JSON.parse(cached)
+            const isExpired = Date.now() - parsed.timestamp > ttlMs
+            return { data: parsed.data, expired: isExpired }
+        }
 
         const setCached = (key: string, data: any) => {
-            localStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), data }));
-        };
+            localStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), data }))
+        }
 
         const loadAllData = async () => {
             try {
-                setIsLoading(true);
+                setIsLoading(true)
 
                 const [companyUser, twitterStatus] = await Promise.all([
                     userApi.getClientByEmail(user.email),
                     twitterApi.getTwitterAccountByUserId(user._id).catch(() => null),
-                ]);
+                ])
 
-                const { companyTicker, companyExchange, companyName, interestTickers = [] } = companyUser || {};
+                const { companyTicker, companyExchange, companyName, interestTickers = [] } = companyUser || {}
 
                 if (!companyTicker || !companyExchange) {
-                    setError("Company ticker or exchange is missing.");
-                    setIsLoading(false);
-                    return;
+                    setError("Company ticker or exchange is missing.")
+                    setIsLoading(false)
+                    return
                 }
 
-                setCompanyTicker(companyTicker);
-                setCompanyExchange(companyExchange);
-                setCompanyName(companyName);
-                setCurrentTickers(interestTickers);
+                setCompanyTicker(companyTicker)
+                setCompanyExchange(companyExchange)
+                setCompanyName(companyName)
+                setCurrentTickers(interestTickers)
+                companyTickerRef.current = companyTicker
+                companyExchangeRef.current = companyExchange
 
                 if (twitterStatus?.connected && twitterStatus?.account?.username) {
-                    setIsTwitterConnected(true);
+                    setIsTwitterConnected(true)
                 }
 
-                const earningsKey = `earnings-${companyTicker}`;
-                const companyKey = `company-${companyTicker}`;
-                const competitorsKey = `competitors-${companyTicker}`;
-                const newsKey = `news-${companyTicker}`;
+                const earningsKey = `earnings-${companyTicker}`
+                const companyKey = `company-${companyTicker}`
+                const competitorsKey = `competitors-${companyTicker}`
+                const newsKey = `news-${companyTicker}`
 
-                const cachedEarnings = getCached(earningsKey, 1000 * 60 * 60 * 24); // 24 hours
-                const cachedCompany = getCached(companyKey, 10000); // 10 seconds
-                const cachedCompetitors = getCached(competitorsKey, 10000); // 10 seconds
-                const cachedNews = getCached(newsKey, 1000 * 60 * 3); // 3 minutes
+                const cachedEarnings = getCached(earningsKey, EARNINGS_CACHE_TTL) // 24h
+                const cachedCompany = getCached(companyKey, COMPANY_CACHE_TTL) // 10s
+                const cachedCompetitors = getCached(competitorsKey, COMPETITORS_CACHE_TTL) // 10s
+                const cachedNews = getCached(newsKey, NEWS_CACHE_TTL) // 3min
 
-                const hubDetails = await fetchHubData(companyTicker, companyExchange, companyUser);
+                let hubDetails = await fetchHubData(companyTicker, companyExchange, companyUser)
 
-                if (!cachedEarnings) {
-                    setCached(earningsKey, hubDetails.earningsCalendar);
-                } else {
-                    hubDetails.earningsCalendar = cachedEarnings;
+                hubDetails.earningsCalendar = cachedEarnings.data ?? hubDetails.earningsCalendar
+                hubDetails.company = cachedCompany.data ?? hubDetails.company
+                hubDetails.competitors = cachedCompetitors.data ?? hubDetails.competitors
+                hubDetails.companyNews = cachedNews.data ?? hubDetails.companyNews
+
+                setHubData(hubDetails)
+
+                if (cachedEarnings.expired) {
+                    console.log("🔁 Refreshing earnings cache...")
+                    setCached(earningsKey, hubDetails.earningsCalendar)
+                    setHubData(prev => prev ? { ...prev, earningsCalendar: hubDetails.earningsCalendar } : null)
                 }
-
-                if (!cachedCompany) {
-                    setCached(companyKey, hubDetails.company);
-                } else {
-                    hubDetails.company = cachedCompany;
+                if (cachedCompany.expired) {
+                    console.log("🔁 Refreshing company cache...")
+                    setCached(companyKey, hubDetails.company)
+                    setHubData(prev => prev ? { ...prev, company: hubDetails.company } : null)
                 }
-
-                if (!cachedCompetitors) {
-                    setCached(competitorsKey, hubDetails.competitors);
-                } else {
-                    hubDetails.competitors = cachedCompetitors;
+                if (cachedCompetitors.expired) {
+                    console.log("🔁 Refreshing competitors cache...")
+                    const filteredComps = interestTickers.length > 0
+                        ? hubDetails.competitors.filter(comp => interestTickers.includes(comp.symbol))
+                        : hubDetails.competitors
+                    setCached(competitorsKey, filteredComps)
+                    setHubData(prev => prev ? { ...prev, competitors: filteredComps } : null)
                 }
-
-                if (!cachedNews) {
-                    setCached(newsKey, hubDetails.companyNews);
-                } else {
-                    hubDetails.companyNews = cachedNews;
+                if (cachedNews.expired) {
+                    console.log("🔁 Refreshing news cache...")
+                    setCached(newsKey, hubDetails.companyNews)
+                    setHubData(prev => prev ? { ...prev, companyNews: hubDetails.companyNews } : null)
                 }
-
-                if (interestTickers.length > 0) {
-                    hubDetails.competitors = hubDetails.competitors.filter(comp =>
-                        interestTickers.includes(comp.symbol),
-                    );
-                }
-
-                setHubData(hubDetails);
             } catch (err) {
-                console.error(err);
-                setError("Failed to load hub data. Please try again later.");
+                console.error(err)
+                setError("Failed to load hub data. Please try again later.")
             } finally {
-                setIsLoading(false);
+                setIsLoading(false)
             }
-        };
+        }
 
-        loadAllData();
-    }, [user]);
+        loadAllData()
+
+        const interval = setInterval(() => {
+            const companyTicker = companyTickerRef.current
+            const companyExchange = companyExchangeRef.current
+
+            if (!companyTicker || !companyExchange) return
+
+            const checkTTL = (key: string, ttl: number) => {
+                const cached = localStorage.getItem(key)
+                if (!cached) return true
+                const { timestamp } = JSON.parse(cached)
+                return Date.now() - timestamp > ttl
+            }
+
+            const shouldRefresh =
+                checkTTL(`company-${companyTicker}`, COMPANY_CACHE_TTL) ||
+                checkTTL(`competitors-${companyTicker}`, COMPETITORS_CACHE_TTL) ||
+                checkTTL(`news-${companyTicker}`, NEWS_CACHE_TTL)
+
+            if (shouldRefresh) {
+                console.log("🔄 Auto-refreshing expired cache...")
+                loadAllData()
+            }
+        }, REFRESH_INTERVAL)
+
+        return () => clearInterval(interval)
+    }, [user])
+
 
     if (loading || isLoading) {
         return <div className="container mx-auto p-6">Loading...</div>

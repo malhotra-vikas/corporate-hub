@@ -19,7 +19,7 @@ import UserApi from "@/lib/api/user.api"
 const ITEMS_PER_PAGE = 10
 const userApi = new UserApi()
 
-export function NewsSection({ data, isLoading = false, isTwitterConnected = false, isLinkedInConnected = false }: NewsSectionProps) {
+function NewsSection({ data, isLoading = false, isTwitterConnected = false, isLinkedInConnected = false }: NewsSectionProps) {
     const { user, loading } = useAuth()
     
     const [currentPage, setCurrentPage] = useState(1)
@@ -290,3 +290,4 @@ export function NewsSection({ data, isLoading = false, isTwitterConnected = fals
     )
 }
 
+export default NewsSection

@@ -30,8 +30,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import EarningsApi from "@/lib/api/earnings.api"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { NewsSection } from "@/components/news-section"
-import { EarningsCalendar } from "@/components/earnings-calendar"
+import dynamic from "next/dynamic"
+
+const NewsSection = dynamic(() => import("@/components/news-section"), {
+    loading: () => <Skeleton className="h-[300px]" />,
+})
+
+const EarningsCalendar = dynamic(() => import("@/components/earnings-calendar"), {
+    loading: () => <Skeleton className="h-[300px]" />,
+})
+
 import TwitterApi from "@/lib/api/twitter.api"
 import { TwitterDto } from "@/dto/twitter.dto"
 import { useRouter } from "next/navigation"
@@ -504,7 +512,7 @@ export default function HubPage() {
                                     <span>{loading ? "Connecting..." : "Connect Twitter"}</span>
                                 </Button>
                             )}
-{/*
+                            {/*
                             {isLinkedInConnected ? (
                                 <div className="flex items-center gap-1 text-green-600 text-xs font-medium">
                                     <CheckCircle className="w-4 h-4" />
@@ -520,7 +528,7 @@ export default function HubPage() {
                                     <span>{loading ? "Connecting..." : "Connect LinkedIn"}</span>
                                 </Button>
                             )}  
- Hide for now */}                                
+ Hide for now */}
                         </CardTitle>
 
                     </CardHeader>

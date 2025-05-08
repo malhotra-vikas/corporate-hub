@@ -12,7 +12,7 @@ import UserApi from "@/lib/api/user.api"
 import { toast } from "react-toastify"
 import { useAuth } from "@/lib/auth-context"
 
-export function EarningsCalendar({ events, isLoading = false }: EarningsCalendarProps) {
+function EarningsCalendar({ events, isLoading = false }: EarningsCalendarProps) {
     const { user, loading } = useAuth()
 
     console.log("In Earnings User is - ", user)
@@ -143,3 +143,6 @@ export function EarningsCalendar({ events, isLoading = false }: EarningsCalendar
         </ScrollArea>
     )
 }
+
+
+export default EarningsCalendar

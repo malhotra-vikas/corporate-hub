@@ -62,12 +62,10 @@ function EarningsCalendar({ events, isLoading = false }: EarningsCalendarProps) 
 
     const CalendarItem = ({ event }: { event: EarningsEvent }) => {
         const date = parseISO(event.date)
-        console.log("EVENT Date is  ", date)
 
         const month = format(date, "MMM")
         const day = format(date, "d")
         const fullDate = event.time ? format(date, "MMM d, yyyy, h:mm a") : format(date, "MMM d, yyyy")
-        console.log("EVENT Full Date is  ", fullDate)
 
         const sendInvite = async () => {
             try {

@@ -32,11 +32,11 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import dynamic from "next/dynamic"
 
-const NewsSection = dynamic(() => import("@/components/news-section"), {
+const NewsSection = dynamic(() => import("@/components/news-section").then(mod => mod.default), {
     loading: () => <Skeleton className="h-[300px]" />,
 })
 
-const EarningsCalendar = dynamic(() => import("@/components/earnings-calendar"), {
+const EarningsCalendar = dynamic(() => import("@/components/earnings-calendar").then(mod => mod.default), {
     loading: () => <Skeleton className="h-[300px]" />,
 })
 
@@ -182,6 +182,31 @@ export default function HubPage() {
         }
     };
 
+    function getCachedEarnings(companyTicker: string) {
+        const key = `earnings-${companyTicker}`;
+        const cached = localStorage.getItem(key);
+        if (!cached) return null;
+
+        const parsed = JSON.parse(cached);
+        const now = Date.now();
+
+        // Optional: expire after 24 hours
+        if (now - parsed.timestamp > 1000 * 60 * 60 * 24) {
+            localStorage.removeItem(key);
+            return null;
+        }
+
+        return parsed.data;
+    }
+
+    function setCachedEarnings(companyTicker: string, data: EarningsEvent[]) {
+        const key = `earnings-${companyTicker}`;
+        localStorage.setItem(key, JSON.stringify({
+            timestamp: Date.now(),
+            data,
+        }));
+    }
+
 
     const loadHubData = async () => {
         const companyUser = await userApi.getClientByEmail(user?.email || "")
@@ -228,26 +253,103 @@ export default function HubPage() {
         }
     }
 
-    useEffect(() => {
-        console.log("🔄 Refresh triggered, isTwitterConnected:", isTwitterConnected);
-    }, [refresh]);
 
-    useEffect(() => {
-        if (user) {
-            loadHubData()
-        }
-    }, [user]) // Added loadHubData to dependencies
 
+    // ✅ Optimize page-level data fetch with caching
     useEffect(() => {
-        console.log("🔥 isTwitterConnected updated to:", isTwitterConnected);
-    }, [isTwitterConnected]); // ✅ Logs when `isTwitterConnected` changes
+        if (!user?.email || !user._id) return;
 
-    useEffect(() => {
-        if (user && user._id) {
-            console.log("🟢 Running checkTwitterConnection...");
-            checkTwitterConnection()
-        }
-    }, [user]) // Added loadHubData to dependencies
+        const getCached = (key: string, ttlMs: number) => {
+            const cached = localStorage.getItem(key);
+            if (!cached) return null;
+            const parsed = JSON.parse(cached);
+            if (Date.now() - parsed.timestamp > ttlMs) return null;
+            return parsed.data;
+        };
+
+        const setCached = (key: string, data: any) => {
+            localStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), data }));
+        };
+
+        const loadAllData = async () => {
+            try {
+                setIsLoading(true);
+
+                const [companyUser, twitterStatus] = await Promise.all([
+                    userApi.getClientByEmail(user.email),
+                    twitterApi.getTwitterAccountByUserId(user._id).catch(() => null),
+                ]);
+
+                const { companyTicker, companyExchange, companyName, interestTickers = [] } = companyUser || {};
+
+                if (!companyTicker || !companyExchange) {
+                    setError("Company ticker or exchange is missing.");
+                    setIsLoading(false);
+                    return;
+                }
+
+                setCompanyTicker(companyTicker);
+                setCompanyExchange(companyExchange);
+                setCompanyName(companyName);
+                setCurrentTickers(interestTickers);
+
+                if (twitterStatus?.connected && twitterStatus?.account?.username) {
+                    setIsTwitterConnected(true);
+                }
+
+                const earningsKey = `earnings-${companyTicker}`;
+                const companyKey = `company-${companyTicker}`;
+                const competitorsKey = `competitors-${companyTicker}`;
+                const newsKey = `news-${companyTicker}`;
+
+                const cachedEarnings = getCached(earningsKey, 1000 * 60 * 60 * 24); // 24 hours
+                const cachedCompany = getCached(companyKey, 10000); // 10 seconds
+                const cachedCompetitors = getCached(competitorsKey, 10000); // 10 seconds
+                const cachedNews = getCached(newsKey, 1000 * 60 * 3); // 3 minutes
+
+                const hubDetails = await fetchHubData(companyTicker, companyExchange, companyUser);
+
+                if (!cachedEarnings) {
+                    setCached(earningsKey, hubDetails.earningsCalendar);
+                } else {
+                    hubDetails.earningsCalendar = cachedEarnings;
+                }
+
+                if (!cachedCompany) {
+                    setCached(companyKey, hubDetails.company);
+                } else {
+                    hubDetails.company = cachedCompany;
+                }
+
+                if (!cachedCompetitors) {
+                    setCached(competitorsKey, hubDetails.competitors);
+                } else {
+                    hubDetails.competitors = cachedCompetitors;
+                }
+
+                if (!cachedNews) {
+                    setCached(newsKey, hubDetails.companyNews);
+                } else {
+                    hubDetails.companyNews = cachedNews;
+                }
+
+                if (interestTickers.length > 0) {
+                    hubDetails.competitors = hubDetails.competitors.filter(comp =>
+                        interestTickers.includes(comp.symbol),
+                    );
+                }
+
+                setHubData(hubDetails);
+            } catch (err) {
+                console.error(err);
+                setError("Failed to load hub data. Please try again later.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadAllData();
+    }, [user]);
 
     if (loading || isLoading) {
         return <div className="container mx-auto p-6">Loading...</div>

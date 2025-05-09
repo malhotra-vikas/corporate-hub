@@ -14,6 +14,7 @@ import {
     Twitter,
     Linkedin,
 } from "lucide-react"
+import { usePathname } from "next/navigation"
 import { useRef, useEffect, useState } from "react"
 import HubApi from "@/lib/api/hub"
 import UserApi from "@/lib/api/user.api"
@@ -42,7 +43,7 @@ const EarningsCalendar = dynamic(() => import("@/components/earnings-calendar").
 
 import TwitterApi from "@/lib/api/twitter.api"
 import { TwitterDto } from "@/dto/twitter.dto"
-import { useRouter } from "next/navigation"
+import { useRouter } from "next/router"
 import { CheckCircle } from "lucide-react"
 
 async function fetchHubData(companyTicker: string, companyExchange: string, companyUser: any): Promise<HubData> {
@@ -70,6 +71,8 @@ const tickerColors = [
 
 export default function HubPage() {
     const { user, loading } = useAuth()
+    const [readyToLoad, setReadyToLoad] = useState(false)
+
     const [hubData, setHubData] = useState<HubData | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -98,7 +101,6 @@ export default function HubPage() {
     const hubApi = new HubApi()
 
     const twitterApi = new TwitterApi()
-    const router = useRouter()
 
     const EARNINGS_CACHE_TTL = Number(process.env.EARNINGS_CACHE_TTL || 1000 * 60 * 60 * 24)
     const COMPANY_CACHE_TTL = Number(process.env.COMPANY_CACHE_TTL || 10000)
@@ -282,7 +284,22 @@ export default function HubPage() {
     }
 
     useEffect(() => {
-        if (!user?.email || !user._id) return
+        if (user && user.email && user._id && !loading) {
+            setReadyToLoad(true)
+        }
+    }, [user, loading])
+
+    const pathname = usePathname()
+
+    useEffect(() => {
+        if (pathname === "/hub") {
+            setReadyToLoad(false)
+            setTimeout(() => setReadyToLoad(true), 0)
+        }
+    }, [pathname])
+
+    useEffect(() => {
+        if (!readyToLoad) return
 
         const getCached = (key: string, ttlMs: number) => {
             const cached = localStorage.getItem(key)
@@ -369,7 +386,7 @@ export default function HubPage() {
         }, REFRESH_INTERVAL)
 
         return () => clearInterval(interval)
-    }, [user])
+    }, [readyToLoad])
 
 
     if (loading || isLoading) {
